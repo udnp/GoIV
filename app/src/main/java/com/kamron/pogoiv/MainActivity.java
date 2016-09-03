@@ -55,10 +55,14 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final PoGoIdentifierService poGoIdentifierService = new PoGoIdentifierService();
+    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
+    private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
+    private static final String KEY_BATTERY_SAVER = "key_battery_saver";
+    private static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
+
+    public static final String ACTION_SHOW_UPDATE_DIALOG = "show-update-dialog";
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    private SharedPreferences sharedPref;
-
     private static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
     private static final int WRITE_STORAGE_REQ_CODE = 1236;
     private static final int SCREEN_CAPTURE_REQ_CODE = 1235;
@@ -68,30 +72,47 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_SCREENSHOT_URI = "screenshotUri";
 
     private static final String ACTION_RESET_SCREENSHOT = "reset-screenshot";
-    public static final String ACTION_SHOW_UPDATE_DIALOG = "show-update-dialog";
-
+    public static boolean shouldShowUpdateDialog;
+    private SharedPreferences sharedPref;
     private ScreenGrabber screen;
     private ContentObserver screenShotObserver;
     private FileObserver screenShotScanner;
     private boolean screenShotWriting = false;
-
     private DisplayMetrics displayMetrics;
     private DisplayMetrics rawDisplayMetrics;
-
     private boolean batterySaver;
     private String screenshotDir;
     private Uri screenshotUri;
-
     private boolean readyForNewScreenshot = true;
-
-    private boolean pokeFlyRunning = false;
+    /**
+     * resetScreenshot
+     * Used to notify a new request for screenshot can be made. Needed to prevent multiple
+     * intents for some devices.
+     */
+    private final BroadcastReceiver resetScreenshot = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            readyForNewScreenshot = true;
+        }
+    };
     private int trainerLevel;
-
     private Point arcInit = new Point();
     private int arcRadius;
     private Context mContext;
+    private final BroadcastReceiver showUpdateDialog = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            AppUpdate update = intent.getParcelableExtra("update");
+            if (update.getStatus() == AppUpdate.UPDATE_AVAILABLE && shouldShowUpdateDialog &&
+                    !isGoIVBeingUpdated(context)) {
+                AlertDialog updateDialog = AppUpdateUtil.getAppUpdateDialog(mContext, update);
+                updateDialog.show();
+            }
+            if (!shouldShowUpdateDialog)
+                shouldShowUpdateDialog = true;
+        }
+    };
     private GoIVSettings settings;
-    public static boolean shouldShowUpdateDialog;
 
     public static Intent createResetScreenshotIntent() {
         return new Intent(ACTION_RESET_SCREENSHOT);
@@ -101,6 +122,20 @@ public class MainActivity extends AppCompatActivity {
         Intent updateIntent = new Intent(MainActivity.ACTION_SHOW_UPDATE_DIALOG);
         updateIntent.putExtra("update", update);
         return updateIntent;
+    }
+
+    public static boolean isGoIVBeingUpdated(Context context) {
+
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Query q = new DownloadManager.Query();
+        q.setFilterByStatus(DownloadManager.STATUS_RUNNING);
+        Cursor c = downloadManager.query(q);
+        if (c.moveToFirst()) {
+            String fileName = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+            if (fileName.equals(DownloadUpdateService.DOWNLOAD_UPDATE_TITLE))
+                return true;
+        }
+        return false;
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -146,13 +181,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (((Button) v).getText().toString().equals(getString(R.string.main_permission))) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(MainActivity.this)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                            !Settings.canDrawOverlays(MainActivity.this)) {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse("package:" + getPackageName()));
                         startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
                     }
-                    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_STORAGE_REQ_CODE);
+                    if (ContextCompat
+                            .checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_DENIED) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_STORAGE_REQ_CODE);
                     }
                 } else if (((Button) v).getText().toString().equals(getString(R.string.main_start))) {
                     batterySaver = settings.isManualScreenshotModeEnabled();
@@ -169,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         startScreenService();
+                        startPoGoScannerService();
                     }
                 } else if (((Button) v).getText().toString().equals(getString(R.string.main_stop))) {
                     stopService(new Intent(MainActivity.this, Pokefly.class));
@@ -178,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
                         screenShotScanner.stopWatching();
                         screenShotScanner = null;
                     }
-                    pokeFlyRunning = false;
+                    poGoIdentifierService.stopSelf();
                     ((Button) v).setText(getString(R.string.main_start));
                 }
             }
@@ -193,8 +233,10 @@ public class MainActivity extends AppCompatActivity {
         Display disp = windowManager.getDefaultDisplay();
         disp.getRealMetrics(rawDisplayMetrics);
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(resetScreenshot, new IntentFilter(ACTION_RESET_SCREENSHOT));
-        LocalBroadcastManager.getInstance(this).registerReceiver(showUpdateDialog, new IntentFilter(ACTION_SHOW_UPDATE_DIALOG));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(resetScreenshot, new IntentFilter(ACTION_RESET_SCREENSHOT));
+        LocalBroadcastManager.getInstance(this)
+                .registerReceiver(showUpdateDialog, new IntentFilter(ACTION_SHOW_UPDATE_DIALOG));
     }
 
     private void setupDisplaySizeInfo() {
@@ -208,7 +250,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         arcRadius = (int) Math.round(displayMetrics.heightPixels / 4.3760683);
-        if (displayMetrics.heightPixels == 1776 || displayMetrics.heightPixels == 960 || displayMetrics.heightPixels == 800) {
+        if (displayMetrics.heightPixels == 1776 || displayMetrics.heightPixels == 960 ||
+                displayMetrics.heightPixels == 800) {
             arcRadius++;
         }
     }
@@ -261,7 +304,8 @@ public class MainActivity extends AppCompatActivity {
                                     if (fUri.toString().contains("images")) {
                                         final String pathChange = getRealPathFromURI(MainActivity.this, fUri);
                                         if (pathChange.contains("Screenshot")) {
-                                            screenshotDir = pathChange.substring(0, pathChange.lastIndexOf(File.separator));
+                                            screenshotDir =
+                                                    pathChange.substring(0, pathChange.lastIndexOf(File.separator));
                                             screenshotUri = fUri;
                                             getContentResolver().unregisterContentObserver(screenShotObserver);
                                             sharedPref.edit().putString("screenshotDir", screenshotDir).apply();
@@ -269,13 +313,17 @@ public class MainActivity extends AppCompatActivity {
                                             ((Button) findViewById(R.id.start)).setText(R.string.main_start);
                                             new AlertDialog.Builder(MainActivity.this)
                                                     .setTitle(R.string.battery_saver_setup)
-                                                    .setMessage(String.format(getString(R.string.screenshot_dir_found), screenshotDir))
-                                                    .setPositiveButton(R.string.done, new DialogInterface.OnClickListener() {
-                                                        public void onClick(DialogInterface dialog, int which) {
-                                                            screenShotObserver = null;
-                                                            getContentResolver().delete(screenshotUri, MediaStore.Files.FileColumns.DATA + "=?", new String[]{pathChange});
-                                                        }
-                                                    })
+                                                    .setMessage(String.format(getString(R.string.screenshot_dir_found),
+                                                            screenshotDir))
+                                                    .setPositiveButton(R.string.done,
+                                                            new DialogInterface.OnClickListener() {
+                                                                public void onClick(DialogInterface dialog, int which) {
+                                                                    screenShotObserver = null;
+                                                                    getContentResolver().delete(screenshotUri,
+                                                                            MediaStore.Files.FileColumns.DATA + "=?",
+                                                                            new String[]{pathChange});
+                                                                }
+                                                            })
                                                     .show();
                                         }
                                     }
@@ -283,7 +331,8 @@ public class MainActivity extends AppCompatActivity {
                                 super.onChange(selfChange, uri);
                             }
                         };
-                        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, screenShotObserver);
+                        getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true,
+                                screenShotObserver);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -311,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
      * startPokeFly
      * Starts the PokeFly background service which contains overlay logic
      */
+    /*
     private void startPokeFly() {
         ((Button) findViewById(R.id.start)).setText(R.string.main_stop);
 
@@ -325,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
             openPokemonGoApp();
         }
     }
-
+    */
     private String getVersionName() {
         try {
             return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
@@ -347,17 +397,15 @@ public class MainActivity extends AppCompatActivity {
         //Check Permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
             launch.setText(getString(R.string.main_permission));
-        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_DENIED) {
             launch.setText(getString(R.string.main_permission));
         }
     }
 
     @Override
     public void onDestroy() {
-        if (pokeFlyRunning) {
-            stopService(new Intent(MainActivity.this, Pokefly.class));
-            pokeFlyRunning = false;
-        }
+        poGoIdentifierService.stopSelf();
         if (screen != null) {
             screen.exit();
         }
@@ -374,7 +422,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -382,19 +429,47 @@ public class MainActivity extends AppCompatActivity {
             if (!Settings.canDrawOverlays(this)) {
                 // SYSTEM_ALERT_WINDOW permission not granted...
                 ((Button) findViewById(R.id.start)).setText(getString(R.string.main_permission));
-            } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            } else if (
+                    ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                            PackageManager.PERMISSION_GRANTED) {
                 ((Button) findViewById(R.id.start)).setText(getString(R.string.main_start));
             }
         } else if (requestCode == SCREEN_CAPTURE_REQ_CODE) {
             if (resultCode == RESULT_OK) {
-                MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                MediaProjectionManager projectionManager =
+                        (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
                 MediaProjection mProjection = projectionManager.getMediaProjection(resultCode, data);
                 screen = ScreenGrabber.init(mProjection, rawDisplayMetrics, displayMetrics);
 
-                startPokeFly();
+                //startPokeFly();
+                startPoGoScannerService();
             } else {
                 ((Button) findViewById(R.id.start)).setText(getString(R.string.main_start));
             }
+        }
+    }
+
+    /**
+     * starts the service which scanns the screen for the pokemon app, and
+     * shows the iv button on detection
+     */
+    private void startPoGoScannerService() {
+        ((Button) findViewById(R.id.start)).setText(R.string.main_stop);
+
+        int statusBarHeight = getStatusBarHeight();
+
+        Intent intent = new Intent(getBaseContext(), PoGoIdentifierService.class);
+        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
+        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri);
+        intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
+
+        //trainerLevel, statusBarHeight, batterySaver, screenshotDir,   screenshotUri);
+        startService(intent);
+
+
+        if (settings.shouldLaunchPokemonGo()) {
+            openPokemonGoApp();
         }
     }
 
@@ -413,7 +488,9 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if (requestCode == WRITE_STORAGE_REQ_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (Settings.canDrawOverlays(this) && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                if (Settings.canDrawOverlays(this) && ContextCompat
+                        .checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                        PackageManager.PERMISSION_GRANTED) {
                     // SYSTEM_ALERT_WINDOW permission not granted...
                     ((Button) findViewById(R.id.start)).setText(getString(R.string.main_start));
                 }
@@ -428,7 +505,8 @@ public class MainActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void startScreenService() {
         ((Button) findViewById(R.id.start)).setText(R.string.accept_screen_capture);
-        MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        MediaProjectionManager projectionManager =
+                (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(projectionManager.createScreenCaptureIntent(), SCREEN_CAPTURE_REQ_CODE);
     }
 
@@ -451,15 +529,16 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         screenShotScanner.startWatching();
-        startPokeFly();
+        //startPokeFly();
+        //TODO: someone who knows how screenshot works, fix that pokeflyservice is depreciated
     }
-
 
     private String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getContentResolver().query(contentUri, proj, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+            cursor = context.getContentResolver()
+                    .query(contentUri, proj, null, null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             cursor.moveToFirst();
             return cursor.getString(column_index);
@@ -468,45 +547,6 @@ public class MainActivity extends AppCompatActivity {
                 cursor.close();
             }
         }
-    }
-
-    /**
-     * resetScreenshot
-     * Used to notify a new request for screenshot can be made. Needed to prevent multiple
-     * intents for some devices.
-     */
-    private final BroadcastReceiver resetScreenshot = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            readyForNewScreenshot = true;
-        }
-    };
-
-    private final BroadcastReceiver showUpdateDialog = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            AppUpdate update = intent.getParcelableExtra("update");
-            if (update.getStatus() == AppUpdate.UPDATE_AVAILABLE && shouldShowUpdateDialog && !isGoIVBeingUpdated(context)) {
-                AlertDialog updateDialog = AppUpdateUtil.getAppUpdateDialog(mContext, update);
-                updateDialog.show();
-            }
-            if (!shouldShowUpdateDialog)
-                shouldShowUpdateDialog = true;
-        }
-    };
-
-    public static boolean isGoIVBeingUpdated(Context context) {
-
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
-        DownloadManager.Query q = new DownloadManager.Query();
-        q.setFilterByStatus(DownloadManager.STATUS_RUNNING);
-        Cursor c = downloadManager.query(q);
-        if (c.moveToFirst()) {
-            String fileName = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
-            if (fileName.equals(DownloadUpdateService.DOWNLOAD_UPDATE_TITLE))
-                return true;
-        }
-        return false;
     }
 
 }
