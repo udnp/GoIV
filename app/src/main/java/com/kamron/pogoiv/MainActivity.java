@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
         Data.arcY = new int[maxPokeLevelIdx + 1];
 
         double baseCpM = Data.CpM[0];
-        double maxPokeCpMDelta = Data.CpM[Math.min(maxPokeLevelIdx + 1, Data.CpM.length)] - baseCpM;
+        double maxPokeCpMDelta = Data.CpM[Math.min(maxPokeLevelIdx + 1, Data.CpM.length - 1)] - baseCpM;
 
         //pokeLevelIdx <= maxPokeLevelIdx ensures we never overflow CpM/arc/arcY.
         for (int pokeLevelIdx = 0; pokeLevelIdx <= maxPokeLevelIdx; pokeLevelIdx++) {
