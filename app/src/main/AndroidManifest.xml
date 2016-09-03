@@ -78,6 +78,9 @@
         <service android:name=".updater.DownloadUpdateService"
             android:exported="false" />
 
+        <service android:name=".PoGoIdentifierService"
+                 android:exported="false" />
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="PLACEHOLDER" />
