@@ -429,9 +429,11 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(getBaseContext(), PoGoIdentifierService.class);
         intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
-        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
-        intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri);
         intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
+        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        if (!screenshotDir.isEmpty()) {
+            intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri.toString());
+        }
 
         //trainerLevel, statusBarHeight, batterySaver, screenshotDir,   screenshotUri);
         startService(intent);
