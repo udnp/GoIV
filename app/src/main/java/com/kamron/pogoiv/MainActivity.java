@@ -60,10 +60,6 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences sharedPref;
 
     private static final PoGoIdentifierService poGoIdentifierService = new PoGoIdentifierService();
-    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
-    private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
-    private static final String KEY_BATTERY_SAVER = "key_battery_saver";
-    private static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
     private static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
     private static final int WRITE_STORAGE_REQ_CODE = 1236;
     private static final int SCREEN_CAPTURE_REQ_CODE = 1235;
@@ -428,11 +424,11 @@ public class MainActivity extends AppCompatActivity {
         int statusBarHeight = getStatusBarHeight();
 
         Intent intent = new Intent(getBaseContext(), PoGoIdentifierService.class);
-        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
-        intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        intent.putExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL, trainerLevel);
+        intent.putExtra(PoGoIdentifierService.KEY_STATUS_BAR_HEIGHT, statusBarHeight);
+        intent.putExtra(PoGoIdentifierService.KEY_BATTERY_SAVER, batterySaver);
         if (!screenshotDir.isEmpty()) {
-            intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri.toString());
+            intent.putExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI, screenshotUri.toString());
         }
 
         //trainerLevel, statusBarHeight, batterySaver, screenshotDir,   screenshotUri);

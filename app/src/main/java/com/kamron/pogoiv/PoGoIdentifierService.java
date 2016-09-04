@@ -31,11 +31,10 @@ import timber.log.Timber;
  * The service which runs in the background and identifies what parts of pogo is visible
  */
 public class PoGoIdentifierService extends Service {
-
-    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
-    private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
-    private static final String KEY_BATTERY_SAVER = "key_battery_saver";
-    private static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
+    static final String KEY_TRAINER_LEVEL = "key_trainer_level";
+    static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
+    static final String KEY_BATTERY_SAVER = "key_battery_saver";
+    static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
 
     private int trainerLevel = -1;
     private boolean batterySaver = false;

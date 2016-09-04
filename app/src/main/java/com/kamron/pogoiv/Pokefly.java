@@ -85,11 +85,6 @@ public class Pokefly extends Service {
 
     private static final String ACTION_SEND_INFO = "action_send_info";
 
-    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
-    private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
-    private static final String KEY_BATTERY_SAVER = "key_battery_saver";
-    private static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
-
     private static final String KEY_SEND_INFO_NAME = "key_send_info_name";
     private static final String KEY_SEND_INFO_CANDY = "key_send_info_candy";
     private static final String KEY_SEND_INFO_HP = "key_send_info_hp";
@@ -279,11 +274,11 @@ public class Pokefly extends Service {
 
     public static Intent createIntent(Activity activity, int trainerLevel, int statusBarHeight, boolean batterySaver, String screenshotDir, Uri screenshotUri) {
         Intent intent = new Intent(activity, Pokefly.class);
-        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
-        intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        intent.putExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL, trainerLevel);
+        intent.putExtra(PoGoIdentifierService.KEY_STATUS_BAR_HEIGHT, statusBarHeight);
+        intent.putExtra(PoGoIdentifierService.KEY_BATTERY_SAVER, batterySaver);
         if (!screenshotDir.isEmpty()) {
-            intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri.toString());
+            intent.putExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI, screenshotUri.toString());
         }
         return intent;
     }
@@ -345,12 +340,12 @@ public class Pokefly extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && intent.hasExtra(KEY_TRAINER_LEVEL)) {
-            trainerLevel = intent.getIntExtra(KEY_TRAINER_LEVEL, 1);
-            statusBarHeight = intent.getIntExtra(KEY_STATUS_BAR_HEIGHT, 0);
-            batterySaver = intent.getBooleanExtra(KEY_BATTERY_SAVER, false);
-            if (intent.hasExtra(KEY_SCREENSHOT_URI)) {
-                screenshotUri = Uri.parse(intent.getStringExtra(KEY_SCREENSHOT_URI));
+        if (intent != null && intent.hasExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL)) {
+            trainerLevel = intent.getIntExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL, 1);
+            statusBarHeight = intent.getIntExtra(PoGoIdentifierService.KEY_STATUS_BAR_HEIGHT, 0);
+            batterySaver = intent.getBooleanExtra(PoGoIdentifierService.KEY_BATTERY_SAVER, false);
+            if (intent.hasExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI)) {
+                screenshotUri = Uri.parse(intent.getStringExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI));
             }
             makeNotification(Pokefly.this);
             createInfoLayout();
