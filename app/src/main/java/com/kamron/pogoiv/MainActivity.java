@@ -55,14 +55,15 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    private SharedPreferences sharedPref;
+
     private static final PoGoIdentifierService poGoIdentifierService = new PoGoIdentifierService();
     private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
     private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
     private static final String KEY_BATTERY_SAVER = "key_battery_saver";
     private static final String KEY_SCREENSHOT_URI = "key_screenshot_uri";
-
-    public static final String ACTION_SHOW_UPDATE_DIALOG = "show-update-dialog";
-    private static final String TAG = MainActivity.class.getSimpleName();
     private static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
     private static final int WRITE_STORAGE_REQ_CODE = 1236;
     private static final int SCREEN_CAPTURE_REQ_CODE = 1235;
@@ -72,47 +73,29 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREF_SCREENSHOT_URI = "screenshotUri";
 
     private static final String ACTION_RESET_SCREENSHOT = "reset-screenshot";
-    public static boolean shouldShowUpdateDialog;
-    private SharedPreferences sharedPref;
+    public static final String ACTION_SHOW_UPDATE_DIALOG = "show-update-dialog";
+
     private ScreenGrabber screen;
     private ContentObserver screenShotObserver;
     private FileObserver screenShotScanner;
     private boolean screenShotWriting = false;
+
     private DisplayMetrics displayMetrics;
     private DisplayMetrics rawDisplayMetrics;
+
     private boolean batterySaver;
     private String screenshotDir;
     private Uri screenshotUri;
+
     private boolean readyForNewScreenshot = true;
-    /**
-     * resetScreenshot
-     * Used to notify a new request for screenshot can be made. Needed to prevent multiple
-     * intents for some devices.
-     */
-    private final BroadcastReceiver resetScreenshot = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            readyForNewScreenshot = true;
-        }
-    };
+
     private int trainerLevel;
+
     private Point arcInit = new Point();
     private int arcRadius;
     private Context mContext;
-    private final BroadcastReceiver showUpdateDialog = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            AppUpdate update = intent.getParcelableExtra("update");
-            if (update.getStatus() == AppUpdate.UPDATE_AVAILABLE && shouldShowUpdateDialog &&
-                    !isGoIVBeingUpdated(context)) {
-                AlertDialog updateDialog = AppUpdateUtil.getAppUpdateDialog(mContext, update);
-                updateDialog.show();
-            }
-            if (!shouldShowUpdateDialog)
-                shouldShowUpdateDialog = true;
-        }
-    };
     private GoIVSettings settings;
+    public static boolean shouldShowUpdateDialog;
 
     public static Intent createResetScreenshotIntent() {
         return new Intent(ACTION_RESET_SCREENSHOT);
@@ -122,20 +105,6 @@ public class MainActivity extends AppCompatActivity {
         Intent updateIntent = new Intent(MainActivity.ACTION_SHOW_UPDATE_DIALOG);
         updateIntent.putExtra("update", update);
         return updateIntent;
-    }
-
-    public static boolean isGoIVBeingUpdated(Context context) {
-
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
-        DownloadManager.Query q = new DownloadManager.Query();
-        q.setFilterByStatus(DownloadManager.STATUS_RUNNING);
-        Cursor c = downloadManager.query(q);
-        if (c.moveToFirst()) {
-            String fileName = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
-            if (fileName.equals(DownloadUpdateService.DOWNLOAD_UPDATE_TITLE))
-                return true;
-        }
-        return false;
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -547,6 +516,46 @@ public class MainActivity extends AppCompatActivity {
                 cursor.close();
             }
         }
+    }
+
+    /**
+     * resetScreenshot
+     * Used to notify a new request for screenshot can be made. Needed to prevent multiple
+     * intents for some devices.
+     */
+    private final BroadcastReceiver resetScreenshot = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            readyForNewScreenshot = true;
+        }
+    };
+
+    private final BroadcastReceiver showUpdateDialog = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            AppUpdate update = intent.getParcelableExtra("update");
+            if (update.getStatus() == AppUpdate.UPDATE_AVAILABLE && shouldShowUpdateDialog &&
+                    !isGoIVBeingUpdated(context)) {
+                AlertDialog updateDialog = AppUpdateUtil.getAppUpdateDialog(mContext, update);
+                updateDialog.show();
+            }
+            if (!shouldShowUpdateDialog)
+                shouldShowUpdateDialog = true;
+        }
+    };
+
+    public static boolean isGoIVBeingUpdated(Context context) {
+
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Query q = new DownloadManager.Query();
+        q.setFilterByStatus(DownloadManager.STATUS_RUNNING);
+        Cursor c = downloadManager.query(q);
+        if (c.moveToFirst()) {
+            String fileName = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+            if (fileName.equals(DownloadUpdateService.DOWNLOAD_UPDATE_TITLE))
+                return true;
+        }
+        return false;
     }
 
 }
