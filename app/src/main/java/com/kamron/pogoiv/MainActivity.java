@@ -173,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
                         startScreenService();
-                        startPoGoScannerService();
                     }
                 } else if (((Button) v).getText().toString().equals(getString(R.string.main_stop))) {
                     stopService(new Intent(MainActivity.this, Pokefly.class));
