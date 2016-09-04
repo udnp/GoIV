@@ -63,6 +63,10 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".Overlay.FloatingIVButton"
+            android:screenOrientation="portrait" />
+
         <activity android:name=".ShareHandlerActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

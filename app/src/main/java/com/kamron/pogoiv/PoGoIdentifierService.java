@@ -18,6 +18,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.kamron.pogoiv.Overlay.FloatingIVButton;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -54,6 +56,18 @@ public class PoGoIdentifierService extends Service {
     private int areaX2;
     private int areaY2;
 
+    private FloatingIVButton floatingIVButton;
+
+    /**
+     * Get an intent that starts this service
+     * @param context
+     * @param trainerLevel
+     * @param statusBarHeight
+     * @param batterySaver
+     * @param screenshotDir
+     * @param screenshotUri
+     * @return
+     */
     public static Intent createIntent(Context context, int trainerLevel, int statusBarHeight, boolean batterySaver,
                                       String screenshotDir, Uri screenshotUri) {
         Intent intent = new Intent(context, PoGoIdentifierService.class);
@@ -125,8 +139,10 @@ public class PoGoIdentifierService extends Service {
                     areaY2)
                     == Color.rgb(28, 135, 150);
             if (isOnPoGoScreen) {
-
                 Log.d("Refactor", "On pokemon screen!");
+                FloatingIVButton.show(this);
+            }else{
+                FloatingIVButton.hide();
             }
         }
         bmp.recycle();
@@ -174,7 +190,6 @@ public class PoGoIdentifierService extends Service {
      * Creates the GoIV notification
      */
     private void makeNotification() {
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, MainActivity.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
