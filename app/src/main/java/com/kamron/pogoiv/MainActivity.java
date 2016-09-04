@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPref;
 
-    private static final PoGoIdentifierService poGoIdentifierService = new PoGoIdentifierService();
     private static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
     private static final int WRITE_STORAGE_REQ_CODE = 1236;
     private static final int SCREEN_CAPTURE_REQ_CODE = 1235;
@@ -175,14 +174,13 @@ public class MainActivity extends AppCompatActivity {
                         startScreenService();
                     }
                 } else if (((Button) v).getText().toString().equals(getString(R.string.main_stop))) {
-                    stopService(new Intent(MainActivity.this, Pokefly.class));
+                    stopService(new Intent(MainActivity.this, PoGoIdentifierService.class));
                     if (screen != null) {
                         screen.exit();
                     } else if (screenShotScanner != null) {
                         screenShotScanner.stopWatching();
                         screenShotScanner = null;
                     }
-                    poGoIdentifierService.stopSelf();
                     ((Button) v).setText(getString(R.string.main_start));
                 }
             }
@@ -369,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        poGoIdentifierService.stopSelf();
+        stopService(new Intent(MainActivity.this, PoGoIdentifierService.class));
         if (screen != null) {
             screen.exit();
         }
