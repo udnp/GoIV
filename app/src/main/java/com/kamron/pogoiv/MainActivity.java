@@ -423,17 +423,10 @@ public class MainActivity extends AppCompatActivity {
 
         int statusBarHeight = getStatusBarHeight();
 
-        Intent intent = new Intent(getBaseContext(), PoGoIdentifierService.class);
-        intent.putExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL, trainerLevel);
-        intent.putExtra(PoGoIdentifierService.KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-        intent.putExtra(PoGoIdentifierService.KEY_BATTERY_SAVER, batterySaver);
-        if (!screenshotDir.isEmpty()) {
-            intent.putExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI, screenshotUri.toString());
-        }
+        Intent intent = PoGoIdentifierService.createIntent(getBaseContext(), trainerLevel, statusBarHeight,
+                batterySaver, screenshotDir, screenshotUri);
 
-        //trainerLevel, statusBarHeight, batterySaver, screenshotDir,   screenshotUri);
         startService(intent);
-
 
         if (settings.shouldLaunchPokemonGo()) {
             openPokemonGoApp();

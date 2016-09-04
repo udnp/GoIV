@@ -272,17 +272,6 @@ public class Pokefly extends Service {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT);
 
-    public static Intent createIntent(Activity activity, int trainerLevel, int statusBarHeight, boolean batterySaver, String screenshotDir, Uri screenshotUri) {
-        Intent intent = new Intent(activity, Pokefly.class);
-        intent.putExtra(PoGoIdentifierService.KEY_TRAINER_LEVEL, trainerLevel);
-        intent.putExtra(PoGoIdentifierService.KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-        intent.putExtra(PoGoIdentifierService.KEY_BATTERY_SAVER, batterySaver);
-        if (!screenshotDir.isEmpty()) {
-            intent.putExtra(PoGoIdentifierService.KEY_SCREENSHOT_URI, screenshotUri.toString());
-        }
-        return intent;
-    }
-
     public static Intent createNoInfoIntent() {
         return new Intent(ACTION_SEND_INFO);
     }

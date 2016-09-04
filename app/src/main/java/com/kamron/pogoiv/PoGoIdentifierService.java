@@ -1,9 +1,11 @@
 package com.kamron.pogoiv;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -52,6 +54,17 @@ public class PoGoIdentifierService extends Service {
     private int areaX2;
     private int areaY2;
 
+    public static Intent createIntent(Context context, int trainerLevel, int statusBarHeight, boolean batterySaver,
+                                      String screenshotDir, Uri screenshotUri) {
+        Intent intent = new Intent(context, PoGoIdentifierService.class);
+        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
+        intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
+        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        if (!screenshotDir.isEmpty()) {
+            intent.putExtra(KEY_SCREENSHOT_URI, screenshotUri.toString());
+        }
+        return intent;
+    }
 
 
     @Override
