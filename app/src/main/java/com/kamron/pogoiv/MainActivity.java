@@ -283,10 +283,11 @@ public class MainActivity extends AppCompatActivity {
 
                 Data.setupArcPoints(arcInit, arcRadius, trainerLevel);
 
+                startPoGoIfSettingOn();
                 if (batterySaver) {
                     startPokeFly();
                 } else {
-                    startScreenService();
+                    startScreenServiceDelayed();
                 }
             }
         });
@@ -441,30 +442,11 @@ public class MainActivity extends AppCompatActivity {
         launchButton.setText(R.string.main_starting);
         launchButton.setEnabled(false);
 
-        startPoGoIfSettingOn();
+        firePokeFlyIntent();
 
-        if (settings.shouldLaunchPokemonGo() && !skipStartPogo) {
-            firePokeFlyIntentDelayed();
-        } else {
-            firePokeFlyIntent();
-        }
         skipStartPogo = false;
     }
 
-    /**
-     * This method adds a delay wrapper and toast messages around firePokeFlyIntent.
-     */
-    private void firePokeFlyIntentDelayed() {
-        Toast.makeText(this, R.string.waiting_for_pogo_start, Toast.LENGTH_SHORT).show();
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                firePokeFlyIntent();
-            }
-        }, POGO_LAUNCH_DELAY_MILLIS);
-        Toast.makeText(this, R.string.goiv_started, Toast.LENGTH_SHORT).show();
-    }
 
     /**
      * This method actually starts pokefly, but other thins need to be done first, such as updating the text on the
@@ -551,11 +533,23 @@ public class MainActivity extends AppCompatActivity {
      * Starts the screen capture.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void startScreenService() {
-        launchButton.setText(R.string.accept_screen_capture);
-        MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(
-                Context.MEDIA_PROJECTION_SERVICE);
-        startActivityForResult(projectionManager.createScreenCaptureIntent(), SCREEN_CAPTURE_REQ_CODE);
+    private void startScreenServiceDelayed() {
+
+        Toast.makeText(this, R.string.waiting_for_pogo_start, Toast.LENGTH_SHORT).show();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                launchButton.setText(R.string.accept_screen_capture);
+                MediaProjectionManager projectionManager = (MediaProjectionManager) getSystemService(
+                        Context.MEDIA_PROJECTION_SERVICE);
+                startActivityForResult(projectionManager.createScreenCaptureIntent(), SCREEN_CAPTURE_REQ_CODE);
+
+            }
+        }, POGO_LAUNCH_DELAY_MILLIS);
+
+        Toast.makeText(this, R.string.goiv_started, Toast.LENGTH_SHORT).show();
+
     }
 
     /**
