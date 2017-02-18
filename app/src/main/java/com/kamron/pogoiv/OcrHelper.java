@@ -172,6 +172,47 @@ public class OcrHelper {
     }
 
     /**
+     * Scans the pokemon image "gender icon" field to determine if the pokemon is male or female, or "other".
+     * <p>
+     * When this method was originally written, only Male and Female pokemon existed, but it's created as returning a
+     * string to be able to manage any future gender that might appear. (genderless? Genderfluid?  We dont know.)
+     *
+     * @param pokemonImage The image of the entire screen with a pokemon on it
+     * @return The gender of the pokemon, as a String (For futureproofing, in case strange genders appear)
+     */
+    private String getPokemonGender(Bitmap pokemonImage) {
+        Bitmap genderSymbolBitmap = getImageCrop(pokemonImage, 0.855, 0.497, 0.077, 0.03);
+        String hash = "gender" + hashBitmap(genderSymbolBitmap);
+        String pokemonGender = ocrCache.get(hash);
+
+        if (pokemonGender == null) {
+            double grayPixels = 0;
+            double genderSymbolPixels = genderSymbolBitmap.getHeight() * genderSymbolBitmap.getWidth();
+            for (int x = 0; x < genderSymbolBitmap.getWidth(); x++) {
+                for (int y = 0; y < genderSymbolBitmap.getHeight(); y++)
+                //We dont need to check r,g and b to see if its not white, so we only check if the green channel
+                // is non-white. We dont check for the exact green channel (204) of the gray color, but rather
+                // Less than, in case the user has some screene tinting app, this method has more flexible
+                {
+                    if (Color.green(genderSymbolBitmap.getPixel(x, y)) < 220) {
+                        grayPixels++;
+                    }
+                }
+            }
+            //A male gender symbol is about 25% gray pixels, female is around 12%.
+            double pixelratio = grayPixels / genderSymbolPixels;
+            if (pixelratio < 0.16) {
+                pokemonGender = "Female";
+            } else {
+                pokemonGender = "Male";
+            }
+            ocrCache.put(hash, pokemonGender);
+        }
+        return pokemonGender;
+    }
+
+
+    /**
      * Examines the image from the given coordinates to determine the distance which is
      * consistently white pixels in ALL cardinal directions. This helps identify the point
      * closest to the center of the level indicator dot.
@@ -597,13 +638,14 @@ public class OcrHelper {
         double estimatedPokemonLevel = getPokemonLevelFromImg(pokemonImage, trainerLevel);
         String pokemonName = getPokemonNameFromImg(pokemonImage);
         String candyName = getCandyNameFromImg(pokemonImage);
+        String gender = getPokemonGender(pokemonImage);
         Optional<Integer> pokemonHP = getPokemonHPFromImg(pokemonImage);
         Optional<Integer> pokemonCP = getPokemonCPFromImg(pokemonImage);
         Optional<Integer> pokemonCandyAmount = getCandyAmountFromImg(pokemonImage);
         Optional<Integer> pokemonUpgradeCost = getPokemonEvolutionCostFromImg(pokemonImage);
         String pokemonUniqueIdentifier = getPokemonIdentifierFromImg(pokemonImage);
 
-        return new ScanResult(estimatedPokemonLevel, pokemonName, candyName, pokemonHP, pokemonCP,
+        return new ScanResult(estimatedPokemonLevel, pokemonName, candyName, gender, pokemonHP, pokemonCP,
                 pokemonCandyAmount, pokemonUpgradeCost, pokemonUniqueIdentifier);
     }
 
