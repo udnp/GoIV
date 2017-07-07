@@ -175,3 +175,7 @@ allprojects {
         }
     }
 }
+
+// for importing custom build settings if following file exists.
+def file = file('./custom.gradle')
+if(file.exists()) apply from: file
