@@ -38,9 +38,10 @@ public class OcrHelper {
     private final String nidoFemale;
     private final String nidoMale;
     private final boolean isPokeSpamEnabled;
+    private final Resources res;
 
     private OcrHelper(String dataPath, int widthPixels, int heightPixels, String nidoFemale, String nidoMale,
-                      GoIVSettings settings) {
+                      GoIVSettings settings, Resources res) {
         tesseract = new TessBaseAPI();
         //tesseract.init(dataPath, "eng"); // 数値は認識されるけど、カタカナのポケモン名は認識できない
         //tesseract.init(dataPath, "jpn"); // 日本語だけだと数字の認識率が落ちる。「9」->「ヲ」、「7」->「フ」、なお「1」が「ー」に誤認識されるのは辞書に問題がある
@@ -69,6 +70,7 @@ public class OcrHelper {
         this.nidoMale = nidoMale;
         this.isPokeSpamEnabled = settings.isPokeSpamEnabled();
         this.settings = settings;
+        this.res = res;
 
         Map<String, String> appraisalMap = settings.loadAppraisalCache();
         for (Map.Entry<String, String> entry : appraisalMap.entrySet()) {
@@ -84,9 +86,9 @@ public class OcrHelper {
      * @return Bitmap with replaced colors
      */
     public static OcrHelper init(String dataPath, int widthPixels, int heightPixels, String nidoFemale,
-                                 String nidoMale, GoIVSettings settings) {
+                                 String nidoMale, GoIVSettings settings, Resources res) {
         if (instance == null) {
-            instance = new OcrHelper(dataPath, widthPixels, heightPixels, nidoFemale, nidoMale, settings);
+            instance = new OcrHelper(dataPath, widthPixels, heightPixels, nidoFemale, nidoMale, settings, res);
         }
         return instance;
     }
