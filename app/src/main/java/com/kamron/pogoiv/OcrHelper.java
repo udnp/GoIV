@@ -785,66 +785,66 @@ public class OcrHelper {
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,
                 // from appraisals.xml
-                "こうげき" +
-                "ぼうぎょ" +
-                "HP" +
+                res.getString(R.string.highest_stat_att) +
+                res.getString(R.string.highest_stat_def) +
+                res.getString(R.string.highest_stat_hp) +
 
                 // mystic
-                "驚異的" +
-                "芸術的" +
-                "目を" +
-                "引く" +
-                "普通" +
-                "以上" +
-                "活躍" +
-                "難" +
+                res.getString(R.string.mystic_percentage1_phrase1) +
+                res.getString(R.string.mystic_percentage1_phrase2) +
+                res.getString(R.string.mystic_percentage2_phrase1) +
+                res.getString(R.string.mystic_percentage2_phrase2) +
+                res.getString(R.string.mystic_percentage3_phrase1) +
+                res.getString(R.string.mystic_percentage3_phrase2) +
+                res.getString(R.string.mystic_percentage4_phrase1) +
+                res.getString(R.string.mystic_percentage4_phrase2) +
 
-                "測定" +
-                "最高" +
-                "素晴" +
-                "驚" +
-                "強" +
-                "だろう" +
-                "まあまあ" +
-                "言える" +
+                res.getString(R.string.mystic_ivrange1_phrase1) +
+                res.getString(R.string.mystic_ivrange1_phrase2) +
+                res.getString(R.string.mystic_ivrange2_phrase1) +
+                res.getString(R.string.mystic_ivrange2_phrase2) +
+                res.getString(R.string.mystic_ivrange3_phrase1) +
+                res.getString(R.string.mystic_ivrange3_phrase2) +
+                res.getString(R.string.mystic_ivrange4_phrase1) +
+                res.getString(R.string.mystic_ivrange4_phrase2) +
 
                 // valor
-                //"言う" +
-                "頼" +
-                //"強" +
-                "自慢" +
-                "普通" +
-                "思" +
-                "向" +
-                "好" +
+                res.getString(R.string.valor_percentage1_phrase1) +
+                res.getString(R.string.valor_percentage1_phrase2) +
+                res.getString(R.string.valor_percentage2_phrase1) +
+                res.getString(R.string.valor_percentage2_phrase2) +
+                res.getString(R.string.valor_percentage3_phrase1) +
+                res.getString(R.string.valor_percentage3_phrase2) +
+                res.getString(R.string.valor_percentage4_phrase1) +
+                res.getString(R.string.valor_percentage4_phrase2) +
 
-                "最高" +
-                "胸" +
-                //"素晴" +
-                "わくわく" +
-                "かなり" +
-                "活躍" +
-                //"まあまあ" +
-                //"強" +
+                res.getString(R.string.valor_ivrange1_phrase1) +
+                res.getString(R.string.valor_ivrange1_phrase2) +
+                res.getString(R.string.valor_ivrange2_phrase1) +
+                res.getString(R.string.valor_ivrange2_phrase2) +
+                res.getString(R.string.valor_ivrange3_phrase1) +
+                res.getString(R.string.valor_ivrange3_phrase2) +
+                res.getString(R.string.valor_ivrange4_phrase1) +
+                res.getString(R.string.valor_ivrange4_phrase2) +
 
                 // instinct
-                "トップレベル" +
-                "だぜ" +
-                "とっても" +
-                //"強" +
-                "普通" +
-                "思" +
-                "まずまず" +
-                "だな" +
+                res.getString(R.string.instinct_percentage1_phrase1) +
+                res.getString(R.string.instinct_percentage1_phrase2) +
+                res.getString(R.string.instinct_percentage2_phrase1) +
+                res.getString(R.string.instinct_percentage2_phrase2) +
+                res.getString(R.string.instinct_percentage3_phrase1) +
+                res.getString(R.string.instinct_percentage3_phrase2) +
+                res.getString(R.string.instinct_percentage4_phrase1) +
+                res.getString(R.string.instinct_percentage4_phrase2) +
 
-                "最高" +
-                "部類" +
-                //"素晴" +
-                "本当" +
-                "強" +
-                "保証" +
-                //"まあまあ" +
-                "かな"
+                res.getString(R.string.instinct_ivrange1_phrase1) +
+                res.getString(R.string.instinct_ivrange1_phrase2) +
+                res.getString(R.string.instinct_ivrange2_phrase1) +
+                res.getString(R.string.instinct_ivrange2_phrase2) +
+                res.getString(R.string.instinct_ivrange3_phrase1) +
+                res.getString(R.string.instinct_ivrange3_phrase2) +
+                res.getString(R.string.instinct_ivrange4_phrase1) +
+                res.getString(R.string.instinct_ivrange4_phrase2)
             );
             appraisalText = tesseract.getUTF8Text().replaceAll("\\s", "");
             appraisalCache.put(hash, appraisalText);
