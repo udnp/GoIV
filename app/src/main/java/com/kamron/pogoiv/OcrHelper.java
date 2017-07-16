@@ -846,7 +846,7 @@ public class OcrHelper {
                 //"まあまあ" +
                 "かな"
             );
-            appraisalText = tesseract.getUTF8Text();
+            appraisalText = tesseract.getUTF8Text().replaceAll("\\s", "");
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
         }
