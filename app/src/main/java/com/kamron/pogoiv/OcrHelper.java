@@ -783,7 +783,69 @@ public class OcrHelper {
             tesseract.setImage(bottom);
             //Set tesseract not single line mode
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
-            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_default));
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,
+                // from appraisals.xml
+                "こうげき" +
+                "ぼうぎょ" +
+                "HP" +
+
+                // mystic
+                "驚異的" +
+                "芸術的" +
+                "目を" +
+                "引く" +
+                "普通" +
+                "以上" +
+                "活躍" +
+                "難" +
+
+                "測定" +
+                "最高" +
+                "素晴" +
+                "驚" +
+                "強" +
+                "だろう" +
+                "まあまあ" +
+                "言える" +
+
+                // valor
+                //"言う" +
+                "頼" +
+                //"強" +
+                "自慢" +
+                "普通" +
+                "思" +
+                "向" +
+                "好" +
+
+                "最高" +
+                "胸" +
+                //"素晴" +
+                "わくわく" +
+                "かなり" +
+                "活躍" +
+                //"まあまあ" +
+                //"強" +
+
+                // instinct
+                "トップレベル" +
+                "だぜ" +
+                "とっても" +
+                //"強" +
+                "普通" +
+                "思" +
+                "まずまず" +
+                "だな" +
+
+                "最高" +
+                "部類" +
+                //"素晴" +
+                "本当" +
+                "強" +
+                "保証" +
+                //"まあまあ" +
+                "かな"
+            );
             appraisalText = tesseract.getUTF8Text();
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
