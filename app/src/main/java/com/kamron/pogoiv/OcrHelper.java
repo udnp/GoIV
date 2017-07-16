@@ -42,10 +42,24 @@ public class OcrHelper {
     private OcrHelper(String dataPath, int widthPixels, int heightPixels, String nidoFemale, String nidoMale,
                       GoIVSettings settings) {
         tesseract = new TessBaseAPI();
-        tesseract.init(dataPath, "eng");
+        //tesseract.init(dataPath, "eng"); // 数値は認識されるけど、カタカナのポケモン名は認識できない
+        tesseract.init(dataPath, "jpn"); // 日本語だけだと数字の認識率が落ちる。「9」->「ヲ」、「7」->「フ」、なお「1」が「ー」に誤認識されるのは辞書に問題がある
         tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE);
         tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂");
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂" +
+                "アァイィウゥヴエェオォ" +
+                "カガキギクグケゲコゴ" +
+                "サザシジスズセゼソゾ" +
+                "タダチヂツッヅテデトド" +
+                "ナニヌネノ" +
+                "ハバパヒビピフブプヘベペホボポ" +
+                "マミムメモ" +
+                "ヤャユュヨョ" +
+                "ラリルレロ" +
+                "ワヲン" +
+                "ー" +
+                "の" +
+                ".");
         this.heightPixels = heightPixels;
         this.widthPixels = widthPixels;
         this.candyWordFirst = isCandyWordFirst();
