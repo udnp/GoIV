@@ -43,7 +43,8 @@ public class OcrHelper {
                       GoIVSettings settings) {
         tesseract = new TessBaseAPI();
         //tesseract.init(dataPath, "eng"); // 数値は認識されるけど、カタカナのポケモン名は認識できない
-        tesseract.init(dataPath, "jpn"); // 日本語だけだと数字の認識率が落ちる。「9」->「ヲ」、「7」->「フ」、なお「1」が「ー」に誤認識されるのは辞書に問題がある
+        //tesseract.init(dataPath, "jpn"); // 日本語だけだと数字の認識率が落ちる。「9」->「ヲ」、「7」->「フ」、なお「1」が「ー」に誤認識されるのは辞書に問題がある
+        tesseract.init(dataPath, "jpn+eng"); // 日本語を主にして英語をサブにしても数字の誤認識はあまり改善されない
         tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE);
         tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂" +
