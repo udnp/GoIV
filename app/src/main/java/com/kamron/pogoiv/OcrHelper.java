@@ -260,6 +260,7 @@ public class OcrHelper {
         //If not cached or fully evolved, ocr text
         int result;
         tesseract.setImage(evolutionCostImage);
+        tesseract.setVariable("classify_bln_numeric_mode", "1");
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
             result = Integer.parseInt(ocrResult);
@@ -406,6 +407,7 @@ public class OcrHelper {
         if (pokemonName == null) {
             name = replaceColors(name, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(name);
+            tesseract.setVariable("classify_bln_numeric_mode", "0");
             pokemonName = fixOcrNumsToLetters(tesseract.getUTF8Text().replace(" ", ""));
             if (isNidoranName(pokemonName)) {
                 pokemonName = getNidoranGenderName(pokemonImage);
@@ -430,6 +432,7 @@ public class OcrHelper {
         if (pokemonType == null) {
             type = replaceColors(type, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(type);
+            tesseract.setVariable("classify_bln_numeric_mode", "0");
             pokemonType = tesseract.getUTF8Text();
             type.recycle();
             ocrCache.put(hash, pokemonType);
@@ -505,6 +508,7 @@ public class OcrHelper {
         if (candyName == null) {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(candy);
+            tesseract.setVariable("classify_bln_numeric_mode", "0");
             candyName = fixOcrNumsToLetters(
                     removeFirstOrLastWord(tesseract.getUTF8Text().replace(" ", ""), candyWordFirst));
             candy.recycle();
@@ -530,6 +534,7 @@ public class OcrHelper {
         if (pokemonHPStr == null) {
             hp = replaceColors(hp, true, 55, 66, 61, Color.WHITE, 200, true);
             tesseract.setImage(hp);
+            tesseract.setVariable("classify_bln_numeric_mode", "1");
             pokemonHPStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonHPStr);
         }
@@ -651,6 +656,7 @@ public class OcrHelper {
         if (mergeRect != null) {
             tesseract.setRectangle(mergeRect);
         }
+        tesseract.setVariable("classify_bln_numeric_mode", "1");
         String cpText = tesseract.getUTF8Text();
         cpText = fixOcrLettersToNums(cpText);
 
@@ -672,6 +678,7 @@ public class OcrHelper {
                 (int) Math.round(widthPixels * .1f), (int) Math.round(heightPixels / 1.714286f),
                 (int) Math.round(widthPixels * .8f), (int) Math.round(heightPixels / 25.26316f));
         tesseract.setImage(infoRow);
+        tesseract.setVariable("classify_bln_numeric_mode", "0");
         String uniqueText = tesseract.getUTF8Text();
 
         return uniqueText;
@@ -696,6 +703,7 @@ public class OcrHelper {
         if (pokemonCandyStr == null) {
             candyAmount = replaceColors(candyAmount, true, 68, 105, 108, Color.WHITE, 90, true);
             tesseract.setImage(candyAmount);
+            tesseract.setVariable("classify_bln_numeric_mode", "1");
             pokemonCandyStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonCandyStr);
         }
@@ -787,6 +795,7 @@ public class OcrHelper {
             tesseract.setImage(bottom);
             //Set tesseract not single line mode
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
+            tesseract.setVariable("classify_bln_numeric_mode", "0");
             appraisalText = tesseract.getUTF8Text();
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
