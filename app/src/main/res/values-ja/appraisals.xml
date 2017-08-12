@@ -2,7 +2,6 @@
 <resources>
     <string name="highest_stat_att">こうげき</string>
     <string name="highest_stat_def">ぼうぎょ</string>
-    <string name="highest_stat_hp">HP</string>
 
     <string name="mystic_percentage1_phrase1">驚異的</string>
     <string name="mystic_percentage1_phrase2">芸術的</string>
