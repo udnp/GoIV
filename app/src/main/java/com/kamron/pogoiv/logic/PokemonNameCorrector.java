@@ -1,7 +1,11 @@
 package com.kamron.pogoiv.logic;
 
 
+import android.content.res.Resources;
+
 import com.google.common.base.Optional;
+
+import com.kamron.pogoiv.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,11 +20,11 @@ import lombok.AllArgsConstructor;
  */
 public class PokemonNameCorrector {
     private final PokeInfoCalculator pokeInfoCalculator;
-    private final String[] pokemonTypes;
+    private final Resources res;
 
-    public PokemonNameCorrector(PokeInfoCalculator pokeInfoCalculator, String[] pokemonTypes) {
+    public PokemonNameCorrector(PokeInfoCalculator pokeInfoCalculator, Resources res) {
         this.pokeInfoCalculator = pokeInfoCalculator;
-        this.pokemonTypes = pokemonTypes;
+        this.res = res;
     }
 
     /**
@@ -69,23 +73,23 @@ public class PokemonNameCorrector {
         if (guess.pokemon == null && candytext.toLowerCase().contains(pokeInfoCalculator.get(132).name.toLowerCase())) {
             HashMap<String, String> eeveelutionCorrection = new HashMap<>();
             // It might be good to move this to a resource at some point
-            eeveelutionCorrection.put(pokemonTypes[2], //WATER
-                    pokeInfoCalculator.get(133).name); //-> Vaporeon
-            eeveelutionCorrection.put(pokemonTypes[3], //ELECTRIC
-                    pokeInfoCalculator.get(134).name); //-> Jolteon
-            eeveelutionCorrection.put(pokemonTypes[1], //FIRE
-                    pokeInfoCalculator.get(135).name); //-> Flareon
-            eeveelutionCorrection.put(pokemonTypes[10], //PSYCHIC
-                    pokeInfoCalculator.get(195).name); //-> Espeon
-            eeveelutionCorrection.put(pokemonTypes[15], //DARK
-                    pokeInfoCalculator.get(196).name); //-> Umbreon
+            eeveelutionCorrection.put(res.getStringArray(R.array.type)[2], //WATER
+                    pokeInfoCalculator.get(133).name); //Vaporeon
+            eeveelutionCorrection.put(res.getStringArray(R.array.type)[3], //ELECTRIC
+                    pokeInfoCalculator.get(134).name); //Jolteon
+            eeveelutionCorrection.put(res.getStringArray(R.array.type)[1], //FIRE
+                    pokeInfoCalculator.get(135).name); //Flareon
+            eeveelutionCorrection.put(res.getStringArray(R.array.type)[10], //PSYCHIC
+                    pokeInfoCalculator.get(195).name); //Espeon
+            eeveelutionCorrection.put(res.getStringArray(R.array.type)[15], //DARK
+                    pokeInfoCalculator.get(196).name); //Umbreon
             // Preparing for the future....
-            // eeveelutionCorrection.put(pokemonTypes[4], //GRASS
-            //       pokeInfoCalculator.get(469).name); //-> Leafeon
-            // eeveelutionCorrection.put(pokemonTypes[5], //ICE
-            //       pokeInfoCalculator.get(470).name); //-> Glaceon
-            // eeveelutionCorrection.put(pokemonTypes[17], //FAIRY
-            //       pokeInfoCalculator.get(699).name); //-> Sylveon
+            // eeveelutionCorrection.put(res.getStringArray(R.array.type)[4], //GRASS
+            //       pokeInfoCalculator.get(469).name); //Leafeon
+            // eeveelutionCorrection.put(res.getStringArray(R.array.type)[5], //ICE
+            //       pokeInfoCalculator.get(470).name); //Glaceon
+            // eeveelutionCorrection.put(res.getStringArray(R.array.type)[17], //FAIRY
+            //       pokeInfoCalculator.get(699).name); //Sylveon
             if (eeveelutionCorrection.containsKey(pokemonType)) {
                 poketext = eeveelutionCorrection.get(pokemonType);
                 guess = new PokeDist(pokeInfoCalculator.get(poketext), 0);

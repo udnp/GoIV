@@ -6,7 +6,6 @@ import android.widget.Toast;
 
 import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.Pokefly;
-import com.kamron.pogoiv.R;
 import com.kamron.pogoiv.ScreenGrabber;
 import com.kamron.pogoiv.logic.IVScanResult;
 import com.kamron.pogoiv.logic.PokeInfoCalculator;
@@ -109,8 +108,7 @@ public class IVPreviewPrinter {
      * @return the processed ivscanresult
      */
     private IVScanResult getIVScanResults(ScanResult res) {
-        PokemonNameCorrector corrector = new PokemonNameCorrector(pokeInfoCalculator,
-                pokefly.getResources().getStringArray(R.array.type));
+        PokemonNameCorrector corrector = new PokemonNameCorrector(pokeInfoCalculator, pokefly.getResources());
         Pokemon poke = corrector.getPossiblePokemon(res.getPokemonName(), res.getCandyName(),
                 res.getUpgradeCandyCost(), res.getPokemonType()).pokemon;
         IVScanResult ivrs = pokeInfoCalculator.getIVPossibilities(poke, res.getEstimatedPokemonLevel(),
