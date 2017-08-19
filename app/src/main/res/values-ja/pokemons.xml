@@ -255,7 +255,7 @@
         <item>ホウオウ</item>
         <item>セレビィ</item>
     </string-array>
-    <string-array name="type">
+    <string-array name="typeNames">
         <item>ノーマル</item>
         <item>ほのお</item>
         <item>みず</item>
