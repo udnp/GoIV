@@ -38,14 +38,20 @@ public class OcrHelper {
     private final String nidoFemale;
     private final String nidoMale;
     private final boolean isPokeSpamEnabled;
+    private final Resources res;
+    private String ocrWhitelistAppraisalText;
 
     private OcrHelper(String dataPath, int widthPixels, int heightPixels, String nidoFemale, String nidoMale,
-                      GoIVSettings settings) {
+                      GoIVSettings settings, Resources res) {
+        this.res = res;
+        createOcrWhiteList();
         tesseract = new TessBaseAPI();
-        tesseract.init(dataPath, "eng");
+        //tesseract.init(dataPath, "eng"); // 数値は認識されるけど、カタカナのポケモン名は認識できない
+        //tesseract.init(dataPath, "jpn"); // 日本語だけだと数字の認識率が落ちる。「9」->「ヲ」、「7」->「フ」、なお「1」が「ー」に誤認識されるのは辞書に問題がある
+        //tesseract.init(dataPath, "jpn+eng"); // 日本語を主にして英語をサブにしても数字の誤認識はあまり改善されない
+        tesseract.init(dataPath, "eng+jpn"); // 数字の認識率を落さないために英語を主にする
         tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE);
-        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST,
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂");
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_default));
         this.heightPixels = heightPixels;
         this.widthPixels = widthPixels;
         this.candyWordFirst = isCandyWordFirst();
@@ -68,9 +74,9 @@ public class OcrHelper {
      * @return Bitmap with replaced colors
      */
     public static OcrHelper init(String dataPath, int widthPixels, int heightPixels, String nidoFemale,
-                                 String nidoMale, GoIVSettings settings) {
+                                 String nidoMale, GoIVSettings settings, Resources res) {
         if (instance == null) {
-            instance = new OcrHelper(dataPath, widthPixels, heightPixels, nidoFemale, nidoMale, settings);
+            instance = new OcrHelper(dataPath, widthPixels, heightPixels, nidoFemale, nidoMale, settings, res);
         }
         return instance;
     }
@@ -244,6 +250,7 @@ public class OcrHelper {
         //If not cached or fully evolved, ocr text
         int result;
         tesseract.setImage(evolutionCostImage);
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
             result = Integer.parseInt(ocrResult);
@@ -390,6 +397,7 @@ public class OcrHelper {
         if (pokemonName == null) {
             name = replaceColors(name, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(name);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_name));
             pokemonName = fixOcrNumsToLetters(tesseract.getUTF8Text().replace(" ", ""));
             if (isNidoranName(pokemonName)) {
                 pokemonName = getNidoranGenderName(pokemonImage);
@@ -414,6 +422,7 @@ public class OcrHelper {
         if (pokemonType == null) {
             type = replaceColors(type, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(type);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_type));
             pokemonType = tesseract.getUTF8Text();
             type.recycle();
             ocrCache.put(hash, pokemonType);
@@ -489,6 +498,7 @@ public class OcrHelper {
         if (candyName == null) {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(candy);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             candyName = fixOcrNumsToLetters(
                     removeFirstOrLastWord(tesseract.getUTF8Text().replace(" ", ""), candyWordFirst));
             candy.recycle();
@@ -514,6 +524,7 @@ public class OcrHelper {
         if (pokemonHPStr == null) {
             hp = replaceColors(hp, true, 55, 66, 61, Color.WHITE, 200, true);
             tesseract.setImage(hp);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_hp));
             pokemonHPStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonHPStr);
         }
@@ -635,6 +646,7 @@ public class OcrHelper {
         if (mergeRect != null) {
             tesseract.setRectangle(mergeRect);
         }
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_cp));
         String cpText = tesseract.getUTF8Text();
         cpText = fixOcrLettersToNums(cpText);
 
@@ -656,6 +668,7 @@ public class OcrHelper {
                 (int) Math.round(widthPixels * .1f), (int) Math.round(heightPixels / 1.714286f),
                 (int) Math.round(widthPixels * .8f), (int) Math.round(heightPixels / 25.26316f));
         tesseract.setImage(infoRow);
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_identifier));
         String uniqueText = tesseract.getUTF8Text();
 
         return uniqueText;
@@ -680,6 +693,7 @@ public class OcrHelper {
         if (pokemonCandyStr == null) {
             candyAmount = replaceColors(candyAmount, true, 68, 105, 108, Color.WHITE, 90, true);
             tesseract.setImage(candyAmount);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             pokemonCandyStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonCandyStr);
         }
@@ -771,7 +785,8 @@ public class OcrHelper {
             tesseract.setImage(bottom);
             //Set tesseract not single line mode
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
-            appraisalText = tesseract.getUTF8Text();
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, ocrWhitelistAppraisalText);
+            appraisalText = tesseract.getUTF8Text().replaceAll("\\s", "");
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
         }
@@ -779,6 +794,71 @@ public class OcrHelper {
 
         return hash + "#" + appraisalText;
 
+    }
+
+    private void createOcrWhiteList() {
+        ocrWhitelistAppraisalText
+                // from appraisals.xml
+                = res.getString(R.string.highest_stat_att)
+                + res.getString(R.string.highest_stat_def)
+                + res.getString(R.string.highest_stat_hp)
+
+                // mystic
+                + res.getString(R.string.mystic_percentage1_phrase1)
+                + res.getString(R.string.mystic_percentage1_phrase2)
+                + res.getString(R.string.mystic_percentage2_phrase1)
+                + res.getString(R.string.mystic_percentage2_phrase2)
+                + res.getString(R.string.mystic_percentage3_phrase1)
+                + res.getString(R.string.mystic_percentage3_phrase2)
+                + res.getString(R.string.mystic_percentage4_phrase1)
+                + res.getString(R.string.mystic_percentage4_phrase2)
+
+                + res.getString(R.string.mystic_ivrange1_phrase1)
+                + res.getString(R.string.mystic_ivrange1_phrase2)
+                + res.getString(R.string.mystic_ivrange2_phrase1)
+                + res.getString(R.string.mystic_ivrange2_phrase2)
+                + res.getString(R.string.mystic_ivrange3_phrase1)
+                + res.getString(R.string.mystic_ivrange3_phrase2)
+                + res.getString(R.string.mystic_ivrange4_phrase1)
+                + res.getString(R.string.mystic_ivrange4_phrase2)
+
+                // valor
+                + res.getString(R.string.valor_percentage1_phrase1)
+                + res.getString(R.string.valor_percentage1_phrase2)
+                + res.getString(R.string.valor_percentage2_phrase1)
+                + res.getString(R.string.valor_percentage2_phrase2)
+                + res.getString(R.string.valor_percentage3_phrase1)
+                + res.getString(R.string.valor_percentage3_phrase2)
+                + res.getString(R.string.valor_percentage4_phrase1)
+                + res.getString(R.string.valor_percentage4_phrase2)
+
+                + res.getString(R.string.valor_ivrange1_phrase1)
+                + res.getString(R.string.valor_ivrange1_phrase2)
+                + res.getString(R.string.valor_ivrange2_phrase1)
+                + res.getString(R.string.valor_ivrange2_phrase2)
+                + res.getString(R.string.valor_ivrange3_phrase1)
+                + res.getString(R.string.valor_ivrange3_phrase2)
+                + res.getString(R.string.valor_ivrange4_phrase1)
+                + res.getString(R.string.valor_ivrange4_phrase2)
+
+                // instinct
+                + res.getString(R.string.instinct_percentage1_phrase1)
+                + res.getString(R.string.instinct_percentage1_phrase2)
+                + res.getString(R.string.instinct_percentage2_phrase1)
+                + res.getString(R.string.instinct_percentage2_phrase2)
+                + res.getString(R.string.instinct_percentage3_phrase1)
+                + res.getString(R.string.instinct_percentage3_phrase2)
+                + res.getString(R.string.instinct_percentage4_phrase1)
+                + res.getString(R.string.instinct_percentage4_phrase2)
+
+                + res.getString(R.string.instinct_ivrange1_phrase1)
+                + res.getString(R.string.instinct_ivrange1_phrase2)
+                + res.getString(R.string.instinct_ivrange2_phrase1)
+                + res.getString(R.string.instinct_ivrange2_phrase2)
+                + res.getString(R.string.instinct_ivrange3_phrase1)
+                + res.getString(R.string.instinct_ivrange3_phrase2)
+                + res.getString(R.string.instinct_ivrange4_phrase1)
+                + res.getString(R.string.instinct_ivrange4_phrase2);
     }
 
     /**
@@ -810,6 +890,7 @@ public class OcrHelper {
         if (pokemonName == null) {
             name = replaceColors(name, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(name);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_name));
             pokemonName = fixOcrNumsToLetters(tesseract.getUTF8Text().replace(" ", ""));
             if (isNidoranName(pokemonName)) {
                 pokemonName = getNidoranGenderName(pokemonImage);
@@ -834,6 +915,7 @@ public class OcrHelper {
         if (pokemonType == null) {
             type = replaceColors(type, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(type);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_type));
             pokemonType = tesseract.getUTF8Text();
             type.recycle();
             ocrCache.put(hash, pokemonType);
@@ -855,6 +937,7 @@ public class OcrHelper {
         if (candyName == null) {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setImage(candy);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             candyName = fixOcrNumsToLetters(
                     removeFirstOrLastWord(tesseract.getUTF8Text().replace(" ", ""), candyWordFirst));
             candy.recycle();
@@ -880,6 +963,7 @@ public class OcrHelper {
         if (pokemonHPStr == null) {
             hp = replaceColors(hp, true, 55, 66, 61, Color.WHITE, 200, true);
             tesseract.setImage(hp);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_hp));
             pokemonHPStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonHPStr);
         }
@@ -920,6 +1004,7 @@ public class OcrHelper {
         Bitmap cp = getImageCropS8(pokemonImage, 0.25, 0.05, 0.5, 0.046);
         cp = replaceColors(cp, true, 255, 255, 255, Color.BLACK, 30, false);
         tesseract.setImage(cp);
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_cp));
         String cpText = tesseract.getUTF8Text();
 
         /*
@@ -957,6 +1042,7 @@ public class OcrHelper {
         if (pokemonCandyStr == null) {
             candyAmount = replaceColors(candyAmount, true, 68, 105, 108, Color.WHITE, 90, true);
             tesseract.setImage(candyAmount);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             pokemonCandyStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonCandyStr);
         }
@@ -1017,6 +1103,7 @@ public class OcrHelper {
                 (int) Math.round(widthPixels * .1f), (int) Math.round(heightPixels / 1.714286f),
                 (int) Math.round(widthPixels * .8f), (int) Math.round(heightPixels / 25.26316f));
         tesseract.setImage(infoRow);
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_identifier));
         String uniqueText = tesseract.getUTF8Text();
 
         return uniqueText;
