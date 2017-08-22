@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mv1">驚異的で芸術的だ</string>
+    <string name="mv2">目を引くものがある</string>
+    <string name="mv3">普通以上</string>
+    <string name="mv4">活躍が難しそうだ</string>
+    <string name="ms1">計測できないほど高い</string>
+    <string name="ms2">素晴らしい</string>
+    <string name="ms3">かなり強い</string>
+    <string name="ms4">まあまあ</string>
+    <string name="defense">ぼうぎょ</string>
+    <string name="attack">こうげき</string>
+    <string name="vv1">とっても頼もしいわ!</string>
+    <string name="vv2">自慢できるわね!</string>
+    <string name="vv3">普通に強いと思うわ</string>
+    <string name="vv4">けど、わたしは好きよ</string>
+    <string name="vs1">最高!胸が熱くなる!</string>
+    <string name="vs2">素晴らしい!わくわくする!</string>
+    <string name="vs3">かなりの強さね</string>
+    <string name="vs4">まあまあの強さね</string>
+    <string name="iv1">トップレベルだぜ!</string>
+    <string name="iv2">とっても強い!</string>
+    <string name="iv3">普通だと思うぜ</string>
+    <string name="iv4">まずまずだぜ</string>
+    <string name="is1">最高の部類だぜ!</string>
+    <string name="is2">素晴らしいぜ!</string>
+    <string name="is3">かなり強いぜ!オレが保証!</string>
+    <string name="is4">まあまあだぜ</string>
+</resources>

@@ -1,0 +1,26 @@
+apply plugin: 'com.android.application'
+
+android {
+    /**
+     * Product flavors
+     * Offline - No Internet permission and disable Crashlytics
+     * Online - Internet permission and enable Crashlytics
+     */
+    productFlavors {
+        offline {
+            minSdkVersion 23
+            applicationId "nagoya.sawdagger.pogoiv.nointernet"
+            buildConfigField "boolean", "isInternetAvailable", "false"
+            resValue "string", "app_name", "GoIV 🇯🇵 Offline"
+            ext.enableCrashlytics = false
+        }
+
+        online {
+            minSdkVersion 23
+            applicationId "nagoya.sawdagger.pogoiv"
+            buildConfigField "boolean", "isInternetAvailable", "true"
+            resValue "string", "app_name", "GoIV 🇯🇵"
+            ext.enableCrashlytics = true
+        }
+    }
+}
