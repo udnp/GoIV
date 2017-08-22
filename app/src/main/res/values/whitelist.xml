@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ocr_whitelist_number">0123456789</string>
+    <string name="ocr_whitelist_default">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂</string>
+
+    <string name="ocr_whitelist_pokemon_name">@string/ocr_whitelist_default</string>
+    <string name="ocr_whitelist_pokemon_type">@string/ocr_whitelist_default</string>
+    <string name="ocr_whitelist_pokemon_hp">HP0123456789/</string>
+    <string name="ocr_whitelist_pokemon_cp">CP0123456789</string>
+    <string name="ocr_whitelist_pokemon_identifier">kgm.0123456789</string>
+    <string name="ocr_whitelist_candy_name">@string/ocr_whitelist_default</string>
+</resources>

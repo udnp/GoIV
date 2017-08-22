@@ -1802,14 +1802,15 @@ public class Pokefly extends Service {
             externalFilesDir = getFilesDir();
         }
         String extdir = externalFilesDir.toString();
-        if (!new File(extdir + "/tessdata/eng.traineddata").exists()) {
+        if (!new File(extdir + "/tessdata/eng.traineddata").exists() || !new File(extdir + "/tessdata/jpn.traineddata").exists()) {
             CopyUtils.copyAssetFolder(getAssets(), "tessdata", extdir + "/tessdata");
         }
 
         ocr = OcrHelper.init(extdir, displayMetrics.widthPixels, displayMetrics.heightPixels,
                 pokeInfoCalculator.get(28).name,
                 pokeInfoCalculator.get(31).name,
-                settings);
+                settings,
+                getResources());
     }
 
 
