@@ -256,23 +256,23 @@
         <item>セレビィ</item>
     </string-array>
     <string-array name="typeNames">
-        <item>ノーマル</item>
-        <item>ほのお</item>
-        <item>みず</item>
-        <item>でんき</item>
-        <item>くさ</item>
-        <item>こおり</item>
-        <item>かくとう</item>
-        <item>どく</item>
-        <item>じめん</item>
-        <item>ひこう</item>
-        <item>エスパー</item>
-        <item>むし</item>
-        <item>いわ</item>
-        <item>ゴースト</item>
-        <item>ドラゴン</item>
-        <item>あく</item>
-        <item>はがね</item>
-        <item>フェアリー</item>
+        <!--  0   normal --> <item>ノーマル</item>
+        <!--  1     fire --> <item>ほのお</item>
+        <!--  2    water --> <item>みず</item>
+        <!--  3 electric --> <item>でんき</item>
+        <!--  4    grass --> <item>くさ</item>
+        <!--  5      ice --> <item>こおり</item>
+        <!--  6 fighting --> <item>かくとう</item>
+        <!--  7   poison --> <item>どく</item>
+        <!--  8   ground --> <item>じめん</item>
+        <!--  9   flying --> <item>ひこう</item>
+        <!-- 10  psychic --> <item>エスパー</item>
+        <!-- 11      bug --> <item>むし</item>
+        <!-- 12     rock --> <item>いわ</item>
+        <!-- 13    ghost --> <item>ゴースト</item>
+        <!-- 14   dragon --> <item>ドラゴン</item>
+        <!-- 15     dark --> <item>あく</item>
+        <!-- 16    steel --> <item>はがね</item>
+        <!-- 17    fairy --> <item>フェアリー</item>
     </string-array>
 </resources>
