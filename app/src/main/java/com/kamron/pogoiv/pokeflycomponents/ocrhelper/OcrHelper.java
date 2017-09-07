@@ -558,7 +558,7 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             tesseract.setImage(candy);
             candyName = fixOcrNumsToLetters(
-                    removeFirstOrLastWord(tesseract.getUTF8Text().replace(" ", ""), candyWordFirst));
+                    removeFirstOrLastWord(tesseract.getUTF8Text().trim().replace("-", " "), candyWordFirst));
             candy.recycle();
             if (isNidoranName(candyName)) {
                 candyName = getNidoranGenderName(pokemonImage);
