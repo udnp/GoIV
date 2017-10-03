@@ -208,23 +208,25 @@ public class OcrHelper {
      */
     private int getCardinalWhiteLineDistFromImg(Bitmap pokemonImage, int x, int y) {
         // Base case of not matching
-        if (pokemonImage.getPixel(x, y) != Color.rgb(255, 255, 255)) {
+        if (pokemonImage.getPixel(x, y) != Color.WHITE) {
             return -1;
         }
 
         int d = 0; // Distance we have successfully searched for white pixels.
         while (true) {
             // If any pixel this distance is not white, return our successful search distance
-            if (pokemonImage.getPixel(x + d, y) != Color.rgb(255, 255, 255)
-                    || pokemonImage.getPixel(x - d, y) != Color.rgb(255, 255, 255)
-                    || pokemonImage.getPixel(x, y + d) != Color.rgb(255, 255, 255)
-                    || pokemonImage.getPixel(x, y - d) != Color.rgb(255, 255, 255)) {
+            if (pokemonImage.getPixel(x + d, y) != Color.WHITE
+                    || pokemonImage.getPixel(x - d, y) != Color.WHITE
+                    || pokemonImage.getPixel(x, y + d) != Color.WHITE
+                    || pokemonImage.getPixel(x, y - d) != Color.WHITE) {
                 return d;
             }
 
             d++;
-            if (pokemonImage.getWidth() <= x + d) { //if the level indicator is on white background, we need to break it
-                // before it loops off screen. Happens very rarely.
+            if (x - d < 0 || y - d < 0
+                    || x + d > pokemonImage.getWidth() || y + d > pokemonImage.getHeight()) {
+                // If the level indicator is on white background, we need to break it before it loops off screen.
+                // Happens very rarely.
                 break;
             }
         }
@@ -599,14 +601,18 @@ public class OcrHelper {
                 //If "/" comes at the end we'll get an array with only one component.
                 String[] hpParts = pokemonHPStr.split("/");
                 String hpStr;
-                if (hpParts.length >= 2) {  //example read "30 / 55 hp"
-                    //Cant read part 0 because that changes if poke has low hp
-                    hpStr = hpParts[1];
-                    hpStr = hpStr.substring(0, hpStr.length() - 2); //Removes the two last chars, like "hp" or "ps"
-                } else if (hpParts.length == 1) { //Failed to read "/", example "30 7 55 hp"
-                    hpStr = hpParts[0];
-                    hpStr = hpStr.substring(0, hpStr.length() - 2); //Removes the two last chars, like "hp" or "ps"
-                } else {
+                try {
+                    if (hpParts.length >= 2) {  //example read "30 / 55 hp"
+                        //Cant read part 0 because that changes if poke has low hp
+                        hpStr = hpParts[1];
+                        hpStr = hpStr.substring(0, hpStr.length() - 2); //Removes the two last chars, like "hp" or "ps"
+                    } else if (hpParts.length == 1) { //Failed to read "/", example "30 7 55 hp"
+                        hpStr = hpParts[0];
+                        hpStr = hpStr.substring(0, hpStr.length() - 2); //Removes the two last chars, like "hp" or "ps"
+                    } else {
+                        return Optional.absent();
+                    }
+                } catch (StringIndexOutOfBoundsException e) {
                     return Optional.absent();
                 }
 
@@ -642,9 +648,10 @@ public class OcrHelper {
         // Every chunk will contain a character
         ArrayList<Rect> chunks = new ArrayList<>(6);
         Rect currentChunk = null;
-        // On devices denser than XHDPI (2x) we can skip a pixel every two to increase performances
-        int increment = Resources.getSystem().getDisplayMetrics().density > 2 ? 2 : 1;
-        for (int x = 0; x < width; x += increment) {
+        // On devices denser than XHDPI (2x) we can skip a pixel every two (or more) to increase performances
+        int increment = (int) Math.max(1, Math.ceil(Resources.getSystem().getDisplayMetrics().density / 2));
+        // When we're over a chunk check every pixel instead of skipping so we're sure to find the blank space after it
+        for (int x = 0; x < width; x += (currentChunk != null) ? 1 : increment) {
             for (int y = 0; y < height; y += increment) {
                 final int pxColor = cp.getPixel(x, y);
 
@@ -653,7 +660,7 @@ public class OcrHelper {
                         // We found a non-black pixel, start a new character chunk
                         currentChunk = new Rect(x, y, x, height - 1);
                         break;
-                    } else if (y == height - 1) {
+                    } else if (y >= height - increment) {
                         // We reached the end of this column without finding any non-black pixel.
                         // The next one probably wont be the start of a new chunk: skip it.
                         x += increment;
@@ -668,7 +675,7 @@ public class OcrHelper {
                         currentChunk.right = x;
                         break;
 
-                    } else if (y == height - 1) {
+                    } else if (y >= height - increment) {
                         // We reached the end of this column without finding any non-black pixel.
                         // End and save the current chunk.
                         chunks.add(currentChunk);
@@ -691,7 +698,12 @@ public class OcrHelper {
                     chunksHeightsSum += chunk.height();
                 }
             }
-            final int avgChunksHeight = chunksHeightsSum / chunks.size();
+            final int avgChunksHeight;
+            if (chunks.size() > 0) {
+                avgChunksHeight = chunksHeightsSum / chunks.size();
+            } else {
+                avgChunksHeight = 1; // Didn't find any chunk wider than 2 columns, fallback to a safe value
+            }
 
             // Discard all the chunks lower than the average height
             chunksIterator = chunks.iterator();
@@ -796,7 +808,7 @@ public class OcrHelper {
      * @param trainerLevel Current level of the trainer
      * @return an object
      */
-    public ScanResult scanPokemon(Bitmap pokemonImage, int trainerLevel) {
+    public ScanResult scanPokemon(@NonNull Bitmap pokemonImage, int trainerLevel) {
         ensureCorrectLevelArcSettings(trainerLevel); //todo, make it so it doesnt initiate on every scan?
         double estimatedPokemonLevel = getPokemonLevelFromImg(pokemonImage, trainerLevel);
 
@@ -836,12 +848,7 @@ public class OcrHelper {
      * @param screen The full phone screen.
      * @return String of whats on the bottom of the screen.
      */
-    public String getAppraisalText(Bitmap screen) {
-
-        if (screen == null) { //bitmap didn't load properly
-            return "";
-        }
-
+    public String getAppraisalText(@NonNull Bitmap screen) {
         Bitmap bottom = getImageCrop(screen, 0.05, 0.89, 0.90, 0.07);
         String hash = "appraisal" + hashBitmap(bottom);
         String appraisalText = appraisalCache.get(hash);

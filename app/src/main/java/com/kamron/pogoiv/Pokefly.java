@@ -22,8 +22,8 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,7 +42,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -74,6 +73,8 @@ import com.kamron.pogoiv.scanlogic.PokemonShareHandler;
 import com.kamron.pogoiv.scanlogic.ScanContainer;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.scanlogic.UpgradeCost;
+import com.kamron.pogoiv.utils.CopyUtils;
+import com.kamron.pogoiv.utils.GuiUtil;
 import com.kamron.pogoiv.widgets.PokemonSpinnerAdapter;
 import com.kamron.pogoiv.widgets.recyclerviews.adapters.IVResultsAdapter;
 
@@ -166,7 +167,7 @@ public class Pokefly extends Service {
     Button pokePickerToggleSpinnerVsInput;
 
     @BindView(R.id.shareWithStorimod)
-    ImageButton shareWithStorimod;
+    ImageView shareWithStorimod;
 
     private PokemonSpinnerAdapter pokeInputSpinnerAdapter;
     @BindView(R.id.spnPokemonName)
@@ -174,6 +175,8 @@ public class Pokefly extends Service {
 
     @BindView(R.id.tvSeeAllPossibilities)
     TextView seeAllPossibilities;
+    @BindView(R.id.correctCPLevel)
+    TextView correctCPorLevel;
     @BindView(R.id.etCp)
     EditText pokemonCPEdit;
     @BindView(R.id.etHp)
@@ -231,8 +234,6 @@ public class Pokefly extends Service {
     TextView exResultHP;
     @BindView(R.id.exResultPercentPerfection)
     TextView exResultPercentPerfection;
-    @BindView(R.id.explainCPPercentageComparedToMaxIV)
-    TextView explainCPPercentageComparedToMaxIV;
     @BindView(R.id.exResStardust)
     TextView exResStardust;
     @BindView(R.id.exResPrevScan)
@@ -340,8 +341,6 @@ public class Pokefly extends Service {
             WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT);
-    private int pointerHeight = 0;
-    private int pointerWidth = 0;
     private int statusBarHeight = 0;
 
     private final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
@@ -584,21 +583,6 @@ public class Pokefly extends Service {
     }
 
     /**
-     * Undeprecated version of getDrawable using the most appropriate underlying API.
-     *
-     * @param id ID of drawable to get
-     * @return Desired drawable.
-     */
-    @SuppressWarnings("deprecation")
-    private Drawable getDrawableC(@DrawableRes int id) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return getDrawable(id);
-        } else {
-            return getResources().getDrawable(id);
-        }
-    }
-
-    /**
      * Undeprecated version of getColor using the most appropriate underlying API.
      *
      * @param id ID of color to get
@@ -618,13 +602,12 @@ public class Pokefly extends Service {
      * Pokemon Go's arc pointer.
      */
     private void createArcPointer() {
+        Drawable dot = ContextCompat.getDrawable(this, R.drawable.dot);
         arcParams.gravity = Gravity.TOP | Gravity.START;
+        arcParams.width = dot.getIntrinsicWidth();
+        arcParams.height = dot.getIntrinsicHeight();
         arcPointer = new ImageView(this);
-        arcPointer.setImageResource(R.drawable.dot);
-
-        Drawable dot = getDrawableC(R.drawable.dot);
-        pointerHeight = dot.getIntrinsicHeight() / 2;
-        pointerWidth = dot.getIntrinsicWidth() / 2;
+        arcPointer.setImageDrawable(dot);
     }
 
 
@@ -636,8 +619,8 @@ public class Pokefly extends Service {
      */
     private void setArcPointer(double pokeLevel) {
         int index = Data.levelToLevelIdx(pokeLevel);
-        arcParams.x = Data.arcX[index] - pointerWidth;
-        arcParams.y = Data.arcY[index] - pointerHeight - statusBarHeight;
+        arcParams.x = Data.arcX[index] - arcParams.width / 2;
+        arcParams.y = Data.arcY[index] - arcParams.height / 2 - statusBarHeight;
         //That is, (int) (arcCenter + (radius * Math.cos(angleInRadians))) and
         //(int) (arcInitialY + (radius * Math.sin(angleInRadians))).
         windowManager.updateViewLayout(arcPointer, arcParams);
@@ -654,7 +637,7 @@ public class Pokefly extends Service {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 estimatedPokemonLevel = Data.levelIdxToLevel(progress);
                 setArcPointer(estimatedPokemonLevel);
-                levelIndicator.setText(estimatedPokemonLevel + "");
+                levelIndicator.setText(String.valueOf(estimatedPokemonLevel));
             }
 
             @Override
@@ -916,10 +899,10 @@ public class Pokefly extends Service {
         Drawable arrowDrawable;
         if (visible) {
             boxVisibility = View.VISIBLE;
-            arrowDrawable = getDrawableC(R.drawable.arrow_expand);
+            arrowDrawable = ContextCompat.getDrawable(this, R.drawable.arrow_expand);
         } else {
             boxVisibility = View.GONE;
-            arrowDrawable = getDrawableC(R.drawable.arrow_collapse);
+            arrowDrawable = ContextCompat.getDrawable(this, R.drawable.arrow_collapse);
         }
         expanderText.setCompoundDrawablesWithIntrinsicBounds(null, null, arrowDrawable, null);
         if (animate) {
@@ -1251,7 +1234,7 @@ public class Pokefly extends Service {
     public void addSpecificClipboard(IVScanResult ivScanResult, IVCombination ivCombination) {
 
 
-        String clipResult = "";
+        String clipResult;
         IVScanResult singleIVScanResult = new IVScanResult(ivScanResult.pokemon, ivScanResult.estimatedPokemonLevel,
                 ivScanResult.scannedCP);
         singleIVScanResult.addIVCombination(ivCombination.att, ivCombination.def, ivCombination.sta);
@@ -1287,7 +1270,9 @@ public class Pokefly extends Service {
         populateResultsHeader(ivScanResult);
 
 
-        if (ivScanResult.getCount() == 1) {
+        if (ivScanResult.getCount() == 0) {
+            populateNotIVMatch(ivScanResult);
+        } else if (ivScanResult.getCount() == 1) {
             populateSingleIVMatch(ivScanResult);
         } else { // More than a match
             populateMultipleIVMatch(ivScanResult);
@@ -1319,7 +1304,7 @@ public class Pokefly extends Service {
 
         // Set Thumb 1 drawable to an orange marker and value at the max possible Pokemon level at the current
         // trainer level
-        expandedLevelSeekbarBackground.getThumb(0).setThumb(getDrawableC(R.drawable
+        expandedLevelSeekbarBackground.getThumb(0).setThumb(ContextCompat.getDrawable(this, R.drawable
                 .orange_seekbar_thumb_marker));
         expandedLevelSeekbarBackground.getThumb(0).setValue(
                 levelToSeekbarProgress(Data.trainerLevelToMaxPokeLevel(trainerLevel)));
@@ -1360,7 +1345,7 @@ public class Pokefly extends Service {
     }
 
     /**
-     * Populates the reuslt screen with the layout as if its multiple results.
+     * Populates the result screen with the layout as if its multiple results.
      */
     private void populateMultipleIVMatch(IVScanResult ivScanResult) {
         llMaxIV.setVisibility(View.VISIBLE);
@@ -1374,7 +1359,8 @@ public class Pokefly extends Service {
 
 
         populateAllIvPossibilities(ivScanResult);
-
+        seeAllPossibilities.setVisibility(View.VISIBLE);
+        correctCPorLevel.setVisibility(View.GONE);
     }
 
     /**
@@ -1383,6 +1369,23 @@ public class Pokefly extends Service {
     private void populateAllIvPossibilities(IVScanResult ivScanResult) {
         IVResultsAdapter ivResults = new IVResultsAdapter(ivScanResult, this);
         rvResults.setAdapter(ivResults);
+    }
+
+    /**
+     * Populates the result screen with error warning.
+     */
+    private void populateNotIVMatch(IVScanResult ivScanResult) {
+        llMaxIV.setVisibility(View.VISIBLE);
+        llMinIV.setVisibility(View.VISIBLE);
+        llSingleMatch.setVisibility(View.GONE);
+        llMultipleIVMatches.setVisibility(View.VISIBLE);
+        tvAvgIV.setText(getString(R.string.avg));
+
+        resultsCombinations.setText(
+                String.format(getString(R.string.possible_iv_combinations), ivScanResult.iVCombinations.size()));
+
+        seeAllPossibilities.setVisibility(View.GONE);
+        correctCPorLevel.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -1402,6 +1405,8 @@ public class Pokefly extends Service {
 
         llSingleMatch.setVisibility(View.VISIBLE);
         llMultipleIVMatches.setVisibility(View.GONE);
+        seeAllPossibilities.setVisibility(View.VISIBLE);
+        correctCPorLevel.setVisibility(View.GONE);
     }
 
     private int getSeekbarOffset() {
@@ -1431,7 +1436,7 @@ public class Pokefly extends Service {
 
         setEstimateCpTextBox(ivScanResult, selectedLevel, selectedPokemon);
         setEstimateHPTextBox(ivScanResult, selectedLevel, selectedPokemon);
-        setPokemonPerfectionPercentageText(ivScanResult, selectedPokemon);
+        setPokemonPerfectionPercentageText(ivScanResult, selectedLevel, selectedPokemon);
         setEstimateCostTextboxes(ivScanResult, selectedLevel, selectedPokemon);
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
@@ -1443,13 +1448,16 @@ public class Pokefly extends Service {
      * Sets the pokemon perfection % text in the powerup and evolution results box.
      *
      * @param ivScanResult    The object containing the ivs to base current pokemon on.
+     * @param selectedLevel   Which level the prediction should me made for.
      * @param selectedPokemon The pokemon to compare selected iv with max iv to.
      */
-    private void setPokemonPerfectionPercentageText(IVScanResult ivScanResult, Pokemon selectedPokemon) {
+    private void setPokemonPerfectionPercentageText(IVScanResult ivScanResult,
+                                                    double selectedLevel, Pokemon selectedPokemon) {
         CPRange cpRange = pokeInfoCalculator.getCpRangeAtLevel(selectedPokemon,
-                ivScanResult.getCombinationLowIVs(), ivScanResult.getCombinationHighIVs(), 40);
+                ivScanResult.getCombinationLowIVs(), ivScanResult.getCombinationHighIVs(),
+                selectedLevel);
         double maxCP = pokeInfoCalculator.getCpRangeAtLevel(selectedPokemon,
-                IVCombination.MAX, IVCombination.MAX, 40).high;
+                IVCombination.MAX, IVCombination.MAX, selectedLevel).high;
         double perfection = (100.0 * cpRange.getFloatingAvg()) / maxCP;
         int difference = (int) (cpRange.getFloatingAvg() - maxCP);
         DecimalFormat df = new DecimalFormat("#.#");
@@ -1830,7 +1838,8 @@ public class Pokefly extends Service {
 
     private <T> String optionalIntToString(Optional<T> src) {
         return src.transform(new Function<T, String>() {
-            @Override public String apply(T input) {
+            @Override
+            public String apply(T input) {
                 return input.toString();
             }
         }).or("");
@@ -1861,7 +1870,7 @@ public class Pokefly extends Service {
      * @param pokemonImage   The image of the pokemon
      * @param screenShotPath The screenshot path if it is a file, used to delete once checked
      */
-    private void scanPokemon(Bitmap pokemonImage, @NonNull Optional<String> screenShotPath) {
+    private void scanPokemon(@NonNull Bitmap pokemonImage, @NonNull Optional<String> screenShotPath) {
         //WARNING: this method *must* always send an intent at the end, no matter what, to avoid the application
         // hanging.
 
@@ -1896,7 +1905,7 @@ public class Pokefly extends Service {
     private final BroadcastReceiver processBitmap = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bitmap bitmap = (Bitmap) intent.getParcelableExtra(KEY_BITMAP);
+            Bitmap bitmap = intent.getParcelableExtra(KEY_BITMAP);
             if (bitmap == null) {
                 return;
             }

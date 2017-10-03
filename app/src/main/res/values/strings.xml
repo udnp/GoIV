@@ -71,6 +71,7 @@
     <string name="cancel">Cancel</string>
     <string name="check_iv">Check IV</string>
     <string name="notification_title">GoIV Running - Level %1$d</string>
+    <string name="notification_title_short">GoIV - Lvl %1$d</string>
     <string name="notification_title_goiv_stopped">GoIV stopped</string>
     <string name="notification_title_tap_to_open">Tap to open GoIV.</string>
     <string name="notification_open_app">Open app</string>
@@ -112,7 +113,7 @@
     <string name="refine_no_progress">Refinement didn\'t improve results</string>
     <string name="last_scan">Last scan: %1$s</string>
     <string name="possible_iv_combinations" tools:ignore="PluralsCandidate">"%1$d possible IV combinations"</string>
-    <string name="too_many_iv_combinations">Too many IV combinations</string>
+    <string name="check_cp_or_level">Something went wrong! Please check that the input values were correct, and that GoIV has the right trainer level in the launch screen.</string>
     <string name="refining_instructions">Increase IV calculation precision by leveling up and comparing two scans of the same monster</string>
     <string name="appraisal_refining">Additional Refining</string>
     <string name="autoappraisal_start">Auto Appraisal Started</string>
@@ -128,7 +129,9 @@
     <string name="ongoing_update">An update for GoIV is already being downloaded</string>
     <string name="iv_perfect" formatted="false">% Perfect</string>
     <string name="wrong_pokemon_name_input">" was not found."</string>
+    <string name="min">MIN</string>
     <string name="avg">AVG</string>
+    <string name="max">MAX</string>
     <string name="atk">ATK</string>
     <string name="def">DEF</string>
     <string name="sta">STA</string>
@@ -138,7 +141,7 @@
     <string name="hp_expanded_box">HP</string>
     <string name="cp_vs_iv" formatted="false">% CP vs max IV</string>
     <string name="alert_explanation_title">Explanation</string>
-    <string name="perfection_explainer">The percentage shows how big the difference is between your monster and a monster of the same species which has perfect IVs and is level 40.\n\nSo for example, if it says 92 percent, then your Pokémon maxes out at 8 percent less CP compared to the same species with maximum IVs.</string>
+    <string name="perfection_explainer">The percentage shows how big the difference is between your monster and a monster of the same species which has perfect IVs.\n\nSo for example, if it says 92 percent, then your Pokémon maxes out at 8 percent less CP compared to the same species with maximum IVs.</string>
     <string name="pokespam">PokéSpam</string>
     <string name="pokespam_formatted_message">%1$d (%2$d rows + %3$d more)</string>
     <string name="candy">Candy</string>
@@ -236,9 +239,9 @@
     <string name="token_fill_custom_separator">Please fill in your custom separator</string>
     <string name="token_not_dot_separator">Custom separator can\'t contain . because the developer is lazy</string>
     <string name="token_max_length">Max length:</string>
-    <string name="token_max_length_parenthesis">(Max length)</string>
     <string name="clipboard_token_list_available">Full list of available token types</string>
     <string name="clipboard_token_description_title">Selected token description</string>
+    <string name="ocr_calibration_unavailable_screenshot_mode">"Automatic calibration isn't available in screenshot mode!"</string>
     <string name="ocr_calibration_result_description">This is the result of the automatic calibration, each field of interest that was detected has been marked.</string>
     <string name="ocr_calibration_save">Save calibration</string>
     <string name="ocr_calibration_check_before">Before saving, check the result correctness in the screenshot below:</string>
@@ -325,4 +328,7 @@
     <string name="token_msg_train">Train</string>
     <string name="go_back_to_goiv">Go back to GoIV</string>
     <string name="go_back">Go back</string>
+    <string name="send_email_to_devs_recalibration">If GoIV failed recalibrating when it should have worked, please press the button below to generate an automatic bug report email.</string>
+    <string name="send_email_to_devs_button">Email error information to developers</string>
+    <string name="report_error">Email error report</string>
 </resources>

@@ -73,8 +73,8 @@ android {
     defaultConfig {
         minSdkVersion 19 /*Dont change this unless you know why*/
         targetSdkVersion 24 /*Dont change this unless you know why*/
-        versionCode 27
-        versionName "3.6.0"
+        versionCode 30
+        versionName "4.0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -122,7 +122,7 @@ android {
         abi {
             enable true
             reset()
-            include 'armeabi', 'armeabi-v7a', 'arm64-v8a', 'mips', 'mips64', 'x86', 'x86_64'
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
     }
 }

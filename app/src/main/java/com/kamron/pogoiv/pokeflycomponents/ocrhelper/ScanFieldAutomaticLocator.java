@@ -26,6 +26,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -82,7 +83,7 @@ public class ScanFieldAutomaticLocator {
     private final int width90Percent;
 
 
-    public ScanFieldAutomaticLocator(Bitmap bmp, int displayWidth, float displayDensity) {
+    public ScanFieldAutomaticLocator(@NonNull Bitmap bmp, int displayWidth, float displayDensity) {
         this.bmp = bmp;
         // Compute scaled density since the acquired screenshot might be at a lower resolution than the screen
         screenshotDensity = bmp.getWidth() * displayDensity / displayWidth;
@@ -257,46 +258,70 @@ public class ScanFieldAutomaticLocator {
         }
     }
 
-    public ScanFieldResults scan(@Nullable Handler mainThreadHandler, @Nullable ProgressDialog dialog, Context
-            context) {
+    public ScanFieldResults scan(@NonNull Handler mainThreadHandler, @NonNull WeakReference<ProgressDialog> dialog,
+                                 @NonNull WeakReference<Context> contextRef) {
+        String findingName = null;
+        String findingType = null;
+        String findingCandyName = null;
+        String findingHp = null;
+        String findingCp = null;
+        String findingCandyAmount = null;
+        String findingEvolutionCost = null;
+        String findingLevelArc = null;
+        String findingWhiteMarker = null;
+        String findingGreenMarker = null;
+        Context context = contextRef.get();
+        if (context != null) {
+            findingName = context.getString(R.string.ocr_finding_name);
+            findingType = context.getString(R.string.ocr_finding_type);
+            findingCandyName = context.getString(R.string.ocr_finding_candy_name);
+            findingHp = context.getString(R.string.ocr_finding_hp);
+            findingCp = context.getString(R.string.ocr_finding_cp);
+            findingCandyAmount = context.getString(R.string.ocr_finding_candy_amount);
+            findingEvolutionCost = context.getString(R.string.ocr_finding_evo_cost);
+            findingLevelArc = context.getString(R.string.ocr_finding_arc_center_and_radius);
+            findingWhiteMarker = context.getString(R.string.ocr_finding_white_pixel);
+            findingGreenMarker = context.getString(R.string.ocr_finding_green_pixel);
+        }
+
         final ScanFieldResults results = new ScanFieldResults();
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_name));
+        postMessage(mainThreadHandler, dialog.get(), findingName);
         findPokemonNameArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_type));
+        postMessage(mainThreadHandler, dialog.get(), findingType);
         findPokemonTypeArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_candy_name));
+        postMessage(mainThreadHandler, dialog.get(), findingCandyName);
         findPokemonCandyNameArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_hp));
+        postMessage(mainThreadHandler, dialog.get(), findingHp);
         findPokemonHPArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_cp));
+        postMessage(mainThreadHandler, dialog.get(), findingCp);
         findPokemonCPScanArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_candy_amount));
+        postMessage(mainThreadHandler, dialog.get(), findingCandyAmount);
         findPokemonCandyAmountArea(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_evo_cost));
+        postMessage(mainThreadHandler, dialog.get(), findingEvolutionCost);
         findPokemonEvolutionCostArea(results); // Always call after findPokemonCandyAmountArea
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_arc_center_and_radius));
+        postMessage(mainThreadHandler, dialog.get(), findingLevelArc);
         findArcValues(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_white_pixel));
+        postMessage(mainThreadHandler, dialog.get(), findingWhiteMarker);
         findWhitePixelPokemonScreen(results);
 
-        postMessage(mainThreadHandler, dialog, context.getString(R.string.ocr_finding_green_pixel));
+        postMessage(mainThreadHandler, dialog.get(), findingGreenMarker);
         findGreenPixelPokemonScreen(results);
 
         return results;
     }
 
-    private static void postMessage(@Nullable Handler handler, @Nullable final ProgressDialog dialog,
-                                    @NonNull final String message) {
-        if (handler != null && dialog != null) {
+    private static void postMessage(@NonNull Handler handler, @Nullable final ProgressDialog dialog,
+                                    @Nullable final String message) {
+        if (dialog != null && message != null) {
             handler.post(new Runnable() {
                 @Override public void run() {
                     dialog.setMessage(message);
@@ -375,7 +400,7 @@ public class ScanFieldAutomaticLocator {
     private void findWhitePixelPokemonScreen(ScanFieldResults results) {
         ScanPoint whitePoint = null;
         float[] hsv = new float[3];
-        for (int x = 0, y = bmp.getHeight() / 2; x < bmp.getWidth(); x++) {
+        for (int x = 0, y = bmp.getHeight() / 2; x < bmp.getWidth() / 2; x++) {
             Color.colorToHSV(bmp.getPixel(x, y), hsv);
             if (hsv[0] < 3 && hsv[1] < 0.05 && hsv[2] > HSV_WHITE_BACKGROUND[2]) {
                 whitePoint = new ScanPoint(x * 2, y);

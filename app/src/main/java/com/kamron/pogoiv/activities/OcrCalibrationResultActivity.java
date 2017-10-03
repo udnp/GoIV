@@ -1,36 +1,51 @@
 package com.kamron.pogoiv.activities;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.ColorInt;
+import android.support.annotation.MainThread;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.base.Strings;
+import com.kamron.pogoiv.BuildConfig;
 import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.R;
-import com.kamron.pogoiv.pokeflycomponents.ocrhelper.CalibrationImage;
 import com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanArea;
 import com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldAutomaticLocator;
 import com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldResults;
 import com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanPoint;
+import com.kamron.pogoiv.utils.MediaStoreUtils;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+
 public class OcrCalibrationResultActivity extends AppCompatActivity {
+
+    public static Bitmap sCalibrationImage;
 
     @BindView(R.id.ocr_calibration_title)
     TextView ocr_calibration_title;
@@ -48,6 +63,10 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
     Button backToGoivButton;
     @BindView(R.id.backButton)
     Button backButton;
+    @BindView(R.id.errorField)
+    LinearLayout errorLayout;
+    @BindView(R.id.emailErrorButton)
+    Button emailErrorButton;
 
 
     private ScanFieldResults results;
@@ -60,7 +79,6 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         fixHomeButton();
-        final Bitmap bmp = CalibrationImage.calibrationImg;
 
         View decor = getWindow().getDecorView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -69,87 +87,17 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
             decor.setSystemUiVisibility(0);
         }
 
-        // Since the variable is static, we need to null the referenced object to be garbage collected.
-        CalibrationImage.calibrationImg = null;
-
-        final ProgressDialog dialog = ProgressDialog.show(this, getText(R.string.ocr_calibrating), getText(R.string
-                .ocr_loading), true);
-
-        final Handler mainThreadHandler = new Handler();
-        final Runnable recalibrateRunner = new Runnable() {
-            @Override public void run() {
-                DisplayMetrics realDisplayMetrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getRealMetrics(realDisplayMetrics);
-                results = new ScanFieldAutomaticLocator(bmp, realDisplayMetrics.widthPixels, realDisplayMetrics.density)
-                        .scan(mainThreadHandler, dialog, getBaseContext());
-                mainThreadHandler.post(new Runnable() {
-                    @Override public void run() {
-                        dialog.setMessage(getText(R.string.done));
-                        dialog.dismiss();
-                        if (results.isCompleteCalibration()) {
-                            saveCalibrationButton.setEnabled(true);
-                            errorListTextView.setVisibility(View.GONE);
-                            ocr_calibration_description.setVisibility(View.VISIBLE);
-                            ocr_calibration_check.setVisibility(View.VISIBLE);
-                        } else {
-                            StringBuilder sb = new StringBuilder();
-                            if (results.pokemonNameArea == null) {
-                                sb.append(getText(R.string.ocr_error_name));
-                            }
-                            if (results.pokemonTypeArea == null) {
-                                sb.append(getText(R.string.ocr_error_type));
-                            }
-                            if (results.candyNameArea == null) {
-                                sb.append(getText(R.string.ocr_error_candy_name));
-                            }
-                            if (results.pokemonHpArea == null) {
-                                sb.append(getText(R.string.ocr_error_hp));
-                            }
-                            if (results.pokemonCpArea == null) {
-                                sb.append(getText(R.string.ocr_error_cp));
-                            }
-                            if (results.pokemonCandyAmountArea == null) {
-                                sb.append(getText(R.string.ocr_error_candy_amount));
-                            }
-                            if (results.pokemonEvolutionCostArea == null) {
-                                sb.append(getText(R.string.ocr_error_evo_cost));
-                            }
-                            if (results.arcCenter == null) {
-                                sb.append(getText(R.string.ocr_error_arc_center));
-                            }
-                            if (results.arcRadius == null) {
-                                sb.append(getText(R.string.ocr_error_arc_radius));
-                            }
-                            if (results.infoScreenCardWhitePixelPoint == null) {
-                                sb.append(getText(R.string.ocr_error_locate_pixel_white));
-                            }
-                            if (results.infoScreenCardWhitePixelColor == null) {
-                                sb.append(getText(R.string.ocr_error_pick_pixel_white));
-                            }
-                            if (results.infoScreenFabGreenPixelPoint == null) {
-                                sb.append(getText(R.string.ocr_error_locate_pixel_green));
-                            }
-                            if (results.infoScreenFabGreenPixelColor == null) {
-                                sb.append(getText(R.string.ocr_error_pick_pixel_green));
-                            }
-                            sb.append(getText(R.string.ocr_msg_verify));
-                            errorListTextView.setText(sb);
-                            ocr_calibration_title.setText(R.string.title_activity_ocr_calibration_error);
-                            ocr_calibration_description.setVisibility(View.GONE);
-                            ocr_calibration_check.setVisibility(View.GONE);
-                            saveCalibrationButton.setVisibility(View.GONE);
-                            backButton.setVisibility(View.VISIBLE);
-                        }
-                        drawResultIndicator(bmp);
-                        resultImageView.setImageBitmap(bmp);
-                    }
-                });
-            }
-        };
-        new Thread(recalibrateRunner).start();
+        if (sCalibrationImage == null) {
+            finish(); // We don't have a screenshot: terminate here
+        } else {
+            final ProgressDialog dialog = ProgressDialog.show(
+                    this, getText(R.string.ocr_calibrating), getText(R.string.ocr_loading), true);
+            new Thread(new RecalibrateRunnable(this, dialog)).start();
+        }
 
         saveCalibrationButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 saveCalibrationButton.setVisibility(View.GONE);
                 backToGoivButton.setVisibility(View.VISIBLE);
                 if (results != null && results.isCompleteCalibration()) {
@@ -163,18 +111,212 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
         });
 
         backButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
                 Intent i = getPackageManager().getLaunchIntentForPackage("com.nianticlabs.pokemongo");
                 if (i != null) {
+                    i.addFlags(FLAG_ACTIVITY_SINGLE_TOP);
                     startActivity(i);
                 }
             }
         });
     }
 
+    private static class RecalibrateRunnable implements Runnable {
+
+        private final Handler mainThreadHandler;
+        private final WeakReference<OcrCalibrationResultActivity> activityRef;
+        private final WeakReference<ProgressDialog> dialogRef;
+
+
+        @MainThread
+        private RecalibrateRunnable(OcrCalibrationResultActivity activity, ProgressDialog dialog) {
+            this.mainThreadHandler = new Handler();
+            this.activityRef = new WeakReference<>(activity);
+            this.dialogRef = new WeakReference<>(dialog);
+        }
+
+        @Override
+        public void run() {
+            final OcrCalibrationResultActivity activity = activityRef.get();
+            final ProgressDialog dialog = dialogRef.get();
+            if (activity == null || dialog == null) {
+                return;
+            }
+
+            DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+            activity.getWindowManager().getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+
+            ScanFieldResults results = new ScanFieldAutomaticLocator(
+                    sCalibrationImage, realDisplayMetrics.widthPixels, realDisplayMetrics.density)
+                    .scan(mainThreadHandler, dialogRef, new WeakReference<Context>(activity));
+
+            mainThreadHandler.post(new ResultRunnable(activityRef, dialogRef, results));
+        }
+    }
+
+    private static class ResultRunnable implements Runnable {
+
+        private final WeakReference<OcrCalibrationResultActivity> activityRef;
+        private final WeakReference<ProgressDialog> dialogRef;
+        private final ScanFieldResults results;
+        private final Bitmap resultIndicatorImage;
+
+
+        private ResultRunnable(WeakReference<OcrCalibrationResultActivity> activityRef,
+                               WeakReference<ProgressDialog> dialogRef, ScanFieldResults results) {
+            this.activityRef = activityRef;
+            this.dialogRef = dialogRef;
+            this.results = results;
+            if (sCalibrationImage != null) {
+                this.resultIndicatorImage = sCalibrationImage.copy(sCalibrationImage.getConfig(), true);
+            } else {
+                this.resultIndicatorImage = null;
+            }
+        }
+
+        @Override
+        public void run() {
+            if (resultIndicatorImage == null) {
+                return;
+            }
+            OcrCalibrationResultActivity activity = activityRef.get();
+            ProgressDialog dialog = dialogRef.get();
+            if (activity == null || dialog == null) {
+                return;
+            }
+
+            activity.results = results;
+
+            dialog.setMessage(activity.getText(R.string.done));
+            dialog.dismiss();
+            if (results.isCompleteCalibration()) {
+                activity.saveCalibrationButton.setEnabled(true);
+                activity.errorListTextView.setVisibility(View.GONE);
+                activity.ocr_calibration_description.setVisibility(View.VISIBLE);
+                activity.ocr_calibration_check.setVisibility(View.VISIBLE);
+            } else {
+                StringBuilder sb = new StringBuilder();
+                if (results.pokemonNameArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_name));
+                }
+                if (results.pokemonTypeArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_type));
+                }
+                if (results.candyNameArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_candy_name));
+                }
+                if (results.pokemonHpArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_hp));
+                }
+                if (results.pokemonCpArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_cp));
+                }
+                if (results.pokemonCandyAmountArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_candy_amount));
+                }
+                if (results.pokemonEvolutionCostArea == null) {
+                    sb.append(activity.getText(R.string.ocr_error_evo_cost));
+                }
+                if (results.arcCenter == null) {
+                    sb.append(activity.getText(R.string.ocr_error_arc_center));
+                }
+                if (results.arcRadius == null) {
+                    sb.append(activity.getText(R.string.ocr_error_arc_radius));
+                }
+                if (results.infoScreenCardWhitePixelPoint == null) {
+                    sb.append(activity.getText(R.string.ocr_error_locate_pixel_white));
+                }
+                if (results.infoScreenCardWhitePixelColor == null) {
+                    sb.append(activity.getText(R.string.ocr_error_pick_pixel_white));
+                }
+                if (results.infoScreenFabGreenPixelPoint == null) {
+                    sb.append(activity.getText(R.string.ocr_error_locate_pixel_green));
+                }
+                if (results.infoScreenFabGreenPixelColor == null) {
+                    sb.append(activity.getText(R.string.ocr_error_pick_pixel_green));
+                }
+                activity.enableUserEmailErrorReporting(sCalibrationImage, sb.toString());
+                sb.append(activity.getText(R.string.ocr_msg_verify));
+                activity.errorListTextView.setText(sb);
+                activity.ocr_calibration_title.setText(R.string.title_activity_ocr_calibration_error);
+                activity.ocr_calibration_description.setVisibility(View.GONE);
+                activity.ocr_calibration_check.setVisibility(View.GONE);
+                activity.saveCalibrationButton.setVisibility(View.GONE);
+                activity.backButton.setVisibility(View.VISIBLE);
+            }
+
+            // Draw results on a copy of the original screenshot
+            activity.drawResultIndicator(resultIndicatorImage, ContextCompat.getColor(activity, R.color.colorAccent));
+            activity.resultImageView.setImageBitmap(resultIndicatorImage);
+        }
+    }
+
+    /**
+     * Shows the email error section of the view, and adds the button logic that creates an email
+     * for the image.
+     *
+     * @param sCalibrationImage The image that will be emailed.
+     * @param errorText         The error message the user got.
+     */
+    private void enableUserEmailErrorReporting(final Bitmap sCalibrationImage, final String errorText) {
+        errorLayout.setVisibility(View.VISIBLE);
+
+        emailErrorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+
+
+                String pathofBmp = MediaStoreUtils.insertPngImage(getContentResolver(),
+                        sCalibrationImage, "goivdebugimgremovable.png");
+                Uri bmpUri = Uri.parse(pathofBmp);
+
+                final String os;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        && !Strings.isNullOrEmpty(Build.VERSION.BASE_OS)) {
+                    os = Build.VERSION.BASE_OS;
+                } else {
+                    os = "Android";
+                }
+
+                final Intent email = new Intent(Intent.ACTION_SENDTO,
+                        Uri.fromParts("mailto", "goivdevelopment@gmail.com", null));
+                email.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                email.putExtra(Intent.EXTRA_EMAIL, new String[]{"goivdevelopment@gmail.com"});
+                email.putExtra(Intent.EXTRA_SUBJECT, "GoIV auto calibration image error");
+                email.putExtra(Intent.EXTRA_TEXT, getString(R.string.app_name) + " version: " + BuildConfig.VERSION_NAME
+                        + "\nDevice maker and model: " + Build.MANUFACTURER + " " + Build.MODEL
+                        + "\nOS: " + os + " " + Build.VERSION.RELEASE
+                        + "\nScreen density: " + realDisplayMetrics.density
+                        + "\n\n\nError message: \n" + errorText);
+                email.putExtra(Intent.EXTRA_STREAM, bmpUri);
+
+                // Grant read permission to candidate resolvers
+                List<ResolveInfo> resolvers = getPackageManager().queryIntentActivities(email, 0);
+                for (ResolveInfo r : resolvers) {
+                    grantUriPermission(r.activityInfo.packageName, bmpUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
+
+                startActivity(Intent.createChooser(email, "Choose an Email App:"));
+            }
+        });
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sCalibrationImage = null; // This screenshot is no longer needed: let it be garbage collected
+    }
+
     private void fixHomeButton() {
         backToGoivButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+            @Override
+            public void onClick(View v) {
 
                 Intent intent = new Intent(OcrCalibrationResultActivity.this, MainActivity.class);
                 startActivity(intent);
@@ -188,25 +330,22 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(uiOptions);
     }
 
-    private void drawResultIndicator(Bitmap bmp) {
-        int purpleBright = Color.parseColor("#FA33FA");
-        int purple = Color.parseColor("#AA00BB");
-
-        showAreaIndicator(bmp, results.pokemonNameArea, purple);
-        showAreaIndicator(bmp, results.pokemonTypeArea, purple);
-        showAreaIndicator(bmp, results.candyNameArea, purple);
-        showAreaIndicator(bmp, results.pokemonHpArea, purple);
-        showAreaIndicator(bmp, results.pokemonCpArea, purple);
-        showAreaIndicator(bmp, results.pokemonCandyAmountArea, purple);
-        showAreaIndicator(bmp, results.pokemonEvolutionCostArea, purple);
+    private void drawResultIndicator(Bitmap bmp, @ColorInt int colorAccent) {
+        showAreaIndicator(bmp, results.pokemonNameArea, colorAccent);
+        showAreaIndicator(bmp, results.pokemonTypeArea, colorAccent);
+        showAreaIndicator(bmp, results.candyNameArea, colorAccent);
+        showAreaIndicator(bmp, results.pokemonHpArea, colorAccent);
+        showAreaIndicator(bmp, results.pokemonCpArea, colorAccent);
+        showAreaIndicator(bmp, results.pokemonCandyAmountArea, colorAccent);
+        showAreaIndicator(bmp, results.pokemonEvolutionCostArea, colorAccent);
 
         showPointIndicator(bmp, results.infoScreenCardWhitePixelPoint,
-                results.infoScreenCardWhitePixelColor, purpleBright);
+                results.infoScreenCardWhitePixelColor, colorAccent);
         showPointIndicator(bmp, results.infoScreenFabGreenPixelPoint,
-                results.infoScreenFabGreenPixelColor, purpleBright);
+                results.infoScreenFabGreenPixelColor, colorAccent);
 
-        showPointIndicator(bmp, results.arcCenter, null, purpleBright);
-        showArcIndicator(bmp, results.arcCenter, results.arcRadius, purple);
+        showPointIndicator(bmp, results.arcCenter, null, colorAccent);
+        showArcIndicator(bmp, results.arcCenter, results.arcRadius, colorAccent);
     }
 
     private void showPointIndicator(Bitmap bmp, ScanPoint point, Integer color, Integer strokeColor) {
@@ -239,8 +378,8 @@ public class OcrCalibrationResultActivity extends AppCompatActivity {
         }
     }
 
-    private void showArcIndicator(Bitmap bmp, ScanPoint point, float radius, int color) {
-        if (point != null) {
+    private void showArcIndicator(Bitmap bmp, ScanPoint point, Integer radius, int color) {
+        if (point != null && radius != null) {
             Canvas c = new Canvas(bmp);
             Paint p = new Paint();
             p.setStyle(Paint.Style.STROKE);

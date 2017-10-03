@@ -54,6 +54,8 @@ import com.kamron.pogoiv.widgets.PlayerTeamAdapter;
 
 import timber.log.Timber;
 
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String ACTION_SHOW_UPDATE_DIALOG = "com.kamron.pogoiv.SHOW_UPDATE_DIALOG";
@@ -316,41 +318,47 @@ public class MainActivity extends AppCompatActivity {
      * Configures the logic for the start button.
      */
     private void initiateStartButton() {
+
         launchButton = (Button) findViewById(R.id.start);
         launchButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                if (!hasAllPermissions()) {
-                    getAllPermissions();
-                } else if (!Pokefly.isRunning()) { //Will start goiv
-                    startGoIV();
-                } else { //Will stop goiv
-                    stopGoIV();
-                }
-            }
+                runStartButtonLogic();
 
-            private void stopGoIV() {
-                stopService(new Intent(MainActivity.this, Pokefly.class));
-                if (screen != null) {
-                    screen.exit();
-                }
-            }
-
-            private void startGoIV() {
-                batterySaver = settings.isManualScreenshotModeEnabled();
-                setupDisplaySizeInfo();
-                trainerLevel = setupTrainerLevel();
-
-                Data.setupArcPoints(arcInit, arcRadius, trainerLevel);
-
-                if (batterySaver) {
-                    startPokeFly();
-                } else {
-                    startScreenService();
-                }
             }
         });
+    }
+
+    public void runStartButtonLogic() {
+        if (!hasAllPermissions()) {
+            getAllPermissions();
+        } else if (!Pokefly.isRunning()) { //Will start goiv
+            startGoIV();
+        } else { //Will stop goiv
+            stopGoIV();
+        }
+    }
+
+    private void stopGoIV() {
+        stopService(new Intent(MainActivity.this, Pokefly.class));
+        if (screen != null) {
+            screen.exit();
+        }
+    }
+
+    private void startGoIV() {
+        batterySaver = settings.isManualScreenshotModeEnabled();
+        setupDisplaySizeInfo();
+        trainerLevel = setupTrainerLevel();
+
+        Data.setupArcPoints(arcInit, arcRadius, trainerLevel);
+
+        if (batterySaver) {
+            startPokeFly();
+        } else {
+            startScreenService();
+        }
     }
 
     private void startPoGoIfSettingOn() {
@@ -576,6 +584,7 @@ public class MainActivity extends AppCompatActivity {
     private void openPokemonGoApp() {
         Intent i = getPackageManager().getLaunchIntentForPackage("com.nianticlabs.pokemongo");
         if (i != null) {
+            i.addFlags(FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }
     }
