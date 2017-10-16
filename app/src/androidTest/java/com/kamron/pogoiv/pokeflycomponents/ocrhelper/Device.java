@@ -18,6 +18,32 @@ public enum Device {
             new Point(0, 0),                            // TODO White pixel
             new Point(0, 0)),                           // TODO Green pixel
 
+    GOOGLE_NEXUS_6P("Google Nexus 6P", 3.5f, "testinfoscreens/nexus6P",
+            makeRect(588, 1109, 256, 67),               // Name
+            makeRect(572, 1508, 306, 30),               // Type
+            makeRect(837, 1771, 326, 28),               // Candy name
+            makeRect(634, 1270, 169, 30),               // HP area
+            makeRect(510, 170, 299, 82),                // CP area
+            makeRect(935, 1690, 131, 44),               // Candy amount
+            makeRect(1065, 2124, 56, 39),               // Evolution cost
+            new Point(720, 849),                        // Arc center
+            546,                                        // Arc radius
+            new Point(0, 0),                            // TODO White pixel
+            new Point(0, 0)),                           // TODO Green pixel
+
+    GOOGLE_PIXEL_XL("Google Pixel XL", 3.5f, "testinfoscreens/pixelXL",
+            makeRect(589, 1109, 264, 82),               // Name
+            makeRect(553, 1508, 344, 30),               // Type
+            makeRect(859, 1771, 288, 28),               // Candy name
+            makeRect(632, 1270, 173, 31),               // HP area
+            makeRect(537, 170, 271, 82),                // CP area
+            makeRect(953, 1690, 98, 45),                // Candy amount
+            makeRect(1066, 2124, 55, 39),               // Evolution cost
+            new Point(720, 849),                        // Arc center
+            546,                                        // Arc radius
+            new Point(0, 0),                            // TODO White pixel
+            new Point(0, 0)),                           // TODO Green pixel
+
     VODAFONE_VDF_500("Vodafone Smart turbo 7", 1.3312501f, "testinfoscreens/vdf500",
             new Rect(178, 394, 178 + 122, 394 + 31),    // Name
             new Rect(187, 537, 187 + 122, 537 + 11),    // Type
@@ -54,6 +80,45 @@ public enum Device {
             new Rect(1091, 2272, 1091 + 60, 2272 + 43), // Evolution cost
             new Point(720, 906),                        // Arc center
             583,                                        // Arc radius
+            new Point(0, 1480),                         // TODO White pixel
+            new Point(0, 0)),                           // TODO Green pixel
+
+    SAMSUNG_G950_game_mode("Samsung Galaxy S8 / Game Mode", 2.625f, "testinfoscreens/g950_game_mode",
+            makeRect(309, 879, 465, 77),                // Name
+            makeRect(410, 1208, 271, 25),               // Type
+            makeRect(634, 1421, 231, 23),               // Candy name
+            makeRect(468, 1017, 142, 25),               // HP area
+            makeRect(395, 136, 218, 65),                // CP area
+            makeRect(693, 1355, 109, 36),               // Candy amount
+            makeRect(818, 1704, 45, 32),                // Evolution cost
+            new Point(540, 679),                        // Arc center
+            377,                                        // Arc radius
+            new Point(0, 0),                            // TODO White pixel
+            new Point(0, 0)),                           // TODO Green pixel
+
+    SAMSUNG_G955("Samsung Galaxy S8+", 3.5f, "testinfoscreens/g955",
+            new Rect(582, 1186, 582 + 283, 1186 + 90),  // Name
+            new Rect(523, 1613, 523 + 372, 1613 + 32),  // Type
+            new Rect(844, 1895, 844 + 311, 1895 + 30),  // Candy name
+            new Rect(626, 1359, 626 + 189, 1359 + 32),  // HP area
+            new Rect(526, 182, 526 + 294, 182 + 86),    // CP area
+            new Rect(946, 1808, 946 + 106, 1808 + 49),  // Candy amount
+            new Rect(1092, 2274, 1092 + 58, 2274 + 41), // Evolution cost
+            new Point(720, 908),                        // Arc center
+            583,                                        // Arc radius
+            new Point(0, 1480),                         // TODO White pixel
+            new Point(0, 0)),                           // TODO Green pixel
+
+    SAMSUNG_G955_game_mode("Samsung Galaxy S8+ / Game Mode", 2.625f, "testinfoscreens/g955_game_mode",
+            makeRect(435, 886, 215, 69),                // Name
+            makeRect(409, 1208, 272, 25),               // Type
+            makeRect(634, 1421, 231, 24),               // Candy name
+            makeRect(470, 1017, 140, 25),               // HP area
+            makeRect(395, 135, 219, 67),                // CP area
+            makeRect(708, 1355, 80, 37),                // Candy amount
+            makeRect(818, 1704, 45, 32),                // Evolution cost
+            new Point(540, 679),                        // Arc center
+            437,                                        // Arc radius
             new Point(0, 1480),                         // TODO White pixel
             new Point(0, 0)),                           // TODO Green pixel
 
@@ -128,5 +193,9 @@ public enum Device {
 
     @Override public String toString() {
         return makerModel;
+    }
+
+    private static Rect makeRect(int x, int y, int w, int h) {
+        return new Rect(x, y, x + w, y + h);
     }
 }

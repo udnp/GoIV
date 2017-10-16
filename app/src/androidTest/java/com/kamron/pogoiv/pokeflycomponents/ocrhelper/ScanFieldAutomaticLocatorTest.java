@@ -1,5 +1,6 @@
 package com.kamron.pogoiv.pokeflycomponents.ocrhelper;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +43,16 @@ public class ScanFieldAutomaticLocatorTest {
     }
 
     @Test
+    public void scan_Nexus6P() throws IOException {
+        checkDevice(Device.GOOGLE_NEXUS_5);
+    }
+
+    @Test
+    public void scan_PixelXL() throws IOException {
+        checkDevice(Device.GOOGLE_PIXEL_XL);
+    }
+
+    @Test
     public void scan_G930() throws IOException {
         checkDevice(Device.SAMSUNG_G930);
     }
@@ -48,6 +60,21 @@ public class ScanFieldAutomaticLocatorTest {
     @Test
     public void scan_G950() throws IOException {
         checkDevice(Device.SAMSUNG_G950);
+    }
+
+    @Test
+    public void scan_G950_game_mode() throws IOException {
+        checkDevice(Device.SAMSUNG_G950_game_mode);
+    }
+
+    @Test
+    public void scan_G955() throws IOException {
+        checkDevice(Device.SAMSUNG_G955);
+    }
+
+    @Test
+    public void scan_G955_game_mode() throws IOException {
+        checkDevice(Device.SAMSUNG_G955_game_mode);
     }
 
     @Test
@@ -62,6 +89,9 @@ public class ScanFieldAutomaticLocatorTest {
 
     private void checkDevice(Device device) throws IOException {
         String[] pokemonInfoScreenFileNames = mContext.getAssets().list(device.infoScreensDirPath);
+
+        assertTrue("No test images found for " + device.toString(), pokemonInfoScreenFileNames.length > 0);
+
         for (String assetFileName : pokemonInfoScreenFileNames) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inMutable = true;
@@ -69,7 +99,9 @@ public class ScanFieldAutomaticLocatorTest {
                     .open(device.infoScreensDirPath + "/" + assetFileName), null, options);
             ScanFieldAutomaticLocator autoLocator =
                     new ScanFieldAutomaticLocator(bmp, bmp.getWidth(), device.screenDensity);
-            ScanFieldResults results = autoLocator.scan(null, null, mTargetContext);
+            //noinspection ConstantConditions
+            ScanFieldResults results = autoLocator.scan(null, new WeakReference<ProgressDialog>(null),
+                    new WeakReference<>(mTargetContext));
             checkScanFieldResults(device, assetFileName, bmp, results);
         }
     }
