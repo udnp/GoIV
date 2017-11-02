@@ -435,7 +435,6 @@ public class OcrHelper {
             if (isNidoranName(pokemonName)) {
                 pokemonName = getNidoranGenderName(pokemonImage);
             }
-            name.recycle();
             ocrCache.put(hash, pokemonName);
         }
         return pokemonName;
@@ -464,7 +463,6 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_type));
             tesseract.setImage(type);
             pokemonType = tesseract.getUTF8Text();
-            type.recycle();
             ocrCache.put(hash, pokemonType);
         }
         return pokemonType;
@@ -564,7 +562,6 @@ public class OcrHelper {
             tesseract.setImage(candy);
             candyName = fixOcrNumsToLetters(
                     removeFirstOrLastWord(tesseract.getUTF8Text().trim().replace("-", " "), candyWordFirst));
-            candy.recycle();
             if (isNidoranName(candyName)) {
                 candyName = getNidoranGenderName(pokemonImage);
             }
@@ -597,7 +594,6 @@ public class OcrHelper {
             pokemonHPStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonHPStr);
         }
-        hp.recycle();
 
         if (pokemonHPStr.contains("/")) {
             try {
@@ -789,7 +785,6 @@ public class OcrHelper {
             pokemonCandyStr = tesseract.getUTF8Text();
             ocrCache.put(hash, pokemonCandyStr);
         }
-        candyAmount.recycle();
 
         if (pokemonCandyStr.length() > 0) {
             try {
@@ -868,7 +863,6 @@ public class OcrHelper {
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
         }
-        bottom.recycle();
 
         return hash + "#" + appraisalText;
 

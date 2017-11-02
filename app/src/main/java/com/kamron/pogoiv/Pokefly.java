@@ -1915,7 +1915,6 @@ public class Pokefly extends Service {
             return;
         }
         scanPokemon(bmp, Optional.<String>absent());
-        bmp.recycle();
     }
 
     /**
@@ -1948,7 +1947,6 @@ public class Pokefly extends Service {
             }
 
             scanPokemon(bitmap, screenShotPath);
-            bitmap.recycle();
         }
     };
 
