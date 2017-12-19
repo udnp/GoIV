@@ -624,7 +624,13 @@ public class Pokefly extends Service {
      * @param pokeLevel The pokemon level to set the arc pointer to.
      */
     private void setArcPointer(double pokeLevel) {
-        int index = Data.levelToLevelIdx(pokeLevel);
+
+        int index = Data.maxPokeLevelToIndex(pokeLevel);
+
+        //If the pokemon is overleveled (Raid catch or weather modifier the arc indicator will be stuck at max)
+        if (index >= Data.arcX.length) {
+            index = Data.arcX.length - 1;
+        }
         arcParams.x = Data.arcX[index] - arcParams.width / 2;
         arcParams.y = Data.arcY[index] - arcParams.height / 2 - statusBarHeight;
         //That is, (int) (arcCenter + (radius * Math.cos(angleInRadians))) and
@@ -636,7 +642,8 @@ public class Pokefly extends Service {
      * Creates the arc adjuster used to move the arc pointer in the scan screen.
      */
     private void createArcAdjuster() {
-        arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIdx(trainerLevel));
+        //arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIndex(trainerLevel));
+        arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIndex(40));
 
         arcAdjustBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -973,7 +980,7 @@ public class Pokefly extends Service {
 
     private void adjustArcPointerBar(double estimatedPokemonLevel) {
         setArcPointer(estimatedPokemonLevel);
-        arcAdjustBar.setProgress(Data.levelToLevelIdx(estimatedPokemonLevel));
+        arcAdjustBar.setProgress(Data.maxPokeLevelToIndex(estimatedPokemonLevel));
     }
 
     @OnClick(R.id.btnDecrementLevel)
@@ -986,7 +993,7 @@ public class Pokefly extends Service {
 
     @OnClick(R.id.btnIncrementLevel)
     public void incrementLevel() {
-        if (estimatedPokemonLevel < Data.trainerLevelToMaxPokeLevel(trainerLevel)) {
+        if (estimatedPokemonLevel < 40) { //40 is max trainer level. //dont allow increment if already at 40.
             estimatedPokemonLevel += 0.5;
         }
         adjustArcPointerBar(estimatedPokemonLevel);
@@ -1578,7 +1585,7 @@ public class Pokefly extends Service {
     /**
      * Sets the text color of the level next to the slider in the estimate box to normal or orange depending on if
      * the user can level up the pokemon that high with his current trainer level. For example, if the user has
-     * trainer level 20, then his pokemon can reach a max level of 21.5 - so any goalLevel above 21.5 would become
+     * trainer level 20, then his pokemon can reach a max level of 22 - so any goalLevel above 22 would become
      * orange.
      *
      * @param selectedLevel The level to reach.
