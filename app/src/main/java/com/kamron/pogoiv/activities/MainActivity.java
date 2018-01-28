@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -22,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -32,10 +34,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -63,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String ACTION_RESTART_POKEFLY = "com.kamron.pogoiv.ACTION_RESTART_POKEFLY";
     public static final String ACTION_OPEN_SETTINGS = "com.kamron.pogoiv.ACTION_OPEN_SETTINGS";
 
+
+    private static final String youtubeTutorialCalibrationUrl = "https://www.youtube.com/embed/w7dNEW1FLjQ?rel=0";
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
@@ -169,15 +177,51 @@ public class MainActivity extends AppCompatActivity {
         initiateUserScreenSettings();
         initiateGui();
         warnUserFirstLaunchIfNoScreenRecording();
+
         registerAllBroadcastRecievers();
 
 
     }
 
     /**
-     * Makes the localBroadcastManager register recievers for the different accepted intents, and tells the app to
+     * Makes the help-buttons load and navigate to the tutorial youtube webview, or open the browser if using offline
+     * build.
+     */
+    private void setupTutorialButton() {
+        Button tuthelp = (Button) findViewById(R.id.recalibrationHelp);
+        Button tuthelp2 = (Button) findViewById(R.id.recalibrationHelp2);
+        tuthelp.setOnClickListener(new RecalibrationTutListener());
+        tuthelp2.setOnClickListener(new RecalibrationTutListener());
+    }
+
+    /**
+     * Loads the webview youtube video.
+     */
+    private void loadRecalibrationTutorialVideo() {
+        String frameVideo = "<html><iframe width=\"310\" height=\"480\" src=\""
+                + youtubeTutorialCalibrationUrl
+                + "\" frameborder=\"0\" gesture=\"media\" allow=\"encrypted-media\" "
+                + "allowfullscreen></iframe></html>";
+
+        WebView displayYoutubeVideo = (WebView) findViewById(R.id.webview_tutorial);
+        displayYoutubeVideo.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return false;
+            }
+
+        });
+        WebSettings webSettings = displayYoutubeVideo.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        displayYoutubeVideo.loadData(frameVideo, "text/html", "utf-8");
+    }
+
+    /**
+     * Makes the localBroadcastManager register recievers for the different accepted intents, and tells
+     * the app to
      * actually do something when those intents are received.
      */
+
     private void registerAllBroadcastRecievers() {
         LocalBroadcastManager.getInstance(this).registerReceiver(pokeflyStateChanged,
                 new IntentFilter(Pokefly.ACTION_UPDATE_UI));
@@ -234,6 +278,8 @@ public class MainActivity extends AppCompatActivity {
         TextView tvVersionNumber = (TextView) findViewById(R.id.version_number);
         tvVersionNumber.setText(String.format("v%s", getVersionName()));
 
+        setupTutorialButton();
+        hideWebviewIfOfflineFlavour();
         initiateOptimizationWarning();
         initiateLevelPicker();
         initiateHelpButton();
@@ -241,22 +287,42 @@ public class MainActivity extends AppCompatActivity {
         initiateStartButton();
     }
 
+    private void hideWebviewIfOfflineFlavour() {
+        if (BuildConfig.FLAVOR.toLowerCase().contains("offline")) {
+            findViewById(R.id.webview_tutorial).setVisibility(View.GONE);
+        }
+    }
+
     /**
-     * Hide the optimization-warning and its components depending on if the user has a manual screen calibration
-     * saved, and if the device has weird screen ratio.
+     * Show the optimization-warning and its components depending on if the user hasn't a manual screen calibration
+     * saved, if the calibration isn't updated and if the device has weird screen ratio.
      */
     private void initiateOptimizationWarning() {
-        LinearLayout warningLayout = (LinearLayout) findViewById(R.id.optimizationWarning);
-        if (settings.hasManualScanCalibration()) {
-            warningLayout.setVisibility(View.GONE);
-        }
+        if (settings.hasUpToDateManualScanCalibration()) {
+            findViewById(R.id.optimizationWarningLayout).setVisibility(View.GONE); // Ensure the layout isn't visible
 
-        TextView nonStandardScreenWarningText = (TextView) findViewById(R.id.nonStandardScreenWarning);
-        double ratio = (double) displayMetrics.widthPixels / (double) displayMetrics.heightPixels;
-        if (ratio > 0.55 && ratio < 0.57) { //standard 9:16 ratio
-            nonStandardScreenWarningText.setVisibility(View.GONE);
         } else {
-            nonStandardScreenWarningText.setVisibility(View.VISIBLE);
+            findViewById(R.id.optimizationWarningLayout).setVisibility(View.VISIBLE);
+
+            if (settings.hasManualScanCalibration()) {
+                // Has outdated calibration
+                findViewById(R.id.shouldRunOptimizationAgainWarning).setVisibility(View.VISIBLE);
+
+            } else {
+                // Has never calibrated
+                findViewById(R.id.neverRunOptimizationWarning).setVisibility(View.VISIBLE);
+
+                // If the screen ratio isn't standard the user must run calibration
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getRealSize(size);
+                float ratio = (float) size.x / size.y;
+                float standardRatio = 9 / 16f;
+                float tolerance = 1 / 400f;
+                if (ratio < (standardRatio - tolerance) || ratio > (standardRatio + tolerance)) {
+                    findViewById(R.id.nonStandardScreenWarning).setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 
@@ -264,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
      * Initiates the links to reddit and github.
      */
     private void initiateCommunityButtons() {
-        Button redditButton = (Button) findViewById(R.id.reddit);
+        View redditButton = findViewById(R.id.reddit);
         redditButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 Uri uriUrl = Uri.parse("https://www.reddit.com/r/GoIV/");
@@ -273,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button githubButton = (Button) findViewById(R.id.github);
+        View githubButton = findViewById(R.id.github);
         githubButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 Uri uriUrl = Uri.parse("https://github.com/farkam135/GoIV");
@@ -319,7 +385,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void initiateStartButton() {
 
-        launchButton = (Button) findViewById(R.id.start);
+        launchButton = findViewById(R.id.start);
+        ViewCompat.setBackgroundTintList(launchButton, null);
         launchButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -681,5 +748,44 @@ public class MainActivity extends AppCompatActivity {
             shouldRestartOnStopComplete = false;
             launchButton.callOnClick();
         }
+    }
+
+
+    /**
+     * An onclick class that shows the video tutorial and loads the tutorial video, and scrolls to the view, or hides
+     * it if its the second time someone clicks.
+     */
+    private class RecalibrationTutListener implements View.OnClickListener {
+
+        @Override public void onClick(View view) {
+            if (BuildConfig.FLAVOR.toLowerCase().contains("online")) {
+                final LinearLayout webLayout = findViewById(R.id.weblayout);
+                WebView displayYoutubeVideo = (WebView) findViewById(R.id.webview_tutorial);
+
+                if (webLayout.getVisibility() == View.GONE) {
+                    webLayout.setVisibility(View.VISIBLE);
+                    loadRecalibrationTutorialVideo();
+                    final ScrollView sw = findViewById(R.id.scrollviewMain);
+
+                    sw.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            sw.smoothScrollTo(0, webLayout.getTop());
+                        }
+                    });
+                } else {
+                    displayYoutubeVideo.stopLoading();
+                    webLayout.setVisibility(View.GONE);
+                }
+
+            } else { //running offline version, we cant load the webpage inserted into the app, we need to open browser.
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(youtubeTutorialCalibrationUrl));
+                startActivity(i);
+            }
+
+
+        }
+
     }
 }

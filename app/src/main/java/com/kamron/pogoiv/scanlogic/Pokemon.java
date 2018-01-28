@@ -1,5 +1,7 @@
 package com.kamron.pogoiv.scanlogic;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,29 @@ import java.util.List;
  */
 
 public class Pokemon {
+
+    public enum Gender {
+        F("♀", "f"),
+        M("♂", "m"),
+        N("", "n");
+
+        private String symbol;
+        private String character;
+
+        Gender(@NonNull String symbol, @NonNull String character) {
+            this.symbol = symbol;
+            this.character = character;
+        }
+
+        @Override public String toString() {
+            return symbol;
+        }
+
+        public String getCharacter() {
+            return character;
+        }
+    }
+
     /**
      * Evolutions of this Pokemon, sorted in alphabetical order.
      * Try to avoid assumptions that only hold for Gen. I Pokemon: evolutions can have smaller

@@ -1,6 +1,7 @@
 package com.kamron.pogoiv.scanlogic;
 
 import com.google.common.base.Optional;
+import com.kamron.pogoiv.utils.LevelRange;
 
 /**
  * A ScanResult represents the result of an OCR scan.
@@ -9,32 +10,40 @@ import com.google.common.base.Optional;
 //TODO: we might want to make this Parcelable instead of sending the fields one by one?
 //But writing the instance by hand would call for unit test.
 public class ScanResult {
-    private final double estimatedPokemonLevel;
+    private final LevelRange estimatedPokemonLevelRange;
     private final String pokemonName;
     private final String pokemonType;
+    private final Pokemon.Gender pokemonGender;
     private final String candyName;
     private final Optional<Integer> pokemonHP;
     private final Optional<Integer> pokemonCP;
     private final Optional<Integer> pokemonCandyAmount;
-    private final Optional<Integer> upgradeCandyCost;
+    private final Optional<Integer> evolutionCandyCost;
+    private final Optional<Integer> powerUpStardustCost;
+    private final Optional<Integer> powerUpCandyCost;
     private final String uniqueID;
 
-    public ScanResult(double estimatedPokemonLevel, String pokemonName, String pokemonType, String candyName,
+    public ScanResult(LevelRange estimatedPokemonLevel, String pokemonName, String pokemonType, String candyName,
+                      Pokemon.Gender pokemonGender,
                       Optional<Integer> pokemonHP, Optional<Integer> pokemonCP,
-                      Optional<Integer> pokemonCandyAmount, Optional<Integer> upgradeCandyCost, String uniqueID) {
-        this.estimatedPokemonLevel = estimatedPokemonLevel;
+                      Optional<Integer> pokemonCandyAmount, Optional<Integer> evolutionCandyCost,
+                      Optional<Integer> powerUpStardustCost, Optional<Integer> powerUpCandyCost, String uniqueID) {
+        this.estimatedPokemonLevelRange = estimatedPokemonLevel;
         this.pokemonName = pokemonName;
         this.pokemonType = pokemonType;
+        this.pokemonGender = pokemonGender;
         this.candyName = candyName;
         this.pokemonHP = pokemonHP;
         this.pokemonCP = pokemonCP;
         this.pokemonCandyAmount = pokemonCandyAmount;
-        this.upgradeCandyCost = upgradeCandyCost;
+        this.evolutionCandyCost = evolutionCandyCost;
+        this.powerUpStardustCost = powerUpStardustCost;
+        this.powerUpCandyCost = powerUpCandyCost;
         this.uniqueID = uniqueID;
     }
 
-    public double getEstimatedPokemonLevel() {
-        return estimatedPokemonLevel;
+    public LevelRange getEstimatedPokemonLevel() {
+        return estimatedPokemonLevelRange;
     }
 
     public String getPokemonName() {
@@ -43,6 +52,10 @@ public class ScanResult {
 
     public String getPokemonType() {
         return pokemonType;
+    }
+
+    public Pokemon.Gender getPokemonGender() {
+        return pokemonGender;
     }
 
     public String getCandyName() {
@@ -61,6 +74,14 @@ public class ScanResult {
         return pokemonCandyAmount;
     }
 
+    public Optional<Integer> getPokemonPowerUpStardustCost() {
+        return powerUpStardustCost;
+    }
+
+    public Optional<Integer> getPokemonPowerUpCandyCost() {
+        return powerUpCandyCost;
+    }
+
     public String getPokemonUniqueID() {
         return uniqueID;
     }
@@ -75,7 +96,7 @@ public class ScanResult {
         return !pokemonHP.isPresent() && !pokemonCP.isPresent();
     }
 
-    public Optional<Integer> getUpgradeCandyCost() {
-        return upgradeCandyCost;
+    public Optional<Integer> getEvolutionCandyCost() {
+        return evolutionCandyCost;
     }
 }

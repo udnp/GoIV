@@ -2,6 +2,8 @@ package com.kamron.pogoiv.scanlogic;
 
 import android.support.annotation.Nullable;
 
+import com.kamron.pogoiv.utils.LevelRange;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,20 +37,24 @@ public class IVScanResult {
     public final int scannedCP;
     public ArrayList<IVCombination> iVCombinations = new ArrayList<>();
     public Pokemon pokemon = null;
-    public final double estimatedPokemonLevel;
+    public final LevelRange estimatedPokemonLevel;
     public int scannedHP = 0;
+    public boolean rangeIVScan = false; //is this several levels worth of possible iv combinations?
+    public Pokemon.Gender scannedGender;
 
     /**
      * Creates a holder object for IV scan results.
      *
-     * @param pokemon               which pokemon it is
-     * @param pokemonCP             pokemon CP
-     * @param estimatedPokemonLevel the estimated pokemon level (should be very low)
+     * @param pokemon        Which pokemon it is
+     * @param estimatedLevel The estimated pokemon level
+     * @param pokemonCP      Pokemon CP
+     * @param gender         Pokemon gender
      */
-    public IVScanResult(Pokemon pokemon, double estimatedPokemonLevel, int pokemonCP) {
+    public IVScanResult(Pokemon pokemon, LevelRange estimatedLevel, int pokemonCP, Pokemon.Gender gender) {
         this.pokemon = pokemon;
-        this.estimatedPokemonLevel = estimatedPokemonLevel;
+        this.estimatedPokemonLevel = estimatedLevel;
         this.scannedCP = pokemonCP;
+        this.scannedGender = gender;
     }
 
     public int getCount() {
@@ -330,5 +336,18 @@ public class IVScanResult {
             }
         }
         iVCombinations = refinedList;
+    }
+
+    public void addPossibilitiesFrom(IVScanResult ivs) {
+
+        for (IVCombination ivc : ivs.iVCombinations) {
+            if (iVCombinations.contains(ivc) == false) { //dont add duplicates
+                addIVCombination(ivc.att, ivc.def, ivc.sta);
+                rangeIVScan = true;
+            }
+
+        }
+
+        updateHighAndLowValues();
     }
 }
