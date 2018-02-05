@@ -1468,7 +1468,8 @@ public class Pokefly extends Service {
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
 
-        setBaseStat(ivScanResult);
+        //setBaseStat(ivScanResult.pokemon); // for the scanned pokemon
+        setBaseStat(selectedPokemon); // for the selected pokemon
 
         setAndCalculatePokeSpamText(ivScanResult);
     }
@@ -1514,10 +1515,10 @@ public class Pokefly extends Service {
         exResultHP.setText(hpText);
     }
 
-    private void setBaseStat(IVScanResult ivScanResult) {
-        baseStatAtk.setText(String.valueOf(ivScanResult.pokemon.baseAttack));
-        baseStatDef.setText(String.valueOf(ivScanResult.pokemon.baseDefense));
-        baseStatSta.setText(String.valueOf(ivScanResult.pokemon.baseStamina));
+    private void setBaseStat(Pokemon pokemon) {
+        baseStatAtk.setText(String.valueOf(pokemon.baseAttack));
+        baseStatDef.setText(String.valueOf(pokemon.baseDefense));
+        baseStatSta.setText(String.valueOf(pokemon.baseStamina));
     }
 
     /**
