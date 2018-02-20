@@ -307,14 +307,6 @@ CHI_TRA_FONTS=( \
     )
 
 JPN_FONTS=( \
-    "TakaoExGothic" \
-    "TakaoExMincho" \
-    "TakaoGothic" \
-    "TakaoMincho" \
-    "TakaoPGothic" \
-    "TakaoPMincho" \
-    "VL Gothic" \
-    "VL PGothic" \
     "Noto Sans CJK JP Bold" \
     "Noto Sans CJK JP Semi-Light" \
 )
