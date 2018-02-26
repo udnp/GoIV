@@ -395,8 +395,8 @@
         <!--  0   normal --> <item>ノーマル</item>
         <!--  1     fire --> <item>ほのお</item>
         <!--  2    water --> <item>みず</item>
-        <!--  3 electric --> <item>でんき</item>
-        <!--  4    grass --> <item>くさ</item>
+        <!--  3    grass --> <item>くさ</item>
+        <!--  4 electric --> <item>でんき</item>
         <!--  5      ice --> <item>こおり</item>
         <!--  6 fighting --> <item>かくとう</item>
         <!--  7   poison --> <item>どく</item>
