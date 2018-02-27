@@ -307,6 +307,7 @@ CHI_TRA_FONTS=( \
     )
 
 JPN_FONTS=( \
+    "Lato Medium" \
     "Noto Sans CJK JP Bold" \
     "Noto Sans CJK JP Semi-Light" \
 )
