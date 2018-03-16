@@ -43,10 +43,13 @@
 # your system is to run text2image with --list_available_fonts and the
 # appropriate --fonts_dir path.
 
+cd `dirname $0`
+
 export BINDIR=/usr/bin
 export TESSDATA_DIR=/usr/share/tesseract-ocr/tessdata
+export LANGDATA_ROOT=../langdata
 
-source /usr/share/tesseract-ocr/tesstrain_utils.sh
+source ./tesstrain_utils.sh
 
 ARGV=("$@")
 parse_flags
@@ -54,7 +57,7 @@ parse_flags
 mkdir -p ${TRAINING_DIR}
 tlog "\n=== Starting training for language '${LANG_CODE}'"
 
-source /usr/share/tesseract-ocr/language-specific.sh
+source ./language-specific.sh
 set_lang_specific_parameters ${LANG_CODE}
 
 initialize_fontconfig
