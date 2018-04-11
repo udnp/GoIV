@@ -5,19 +5,19 @@
 
     <string name="mystic_percentage1_phrase1">驚異的</string>
     <string name="mystic_percentage1_phrase2">芸術的</string>
-    <string name="mystic_percentage2_phrase1">目を</string>
-    <string name="mystic_percentage2_phrase2">引く</string>
+    <string name="mystic_percentage2_phrase1">目を引く</string>
+    <string name="mystic_percentage2_phrase2">ものがある</string>
     <string name="mystic_percentage3_phrase1">普通</string>
     <string name="mystic_percentage3_phrase2">以上</string>
     <string name="mystic_percentage4_phrase1">活躍</string>
-    <string name="mystic_percentage4_phrase2">難</string>
+    <string name="mystic_percentage4_phrase2">難しそう</string>
 
-    <string name="mystic_ivrange1_phrase1">測定</string>
-    <string name="mystic_ivrange1_phrase2">最高</string>
-    <string name="mystic_ivrange2_phrase1">素晴</string>
-    <string name="mystic_ivrange2_phrase2">驚</string>
-    <string name="mystic_ivrange3_phrase1">強</string>
-    <string name="mystic_ivrange3_phrase2">だろう</string>
+    <string name="mystic_ivrange1_phrase1">測定できないほど</string>
+    <string name="mystic_ivrange1_phrase2">最高だ</string>
+    <string name="mystic_ivrange2_phrase1">素晴らしい</string>
+    <string name="mystic_ivrange2_phrase2">驚いている</string>
+    <string name="mystic_ivrange3_phrase1">かなりの強さ</string>
+    <string name="mystic_ivrange3_phrase2">言えるだろう</string>
     <string name="mystic_ivrange4_phrase1">まあまあ</string>
     <string name="mystic_ivrange4_phrase2">言える</string>
 
