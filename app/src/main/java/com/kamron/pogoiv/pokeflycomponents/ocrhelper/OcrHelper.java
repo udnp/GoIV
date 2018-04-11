@@ -1053,8 +1053,7 @@ public class OcrHelper {
             tesseract.setImage(bottom);
             //Set tesseract not single line mode
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
-            //appraisalText = tesseract.getUTF8Text();
-            appraisalText = tesseract.getUTF8Text().replaceAll("\\s", ""); // TODO locale が ja のときのみにする
+            appraisalText = tesseract.getUTF8Text();
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
         }
