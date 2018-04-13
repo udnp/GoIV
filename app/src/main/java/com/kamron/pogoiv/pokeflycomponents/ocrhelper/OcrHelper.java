@@ -59,7 +59,6 @@ public class OcrHelper {
     private static boolean candyWordFirst;
 
     private static Resources res;
-    private static String ocrWhitelistAppraisalText;
 
     private OcrHelper() {
     }
@@ -75,7 +74,6 @@ public class OcrHelper {
                                               @NonNull GoIVSettings settings,
                                               Resources resources) {
         res = resources;
-        createOcrWhiteList();
 
         if (instance == null) {
             tesseract = new TessBaseAPI();
@@ -1051,83 +1049,17 @@ public class OcrHelper {
         if (appraisalText == null) {
             //68,105,108 is the color of the appraisal text
             bottom = replaceColors(bottom, true, 68, 105, 108, Color.WHITE, 100, true);
-            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, ocrWhitelistAppraisalText);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_appraisals));
             tesseract.setImage(bottom);
             //Set tesseract not single line mode
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK);
-            //appraisalText = tesseract.getUTF8Text();
-            appraisalText = tesseract.getUTF8Text().replaceAll("\\s", ""); // TODO locale が ja のときのみにする
+            appraisalText = tesseract.getUTF8Text();
             appraisalCache.put(hash, appraisalText);
             settings.saveAppraisalCache(appraisalCache.snapshot());
         }
 
         return hash + "#" + appraisalText;
 
-    }
-
-    private static void createOcrWhiteList() {
-        ocrWhitelistAppraisalText
-                // from appraisals.xml
-                = res.getString(R.string.highest_stat_att)
-                + res.getString(R.string.highest_stat_def)
-                + res.getString(R.string.highest_stat_hp)
-
-                // mystic
-                + res.getString(R.string.mystic_percentage1_phrase1)
-                + res.getString(R.string.mystic_percentage1_phrase2)
-                + res.getString(R.string.mystic_percentage2_phrase1)
-                + res.getString(R.string.mystic_percentage2_phrase2)
-                + res.getString(R.string.mystic_percentage3_phrase1)
-                + res.getString(R.string.mystic_percentage3_phrase2)
-                + res.getString(R.string.mystic_percentage4_phrase1)
-                + res.getString(R.string.mystic_percentage4_phrase2)
-
-                + res.getString(R.string.mystic_ivrange1_phrase1)
-                + res.getString(R.string.mystic_ivrange1_phrase2)
-                + res.getString(R.string.mystic_ivrange2_phrase1)
-                + res.getString(R.string.mystic_ivrange2_phrase2)
-                + res.getString(R.string.mystic_ivrange3_phrase1)
-                + res.getString(R.string.mystic_ivrange3_phrase2)
-                + res.getString(R.string.mystic_ivrange4_phrase1)
-                + res.getString(R.string.mystic_ivrange4_phrase2)
-
-                // valor
-                + res.getString(R.string.valor_percentage1_phrase1)
-                + res.getString(R.string.valor_percentage1_phrase2)
-                + res.getString(R.string.valor_percentage2_phrase1)
-                + res.getString(R.string.valor_percentage2_phrase2)
-                + res.getString(R.string.valor_percentage3_phrase1)
-                + res.getString(R.string.valor_percentage3_phrase2)
-                + res.getString(R.string.valor_percentage4_phrase1)
-                + res.getString(R.string.valor_percentage4_phrase2)
-
-                + res.getString(R.string.valor_ivrange1_phrase1)
-                + res.getString(R.string.valor_ivrange1_phrase2)
-                + res.getString(R.string.valor_ivrange2_phrase1)
-                + res.getString(R.string.valor_ivrange2_phrase2)
-                + res.getString(R.string.valor_ivrange3_phrase1)
-                + res.getString(R.string.valor_ivrange3_phrase2)
-                + res.getString(R.string.valor_ivrange4_phrase1)
-                + res.getString(R.string.valor_ivrange4_phrase2)
-
-                // instinct
-                + res.getString(R.string.instinct_percentage1_phrase1)
-                + res.getString(R.string.instinct_percentage1_phrase2)
-                + res.getString(R.string.instinct_percentage2_phrase1)
-                + res.getString(R.string.instinct_percentage2_phrase2)
-                + res.getString(R.string.instinct_percentage3_phrase1)
-                + res.getString(R.string.instinct_percentage3_phrase2)
-                + res.getString(R.string.instinct_percentage4_phrase1)
-                + res.getString(R.string.instinct_percentage4_phrase2)
-
-                + res.getString(R.string.instinct_ivrange1_phrase1)
-                + res.getString(R.string.instinct_ivrange1_phrase2)
-                + res.getString(R.string.instinct_ivrange2_phrase1)
-                + res.getString(R.string.instinct_ivrange2_phrase2)
-                + res.getString(R.string.instinct_ivrange3_phrase1)
-                + res.getString(R.string.instinct_ivrange3_phrase2)
-                + res.getString(R.string.instinct_ivrange4_phrase1)
-                + res.getString(R.string.instinct_ivrange4_phrase2);
     }
 
     /**
