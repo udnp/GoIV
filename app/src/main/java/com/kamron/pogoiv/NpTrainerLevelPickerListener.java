@@ -6,13 +6,16 @@ import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.NumberPicker;
 
+import com.kamron.pogoiv.activities.MainActivity;
+
 /**
  * This handler will handle changes to NpTrainerLevelPickerListener and handles if we restart on complete and if we
  * skip restarting Pogo.
  * Created by NightMadness on 11/5/2016.
  */
 
-class NpTrainerLevelPickerListener implements NumberPicker.OnScrollListener, NumberPicker.OnValueChangeListener {
+public class NpTrainerLevelPickerListener implements NumberPicker.OnScrollListener, NumberPicker.OnValueChangeListener {
+    private int lastValue = 1;
     private int scrollState = 0;
     private final Handler handler = new Handler();
     private final int delayTime = 500;
@@ -23,9 +26,10 @@ class NpTrainerLevelPickerListener implements NumberPicker.OnScrollListener, Num
         this.context = context;
     }
 
-    Runnable runnable = new Runnable() {
+    private Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            GoIVSettings.getInstance(context).setLevel(lastValue);
             if (Pokefly.isRunning()) {
                 LocalBroadcastManager.getInstance(context)
                         .sendBroadcast(new Intent(MainActivity.ACTION_RESTART_POKEFLY));
@@ -37,6 +41,7 @@ class NpTrainerLevelPickerListener implements NumberPicker.OnScrollListener, Num
     public void onScrollStateChange(NumberPicker view, int scrollState) {
         this.scrollState = scrollState;
         if (scrollState == SCROLL_STATE_IDLE) {
+            lastValue = view.getValue();
             update();
         } else {
             //we are scrolling (or flinging) so we don't need to run update
@@ -48,6 +53,7 @@ class NpTrainerLevelPickerListener implements NumberPicker.OnScrollListener, Num
     @Override
     public void onValueChange(final NumberPicker picker, final int oldVal, final int newVal) {
         if (scrollState == SCROLL_STATE_IDLE) {
+            lastValue = newVal;
             update();
         }
     }

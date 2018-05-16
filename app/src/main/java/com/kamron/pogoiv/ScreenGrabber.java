@@ -14,9 +14,11 @@ import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.util.DisplayMetrics;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
@@ -29,13 +31,11 @@ public class ScreenGrabber {
     private ImageReader imageReader;
     private MediaProjection projection = null;
     private DisplayMetrics rawDisplayMetrics;
-    private DisplayMetrics displayMetrics;
     private VirtualDisplay virtualDisplay;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private ScreenGrabber(MediaProjection mediaProjection, DisplayMetrics raw, DisplayMetrics display) {
+    private ScreenGrabber(MediaProjection mediaProjection, DisplayMetrics raw) {
         rawDisplayMetrics = raw;
-        displayMetrics = display;
         projection = mediaProjection;
         imageReader = ImageReader.newInstance(rawDisplayMetrics.widthPixels, rawDisplayMetrics.heightPixels,
                 PixelFormat.RGBA_8888, 2);
@@ -45,9 +45,9 @@ public class ScreenGrabber {
                 null, null);
     }
 
-    public static ScreenGrabber init(MediaProjection mediaProjection, DisplayMetrics raw, DisplayMetrics display) {
+    public static ScreenGrabber init(MediaProjection mediaProjection, DisplayMetrics raw) {
         if (instance == null) {
-            instance = new ScreenGrabber(mediaProjection, raw, display);
+            instance = new ScreenGrabber(mediaProjection, raw);
         }
         return instance;
     }
@@ -72,31 +72,33 @@ public class ScreenGrabber {
             projection.stop();
             projection = null;
             rawDisplayMetrics = null;
-            displayMetrics = null;
             instance = null;
         }
     }
 
-    private Bitmap getBitmap(ByteBuffer buffer, int pixelStride, int rowPadding) {
-        Bitmap bmp = Bitmap.createBitmap(rawDisplayMetrics.widthPixels + rowPadding / pixelStride,
-                displayMetrics.heightPixels, Bitmap.Config.ARGB_8888);
-        bmp.copyPixelsFromBuffer(buffer);
-        return bmp;
-    }
-
+    @WorkerThread
     public @Nullable Bitmap grabScreen() {
         Image image = null;
         Bitmap bmp = null;
-        Integer retries = 100;
+        Integer retries = 60; // Retry for an entire second (given the rendering speed of 60fps)
 
-        while (image == null && retries > 0) {
+        while (retries > 0) {
             try {
                 //Note: imageReader shouldn't be null, but apparently sometimes is.
                 //Let's allow this to still happen.
                 image = imageReader.acquireLatestImage();
+                break;
             } catch (Exception exception) {
                 Timber.e("Error thrown in grabScreen() - acquireLatestImage()");
                 Timber.e(exception);
+            }
+            // If the screenshot failed, wait 16 milliseconds (1/60 seconds, the duration of a frame at 60fps).
+            // This avoid useless and very fast executions (100 loops on a n-GHz lasts less then a nanosecond) because
+            // a new video frame will never be available in time. This also greatly reduce battery drain.
+            try {
+                TimeUnit.MILLISECONDS.wait(16);
+            } catch (InterruptedException e) {
+                Timber.e(e);
             }
             retries--;
         }
@@ -105,11 +107,15 @@ public class ScreenGrabber {
             final ByteBuffer buffer = planes[0].getBuffer();
             int pixelStride = planes[0].getPixelStride();
             int rowStride = planes[0].getRowStride();
-            int rowPadding = rowStride - pixelStride * rawDisplayMetrics.widthPixels;
+            int rowPaddingPx = (rowStride - pixelStride * rawDisplayMetrics.widthPixels) / pixelStride;
             image.close();
 
             try {
-                bmp = getBitmap(buffer, pixelStride, rowPadding);
+                bmp = Bitmap.createBitmap(rawDisplayMetrics.widthPixels + rowPaddingPx,
+                        rawDisplayMetrics.heightPixels, Bitmap.Config.ARGB_8888);
+                bmp.copyPixelsFromBuffer(buffer);
+                // Crop padding
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth() - rowPaddingPx, bmp.getHeight());
             } catch (Exception exception) {
                 Timber.e("Exception thrown in grabScreen() - when creating bitmap");
                 Timber.e(exception);

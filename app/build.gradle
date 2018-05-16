@@ -7,7 +7,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.21.6'
+        //noinspection GradleDynamicVersion
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
@@ -24,7 +25,6 @@ repositories {
  */
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'android-apt'
 apply from: '../checkstyle/checkstyle.gradle'
 
 /**
@@ -61,8 +61,8 @@ android {
      * Android SDK and build-tools version
      * Update (both Gradle and local SDK) whenever possible
      */
-    compileSdkVersion 24
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     /**
      * Build configurations for APK
@@ -72,10 +72,11 @@ android {
      */
     defaultConfig {
         minSdkVersion 19 /*Dont change this unless you know why*/
-        targetSdkVersion 24 /*Dont change this unless you know why*/
-        versionCode 27
-        versionName "3.6.0"
+        targetSdkVersion 27 /*Dont change this unless you know why*/
+        versionCode 39
+        versionName "4.3.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
 
     /**
@@ -83,19 +84,21 @@ android {
      * Offline - No Internet permission and disable Crashlytics
      * Online - Internet permission and enable Crashlytics
      */
+    flavorDimensions "default"
+
     productFlavors {
         offline {
             applicationId "com.swanberg.pogoiv.nointernet"
             buildConfigField "boolean", "isInternetAvailable", "false"
-            resValue "string", "app_name", "GoIV Offline"
             ext.enableCrashlytics = false
+            dimension "default"
         }
 
         online {
             applicationId "com.swanberg.pogoiv"
             buildConfigField "boolean", "isInternetAvailable", "true"
-            resValue "string", "app_name", "GoIV"
             ext.enableCrashlytics = true
+            dimension "default"
         }
     }
 
@@ -106,6 +109,7 @@ android {
      */
     buildTypes {
         debug {
+            applicationIdSuffix ".debug"
             ext.enableCrashlytics = false
         }
         release {
@@ -113,8 +117,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             lintOptions {
                 disable 'MissingTranslation'
+                checkReleaseBuilds false
             }
             signingConfig signingConfigs.releaseConfig
+        }
+    }
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+    sourceSets {
+        onlineRelease {
+            // Contains the io.fabric.ApiKey meta-data
+            manifest.srcFile 'src/onlineRelease/FabricManifest.xml'
         }
     }
 }
@@ -130,39 +149,41 @@ dependencies {
     /**
      * Builds Dependencies for All Builds.
      */
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:recyclerview-v7:24.2.1'
-    compile 'com.google.guava:guava:19.0'
-    compile 'com.google.code.findbugs:jsr305:3.0.1'
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.jakewharton.timber:timber:4.3.0'
-    compile 'com.rmtheis:tess-two:7.0.0'
-    compile 'io.apptik.widget:multislider:1.2'
-    compile 'com.pavelsikun:material-seekbar-preference:2.3.0'
-    provided 'org.projectlombok:lombok:1.16.10'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    apt "org.projectlombok:lombok:1.16.10"
 
     /**
      * Online Build Dependencies
      */
     //Include Crashlytics in the online build
-    onlineCompile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
-        transitive = true;
+    onlineCompile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
+        transitive = true
     }
-    onlineCompile 'com.squareup.okhttp3:okhttp:3.4.1'
-    onlineCompile 'com.squareup.okio:okio:1.10.0'
 
     /**
      * Test Build Dependencies
      */
+    compile 'com.android.support:appcompat-v7:27.0.2'
+    compile 'com.android.support:preference-v7:27.0.2'
+    compile 'com.android.support:recyclerview-v7:27.0.2'
+    compile 'com.android.support:design:27.0.2'
+    compile 'com.google.guava:guava:23.5-android'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    compile 'com.jakewharton.timber:timber:4.3.0'
+    compile 'com.rmtheis:tess-two:7.0.0'
+    compile 'io.apptik.widget:multislider:1.2'
+    compile 'com.pavelsikun:material-seekbar-preference:2.3.0'
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.assertj:assertj-android:1.1.1'
     testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.android.support:support-annotations:24.2.1'
-    testCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support:support-annotations:24.2.1'
-    androidTestCompile 'com.android.support.test:runner:0.5'
+    testCompile 'com.android.support:support-annotations:27.0.2'
+    testCompile 'com.android.support.test:runner:1.0.1'
+    androidTestCompile 'com.android.support:support-annotations:27.0.2'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    annotationProcessor 'org.projectlombok:lombok:1.16.18'
+    onlineCompile 'com.squareup.okhttp3:okhttp:3.7.0'
+    compileOnly 'org.projectlombok:lombok:1.16.18'
+    compile project(':openCVLibrary330')
 }
 
 /**

@@ -1,9 +1,11 @@
 package com.kamron.pogoiv.pokeflycomponents;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -12,7 +14,7 @@ import android.view.WindowManager;
 
 import com.kamron.pogoiv.Pokefly;
 import com.kamron.pogoiv.R;
-import com.kamron.pogoiv.logic.IVScanResult;
+import com.kamron.pogoiv.scanlogic.IVScanResult;
 
 /**
  * Created by johan on 2017-07-06.
@@ -27,10 +29,13 @@ public class IVPopupButton extends android.support.v7.widget.AppCompatButton {
     private WindowManager windowManager;
     private boolean showing = false;
 
+    @SuppressWarnings("deprecation")
     private final WindowManager.LayoutParams ivButtonParams = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_PHONE,
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT);
 
@@ -79,6 +84,7 @@ public class IVPopupButton extends android.support.v7.widget.AppCompatButton {
      * resets the visual look of the button to its default state.
      */
     private void resetButtonLook() {
+        setTextColor(Color.WHITE);
         setBackgroundResource(R.drawable.iv_button);
         setWidth(dpToPx(60));
         setText("");
@@ -86,6 +92,7 @@ public class IVPopupButton extends android.support.v7.widget.AppCompatButton {
         ivButtonParams.x = dpToPx(16);
         ivButtonParams.y = dpToPx(14);
         setLayoutParams(ivButtonParams);
+        setTextAlignment(TEXT_ALIGNMENT_CENTER);
         setGravity(Gravity.CENTER_VERTICAL);
     }
 
@@ -100,9 +107,14 @@ public class IVPopupButton extends android.support.v7.widget.AppCompatButton {
         int low = ivrs.getLowestIVCombination().percentPerfect;
         int high = ivrs.getHighestIVCombination().percentPerfect;
         if (ivrs.getCount() == 1 || high == low) { // display something like "IV: 98%"
-            setText(ivrs.pokemon.name + "\nIV: " + low + "%");
+            setText(String.format("#%d %s\nIV: %d%% PL %s", ivrs.pokemon.pokedexNumber, ivrs.pokemon.name, low, ivrs
+                    .estimatedPokemonLevel.toString()));
         } else { // display something like "IV: 55 - 87%"
-            setText(ivrs.pokemon.name + "\nIV: " + low + " - " + high + "%");
+            setText(String.format("#%d %s\nIV: %d - %d%%\nPL %s", ivrs.pokemon.pokedexNumber, ivrs.pokemon.name, low,
+                    high, ivrs.estimatedPokemonLevel.toString()));
+        }
+        if (ivrs.rangeIVScan) {
+            setText(getText() + "*");
         }
 
         setBackgroundGradient(ivrs);
@@ -191,6 +203,21 @@ public class IVPopupButton extends android.support.v7.widget.AppCompatButton {
     public void outsideScreenClicked() {
         setText("...");
         setGradientColor(0, 0); //makes gradient invisible
+        setBackgroundResource(R.drawable.preview_button_0_100);
+
+        int black = ResourcesCompat.getColor(getResources(), R.color.p_loading, null);
+        setGradientColor(black, black);
+    }
+
+    public void showError() {
+        resetButtonLook();
+
+        setBackgroundResource(R.drawable.preview_button_0_100);
+        int black = ResourcesCompat.getColor(getResources(), R.color.p_error, null);
+        setGradientColor(black, black);
+
+        setText("?");
+
     }
 
     /**

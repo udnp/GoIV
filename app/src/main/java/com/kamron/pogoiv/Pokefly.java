@@ -11,8 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -22,8 +20,8 @@ import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,7 +37,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -49,35 +46,41 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.kamron.pogoiv.clipboard.ClipboardTokenHandler;
-import com.kamron.pogoiv.logic.CPRange;
-import com.kamron.pogoiv.logic.Data;
-import com.kamron.pogoiv.logic.IVCombination;
-import com.kamron.pogoiv.logic.IVScanResult;
-import com.kamron.pogoiv.logic.PokeInfoCalculator;
-import com.kamron.pogoiv.logic.PokeSpam;
-import com.kamron.pogoiv.logic.Pokemon;
-import com.kamron.pogoiv.logic.PokemonNameCorrector;
-import com.kamron.pogoiv.logic.PokemonShareHandler;
-import com.kamron.pogoiv.logic.ScanContainer;
-import com.kamron.pogoiv.logic.ScanResult;
-import com.kamron.pogoiv.logic.UpgradeCost;
+import com.kamron.pogoiv.clipboardlogic.ClipboardTokenHandler;
+import com.kamron.pogoiv.pokeflycomponents.AutoAppraisal;
 import com.kamron.pogoiv.pokeflycomponents.GoIVNotificationManager;
 import com.kamron.pogoiv.pokeflycomponents.IVPopupButton;
 import com.kamron.pogoiv.pokeflycomponents.IVPreviewPrinter;
 import com.kamron.pogoiv.pokeflycomponents.ScreenWatcher;
-import com.kamron.pogoiv.widgets.IVResultsAdapter;
+import com.kamron.pogoiv.pokeflycomponents.ocrhelper.OcrHelper;
+import com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanPoint;
+import com.kamron.pogoiv.scanlogic.CPRange;
+import com.kamron.pogoiv.scanlogic.Data;
+import com.kamron.pogoiv.scanlogic.IVCombination;
+import com.kamron.pogoiv.scanlogic.IVScanResult;
+import com.kamron.pogoiv.scanlogic.PokeInfoCalculator;
+import com.kamron.pogoiv.scanlogic.PokeSpam;
+import com.kamron.pogoiv.scanlogic.Pokemon;
+import com.kamron.pogoiv.scanlogic.PokemonNameCorrector;
+import com.kamron.pogoiv.scanlogic.PokemonShareHandler;
+import com.kamron.pogoiv.scanlogic.ScanContainer;
+import com.kamron.pogoiv.scanlogic.ScanResult;
+import com.kamron.pogoiv.scanlogic.UpgradeCost;
+import com.kamron.pogoiv.utils.CopyUtils;
+import com.kamron.pogoiv.utils.GuiUtil;
+import com.kamron.pogoiv.utils.LevelRange;
 import com.kamron.pogoiv.widgets.PokemonSpinnerAdapter;
+import com.kamron.pogoiv.widgets.recyclerviews.adapters.IVResultsAdapter;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -85,6 +88,7 @@ import butterknife.OnClick;
 import io.apptik.widget.MultiSlider;
 
 import static com.kamron.pogoiv.GoIVSettings.APPRAISAL_WINDOW_POSITION;
+import static com.kamron.pogoiv.clipboardlogic.ClipboardResultMode.SINGLE_RESULT;
 
 /**
  * Currently, the central service in Pokemon Go, dealing with everything except
@@ -96,22 +100,26 @@ public class Pokefly extends Service {
 
     public static final String ACTION_UPDATE_UI = "com.kamron.pogoiv.ACTION_UPDATE_UI";
     private static final String ACTION_SEND_INFO = "com.kamron.pogoiv.ACTION_SEND_INFO";
-    public static final String ACTION_STOP = "com.kamron.pogoiv.ACTION_STOP";
+    private static final String ACTION_START = "com.kamron.pogoiv.ACTION_START";
+    private static final String ACTION_STOP = "com.kamron.pogoiv.ACTION_STOP";
 
-    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
     private static final String KEY_STATUS_BAR_HEIGHT = "key_status_bar_height";
-    private static final String KEY_BATTERY_SAVER = "key_battery_saver";
+    private static final String KEY_TRAINER_LEVEL = "key_trainer_level";
 
     private static final String KEY_SEND_INFO_NAME = "key_send_info_name";
     private static final String KEY_SEND_INFO_TYPE = "key_send_info_type";
     private static final String KEY_SEND_INFO_CANDY = "key_send_info_candy";
+    private static final String KEY_SEND_INFO_GENDER = "key_send_info_gender";
     private static final String KEY_SEND_INFO_HP = "key_send_info_hp";
     private static final String KEY_SEND_INFO_CP = "key_send_info_cp";
-    private static final String KEY_SEND_INFO_LEVEL = "key_send_info_level";
+    private static final String KEY_SEND_INFO_LEVEL_LOWER = "key_send_info_level_low";
+    private static final String KEY_SEND_INFO_LEVEL_HIGHER = "key_send_info_level_high";
     private static final String KEY_SEND_SCREENSHOT_FILE = "key_send_screenshot_file";
     private static final String KEY_SEND_INFO_CANDY_AMOUNT = "key_send_info_candy_amount";
     private static final String KEY_SEND_UPGRADE_CANDY_COST = "key_send_upgrade_candy_cost";
     private static final String KEY_SEND_UNIQUE_ID = "key_send_unique_id";
+    private static final String KEY_SEND_POWERUP_STARTDUST_COST = "key_send_powerup_stardust";
+    private static final String KEY_SEND_POWERUP_CANDYCOST = "key_send_powerup_candycost";
 
     private static final String ACTION_PROCESS_BITMAP = "com.kamron.pogoiv.PROCESS_BITMAP";
     private static final String KEY_BITMAP = "bitmap";
@@ -122,8 +130,7 @@ public class Pokefly extends Service {
 
     private static boolean running = false;
 
-    private int trainerLevel = -1;
-    private boolean batterySaver = false;
+    private int trainerLevel;
 
     private boolean receivedInfo = false;
 
@@ -134,7 +141,6 @@ public class Pokefly extends Service {
     private ScreenGrabber screen;
     private ScreenShotHelper screenShotHelper;
     private OcrHelper ocr;
-    private GoIVSettings settings;
 
 
     private boolean infoShownSent = false;
@@ -144,7 +150,6 @@ public class Pokefly extends Service {
     private ScreenWatcher screenWatcher;
     private IVPopupButton ivButton;
     private ClipboardTokenHandler clipboardTokenHandler;
-    private GoIVNotificationManager goIVNotificationManager;
     private IVPreviewPrinter ivPreviewPrinter;
 
     private ImageView arcPointer;
@@ -160,10 +165,10 @@ public class Pokefly extends Service {
     AutoCompleteTextView autoCompleteTextView1;
 
     @BindView(R.id.pokePickerToggleSpinnerVsInput)
-    Button pokePickerToggleSpinnerVsInput;
+    ImageButton pokePickerToggleSpinnerVsInput;
 
     @BindView(R.id.shareWithStorimod)
-    ImageButton shareWithStorimod;
+    ImageView shareWithStorimod;
 
     private PokemonSpinnerAdapter pokeInputSpinnerAdapter;
     @BindView(R.id.spnPokemonName)
@@ -171,6 +176,8 @@ public class Pokefly extends Service {
 
     @BindView(R.id.tvSeeAllPossibilities)
     TextView seeAllPossibilities;
+    @BindView(R.id.correctCPLevel)
+    TextView correctCPorLevel;
     @BindView(R.id.etCp)
     EditText pokemonCPEdit;
     @BindView(R.id.etHp)
@@ -179,6 +186,8 @@ public class Pokefly extends Service {
     EditText pokemonCandyEdit;
     @BindView(R.id.sbArcAdjust)
     SeekBar arcAdjustBar;
+    @BindView(R.id.levelIndicator)
+    TextView levelIndicator;
     @BindView(R.id.llButtonsInitial)
     LinearLayout initialButtonsLayout;
     @BindView(R.id.llButtonsOnCheck)
@@ -216,6 +225,8 @@ public class Pokefly extends Service {
     TextView exResCandy;
     @BindView(R.id.exResLevel)
     TextView exResLevel;
+    @BindView(R.id.resultsPokedexNumber)
+    TextView resultPokedexNumber;
     @BindView(R.id.resultsPokemonName)
     TextView resultsPokemonName;
     @BindView(R.id.resultsCombinations)
@@ -226,8 +237,6 @@ public class Pokefly extends Service {
     TextView exResultHP;
     @BindView(R.id.exResultPercentPerfection)
     TextView exResultPercentPerfection;
-    @BindView(R.id.explainCPPercentageComparedToMaxIV)
-    TextView explainCPPercentageComparedToMaxIV;
     @BindView(R.id.exResStardust)
     TextView exResStardust;
     @BindView(R.id.exResPrevScan)
@@ -261,6 +270,11 @@ public class Pokefly extends Service {
 
     @BindView(R.id.inputAppraisalExpandBox)
     TextView inputAppraisalExpandBox;
+    @BindView(R.id.eggRaidSwitch)
+    Switch eggRaidSwitch;
+
+    @BindView(R.id.defaultInputPart)
+    LinearLayout defaultInputPart;
 
     @BindView(R.id.rvResults)
     RecyclerView rvResults;
@@ -315,29 +329,34 @@ public class Pokefly extends Service {
     private String pokemonName;
     private String pokemonType;
     private String candyName;
+    private Pokemon.Gender pokemonGender = Pokemon.Gender.N;
     private Optional<Integer> pokemonCandy = Optional.absent();
     private Optional<Integer> pokemonCP = Optional.absent();
     private Optional<Integer> pokemonHP = Optional.absent();
     private Optional<Integer> candyUpgradeCost = Optional.absent();
     private String pokemonUniqueID = "";
-    private double estimatedPokemonLevel = 1.0;
+    private LevelRange estimatedPokemonLevelRange = new LevelRange(1.0);
     private @NonNull Optional<String> screenShotPath = Optional.absent();
 
 
+    @SuppressWarnings("deprecation")
     private final WindowManager.LayoutParams arcParams = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_PHONE,
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT);
-    private int pointerHeight = 0;
-    private int pointerWidth = 0;
     private int statusBarHeight = 0;
 
+    @SuppressWarnings("deprecation")
     private final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_PHONE,
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
             PixelFormat.TRANSPARENT);
 
@@ -346,11 +365,17 @@ public class Pokefly extends Service {
         return running;
     }
 
-    public static Intent createIntent(Activity activity, int trainerLevel, int statusBarHeight, boolean batterySaver) {
-        Intent intent = new Intent(activity, Pokefly.class);
-        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
+    public static Intent createStopIntent(@NonNull Context context) {
+        Intent intent = new Intent(context, Pokefly.class);
+        intent.setAction(ACTION_STOP);
+        return intent;
+    }
+
+    public static Intent createStartIntent(@NonNull Context context, int statusBarHeight, int trainerLevel) {
+        Intent intent = new Intent(context, Pokefly.class);
+        intent.setAction(ACTION_START);
         intent.putExtra(KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-        intent.putExtra(KEY_BATTERY_SAVER, batterySaver);
+        intent.putExtra(KEY_TRAINER_LEVEL, trainerLevel);
         return intent;
     }
 
@@ -362,13 +387,17 @@ public class Pokefly extends Service {
         intent.putExtra(KEY_SEND_INFO_NAME, scanResult.getPokemonName());
         intent.putExtra(KEY_SEND_INFO_TYPE, scanResult.getPokemonType());
         intent.putExtra(KEY_SEND_INFO_CANDY, scanResult.getCandyName());
+        intent.putExtra(KEY_SEND_INFO_GENDER, scanResult.getPokemonGender());
         intent.putExtra(KEY_SEND_INFO_HP, scanResult.getPokemonHP());
         intent.putExtra(KEY_SEND_INFO_CP, scanResult.getPokemonCP());
-        intent.putExtra(KEY_SEND_INFO_LEVEL, scanResult.getEstimatedPokemonLevel());
+        intent.putExtra(KEY_SEND_INFO_LEVEL_LOWER, scanResult.getEstimatedPokemonLevel().min);
+        intent.putExtra(KEY_SEND_INFO_LEVEL_HIGHER, scanResult.getEstimatedPokemonLevel().max);
         intent.putExtra(KEY_SEND_SCREENSHOT_FILE, filePath);
         intent.putExtra(KEY_SEND_INFO_CANDY_AMOUNT, scanResult.getPokemonCandyAmount());
-        intent.putExtra(KEY_SEND_UPGRADE_CANDY_COST, scanResult.getUpgradeCandyCost());
+        intent.putExtra(KEY_SEND_UPGRADE_CANDY_COST, scanResult.getEvolutionCandyCost());
         intent.putExtra(KEY_SEND_UNIQUE_ID, scanResult.getPokemonUniqueID());
+        intent.putExtra(KEY_SEND_POWERUP_CANDYCOST, scanResult.getPokemonPowerUpCandyCost());
+        intent.putExtra(KEY_SEND_POWERUP_STARTDUST_COST, scanResult.getPokemonPowerUpStardustCost());
     }
 
     public static Intent createProcessBitmapIntent(Bitmap bitmap, String file) {
@@ -382,22 +411,6 @@ public class Pokefly extends Service {
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    private String[] getPokemonNamesArray() {
-        if (getResources().getBoolean(R.bool.use_default_pokemonsname_as_ocrstring)) {
-            //If flag ON, force to use English strings as pokemon name for OCR.
-            Resources res = getResources();
-            Configuration conf = res.getConfiguration();
-            Locale def = getResources().getConfiguration().locale;//Keep original locale
-            conf.setLocale(new Locale("en"));
-            res.updateConfiguration(conf, null);
-            String[] rtn = res.getStringArray(R.array.pokemon);
-            conf.setLocale(def);//Restore to original locale
-            res.updateConfiguration(conf, null);
-            return rtn;
-        }
-        return getResources().getStringArray(R.array.pokemon);
     }
 
     public IVPopupButton getIvButton() {
@@ -424,19 +437,6 @@ public class Pokefly extends Service {
         return infoShownSent;
     }
 
-    public boolean isBatterySaver() {
-        return batterySaver;
-    }
-
-    private String[] getPokemonDisplayNamesArray() {
-        if (settings.isShowTranslatedPokemonName()) {
-            //If pref ON, use translated strings as pokemon name.
-            return getResources().getStringArray(R.array.pokemon);
-        }
-        //Otherwise, use default locale's pokemon name.
-        return getPokemonNamesArray();
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -445,17 +445,8 @@ public class Pokefly extends Service {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPDATE_UI));
 
-        settings = GoIVSettings.getInstance(this);
-        pokeInfoCalculator = PokeInfoCalculator.getInstance(
-                getPokemonNamesArray(),
-                getPokemonDisplayNamesArray(),
-                getResources().getIntArray(R.array.attack),
-                getResources().getIntArray(R.array.defense),
-                getResources().getIntArray(R.array.stamina),
-                getResources().getIntArray(R.array.devolutionNumber),
-                getResources().getIntArray(R.array.evolutionCandyCost),
-                getResources().getIntArray(R.array.candyNames));
-        displayMetrics = this.getResources().getDisplayMetrics();
+        pokeInfoCalculator = PokeInfoCalculator.getInstance(GoIVSettings.getInstance(this), getResources());
+        displayMetrics = getResources().getDisplayMetrics();
         initOcr();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
@@ -475,7 +466,7 @@ public class Pokefly extends Service {
         }
 
         running = true;
-        goIVNotificationManager = new GoIVNotificationManager(this);
+        GoIVNotificationManager goIVNotificationManager = new GoIVNotificationManager(this);
         ivPreviewPrinter = new IVPreviewPrinter(this);
         clipboardTokenHandler = new ClipboardTokenHandler(this);
 
@@ -485,15 +476,20 @@ public class Pokefly extends Service {
             }
             stopSelf();
             goIVNotificationManager.showPausedNotification();
-        } else if (intent.hasExtra(KEY_TRAINER_LEVEL)) {
-            trainerLevel = intent.getIntExtra(KEY_TRAINER_LEVEL, 1);
+
+        } else if (ACTION_START.equals(intent.getAction())) {
+            GoIVSettings.reloadPreferences(this);
             statusBarHeight = intent.getIntExtra(KEY_STATUS_BAR_HEIGHT, 0);
-            batterySaver = intent.getBooleanExtra(KEY_BATTERY_SAVER, false);
+            trainerLevel = intent.getIntExtra(KEY_TRAINER_LEVEL, Data.MINIMUM_TRAINER_LEVEL);
+
+            setupDisplaySizeInfo();
+
             createFlyingComponents();
+
             /* Assumes MainActivity initialized ScreenGrabber before starting this service. */
-            if (!batterySaver) {
+            if (!GoIVSettings.getInstance(this).isManualScreenshotModeEnabled()) {
                 screen = ScreenGrabber.getInstance();
-                autoAppraisal = new AutoAppraisal(screen, ocr, this, attDefStaLayout,
+                autoAppraisal = new AutoAppraisal(screen, this, attDefStaLayout,
                         attCheckbox, defCheckbox, staCheckbox,
                         appraisalIVRangeGroup, appraisalStatsGroup);
                 screenWatcher = new ScreenWatcher(this, appraisalBox, autoAppraisal);
@@ -507,6 +503,24 @@ public class Pokefly extends Service {
         //We have intent data, it's possible this service will be killed and we would want to recreate it
         //https://github.com/farkam135/GoIV/issues/477
         return START_REDELIVER_INTENT;
+    }
+
+    private void setupDisplaySizeInfo() {
+        ScanPoint arcInit = new ScanPoint((int) (displayMetrics.widthPixels * 0.5),
+                (int) Math.floor(displayMetrics.heightPixels * 0.35664));
+        if (displayMetrics.heightPixels == 2392 || displayMetrics.heightPixels == 800) {
+            arcInit.yCoord--;
+        } else if (displayMetrics.heightPixels == 1920) {
+            arcInit.yCoord++;
+        }
+
+        int arcRadius = (int) Math.round(displayMetrics.heightPixels * 0.2285);
+        if (displayMetrics.heightPixels == 1776 || displayMetrics.heightPixels == 960
+                || displayMetrics.heightPixels == 800) {
+            arcRadius++;
+        }
+
+        Data.setupArcPoints(arcInit, arcRadius, trainerLevel);
     }
 
     /**
@@ -543,7 +557,7 @@ public class Pokefly extends Service {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(displayInfo);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(processBitmap);
 
-        if (!batterySaver) {
+        if (!GoIVSettings.getInstance(this).isManualScreenshotModeEnabled()) {
             screenWatcher.unwatchScreen();
             if (screen != null) {
                 screen.exit();
@@ -567,21 +581,6 @@ public class Pokefly extends Service {
     }
 
     /**
-     * Undeprecated version of getDrawable using the most appropriate underlying API.
-     *
-     * @param id ID of drawable to get
-     * @return Desired drawable.
-     */
-    @SuppressWarnings("deprecation")
-    private Drawable getDrawableC(@DrawableRes int id) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return getDrawable(id);
-        } else {
-            return getResources().getDrawable(id);
-        }
-    }
-
-    /**
      * Undeprecated version of getColor using the most appropriate underlying API.
      *
      * @param id ID of color to get
@@ -601,13 +600,12 @@ public class Pokefly extends Service {
      * Pokemon Go's arc pointer.
      */
     private void createArcPointer() {
+        Drawable dot = ContextCompat.getDrawable(this, R.drawable.dot);
         arcParams.gravity = Gravity.TOP | Gravity.START;
+        arcParams.width = dot.getIntrinsicWidth();
+        arcParams.height = dot.getIntrinsicHeight();
         arcPointer = new ImageView(this);
-        arcPointer.setImageResource(R.drawable.dot);
-
-        Drawable dot = getDrawableC(R.drawable.dot);
-        pointerHeight = dot.getIntrinsicHeight() / 2;
-        pointerWidth = dot.getIntrinsicWidth() / 2;
+        arcPointer.setImageDrawable(dot);
     }
 
 
@@ -618,9 +616,15 @@ public class Pokefly extends Service {
      * @param pokeLevel The pokemon level to set the arc pointer to.
      */
     private void setArcPointer(double pokeLevel) {
-        int index = Data.levelToLevelIdx(pokeLevel);
-        arcParams.x = Data.arcX[index] - pointerWidth;
-        arcParams.y = Data.arcY[index] - pointerHeight - statusBarHeight;
+
+        int index = Data.maxPokeLevelToIndex(pokeLevel);
+
+        //If the pokemon is overleveled (Raid catch or weather modifier the arc indicator will be stuck at max)
+        if (index >= Data.arcX.length) {
+            index = Data.arcX.length - 1;
+        }
+        arcParams.x = Data.arcX[index] - arcParams.width / 2;
+        arcParams.y = Data.arcY[index] - arcParams.height / 2 - statusBarHeight;
         //That is, (int) (arcCenter + (radius * Math.cos(angleInRadians))) and
         //(int) (arcInitialY + (radius * Math.sin(angleInRadians))).
         windowManager.updateViewLayout(arcPointer, arcParams);
@@ -630,13 +634,15 @@ public class Pokefly extends Service {
      * Creates the arc adjuster used to move the arc pointer in the scan screen.
      */
     private void createArcAdjuster() {
-        arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIdx(trainerLevel));
+        //arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIndex(trainerLevel));
+        arcAdjustBar.setMax(Data.trainerLevelToMaxPokeLevelIndex(40));
 
         arcAdjustBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                estimatedPokemonLevel = Data.levelIdxToLevel(progress);
-                setArcPointer(estimatedPokemonLevel);
+                estimatedPokemonLevelRange = new LevelRange(Data.levelIdxToLevel(progress));
+                setArcPointer(estimatedPokemonLevelRange.min);
+                levelIndicator.setText(String.valueOf(estimatedPokemonLevelRange.toString()));
             }
 
             @Override
@@ -649,11 +655,6 @@ public class Pokefly extends Service {
         });
     }
 
-    /**
-     * Creates the IV Button view.
-     */
-    private void createIVButton() {
-    }
 
     /**
      * Sets the internal state that tells the broadcastrecievers to behave when the user has pressed the iv button.
@@ -668,8 +669,7 @@ public class Pokefly extends Service {
      * creates the info layout which contains all the scanned data views and allows for correction.
      */
     private void createInfoLayout() {
-
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(this);
         infoLayout = (LinearLayout) inflater.inflate(R.layout.dialog_info_window, null);
         layoutParams.gravity = Gravity.CENTER | Gravity.BOTTOM;
         ButterKnife.bind(this, infoLayout);
@@ -817,6 +817,7 @@ public class Pokefly extends Service {
      * Changes the text in the appraisal checkboxes depending on what team the player is on.
      */
     private void populateTeamAppraisalSpinners() {
+        GoIVSettings settings = GoIVSettings.getInstance(this);
 
         //Load the correct phrases from the text resources depending on what team is stored in app settings
         if (settings.playerTeam() == 0) { //mystic
@@ -856,11 +857,11 @@ public class Pokefly extends Service {
 
     }
 
-    @OnClick({R.id.pokePickerToggleSpinnerVsInput})
     /**
      * In the input screen, switches between the two methods the user has of picking pokemon - a dropdown list, or
-     * typing
+     * typing.
      */
+    @OnClick({R.id.pokePickerToggleSpinnerVsInput})
     public void toggleSpinnerVsInput() {
         if (autoCompleteTextView1.getVisibility() == View.GONE) {
             autoCompleteTextView1.setVisibility(View.VISIBLE);
@@ -871,10 +872,10 @@ public class Pokefly extends Service {
         }
     }
 
-    @OnClick({R.id.shareWithStorimod})
     /**
      * Creates an intent to share the result of the pokemon scan, and closes the overlay.
      */
+    @OnClick({R.id.shareWithStorimod})
     public void shareScannedPokemonInformation() {
         PokemonShareHandler communicator = new PokemonShareHandler();
         communicator.spreadResultIntent(this, ScanContainer.scanContainer.currScan, pokemonUniqueID);
@@ -898,10 +899,10 @@ public class Pokefly extends Service {
         Drawable arrowDrawable;
         if (visible) {
             boxVisibility = View.VISIBLE;
-            arrowDrawable = getDrawableC(R.drawable.arrow_expand);
+            arrowDrawable = ContextCompat.getDrawable(this, R.drawable.arrow_expand);
         } else {
             boxVisibility = View.GONE;
-            arrowDrawable = getDrawableC(R.drawable.arrow_collapse);
+            arrowDrawable = ContextCompat.getDrawable(this, R.drawable.arrow_collapse);
         }
         expanderText.setCompoundDrawablesWithIntrinsicBounds(null, null, arrowDrawable, null);
         if (animate) {
@@ -920,12 +921,14 @@ public class Pokefly extends Service {
         toggleVisibility(resultsMoreInformationText, expandedResultsBox, true);
     }
 
-    @OnClick({R.id.inputAppraisalExpandBox})
     /**
-     * Method called when user presses the text to expand the appraisal box on the input screen
+     * Method called when user presses the text to expand the appraisal box on the input screen, also collapses the
+     * default view, since only either the appraisal or the default view is visible.
      */
+    @OnClick({R.id.inputAppraisalExpandBox})
     public void toggleAppraisalBox() {
         toggleVisibility(inputAppraisalExpandBox, appraisalBox, true);
+        setInputBoxToMatchAppraisalBox();
         positionHandler.setVisibility(appraisalBox.getVisibility());
         moveOverlayUpOrDownToMatchAppraisalBox();
     }
@@ -964,23 +967,19 @@ public class Pokefly extends Service {
 
     private void adjustArcPointerBar(double estimatedPokemonLevel) {
         setArcPointer(estimatedPokemonLevel);
-        arcAdjustBar.setProgress(Data.levelToLevelIdx(estimatedPokemonLevel));
+        arcAdjustBar.setProgress(Data.maxPokeLevelToIndex(estimatedPokemonLevel));
     }
 
     @OnClick(R.id.btnDecrementLevel)
     public void decrementLevel() {
-        if (estimatedPokemonLevel > 1.0) {
-            estimatedPokemonLevel -= 0.5;
-        }
-        adjustArcPointerBar(estimatedPokemonLevel);
+        estimatedPokemonLevelRange.dec();
+        adjustArcPointerBar(estimatedPokemonLevelRange.min);
     }
 
     @OnClick(R.id.btnIncrementLevel)
     public void incrementLevel() {
-        if (estimatedPokemonLevel < Data.trainerLevelToMaxPokeLevel(trainerLevel)) {
-            estimatedPokemonLevel += 0.5;
-        }
-        adjustArcPointerBar(estimatedPokemonLevel);
+        estimatedPokemonLevelRange.inc();
+        adjustArcPointerBar(estimatedPokemonLevelRange.min);
     }
 
     @OnClick(R.id.btnIncrementLevelExpanded)
@@ -1021,10 +1020,10 @@ public class Pokefly extends Service {
         return true;
     }
 
-    @OnClick(R.id.btnCheckIv)
     /**
-     * Method called when user presses "check iv" in the input screen, which takes the user to the result screen
+     * Method called when user presses "check iv" in the input screen, which takes the user to the result screen.
      */
+    @OnClick(R.id.btnCheckIv)
     public void checkIv() {
         //warn user and stop calculation if scan/input failed/is wrong
         if (!parseNumericInputs() || !pokemonHP.isPresent() || !pokemonCP.isPresent()) {
@@ -1040,10 +1039,11 @@ public class Pokefly extends Service {
         }
 
 
-        IVScanResult ivScanResult = pokeInfoCalculator.getIVPossibilities(pokemon, estimatedPokemonLevel,
-                pokemonHP.get(), pokemonCP.get());
+        IVScanResult ivScanResult = pokeInfoCalculator.getIVPossibilities(pokemon, estimatedPokemonLevelRange,
+                pokemonHP.get(), pokemonCP.get(), pokemonGender);
 
         refineByAvailableAppraisalInfo(ivScanResult);
+        refineByEggRaidInformation(ivScanResult);
 
         //Dont run clipboard logic if scan failed - some tokens might crash the program.
         if (ivScanResult.iVCombinations.size() > 0) {
@@ -1054,9 +1054,21 @@ public class Pokefly extends Service {
         exResCompare.setEnabled(enableCompare);
         exResCompare.setTextColor(getColorC(enableCompare ? R.color.colorPrimary : R.color.unimportantText));
 
-        moveOverlay(false); //we dont want overlay to stay on top if user had appraisal box
+        moveOverlay(false); // We don't want overlay to stay on top if user had appraisal box
         closeKeyboard();
         transitionOverlayViewFromInputToResults();
+    }
+
+    /**
+     * Deletes impossible combinations from the ivScanResult that comes from the knowledge that a pokemon was aquired
+     * from an egg or a raid. Pokemon from eggs and raids cannot have stats lower than 10.
+     *
+     * @param ivScanResult The ivscanresult object to remove the impossible combinations from.
+     */
+    private void refineByEggRaidInformation(IVScanResult ivScanResult) {
+        if (eggRaidSwitch.isChecked()) {
+            ivScanResult.refineByEggRaid();
+        }
     }
 
 
@@ -1125,8 +1137,8 @@ public class Pokefly extends Service {
      * screenshot, and then deletes the screenshot.
      */
     private void deleteScreenShotIfRequired() {
-        if (batterySaver && screenShotPath.isPresent()) {
-            if (settings.shouldDeleteScreenshots()) {
+        if (GoIVSettings.getInstance(this).isManualScreenshotModeEnabled() && screenShotPath.isPresent()) {
+            if (GoIVSettings.getInstance(this).shouldDeleteScreenshots()) {
                 screenShotHelper.deleteScreenShot(screenShotPath.get());
             }
         }
@@ -1193,12 +1205,12 @@ public class Pokefly extends Service {
     }
 
 
-
-
     /**
      * Adds the iv range of the pokemon to the clipboard if the clipboard setting is on.
      */
     public void addClipboardInfoIfSettingOn(IVScanResult ivScanResult) {
+        GoIVSettings settings = GoIVSettings.getInstance(this);
+
         if (settings.shouldCopyToClipboard()) {
             String clipResult = clipboardTokenHandler.getClipboardText(ivScanResult, pokeInfoCalculator);
 
@@ -1220,12 +1232,11 @@ public class Pokefly extends Service {
     public void addSpecificClipboard(IVScanResult ivScanResult, IVCombination ivCombination) {
 
 
-
-        String clipResult = "";
+        String clipResult;
         IVScanResult singleIVScanResult = new IVScanResult(ivScanResult.pokemon, ivScanResult.estimatedPokemonLevel,
-                ivScanResult.scannedCP);
+                ivScanResult.scannedCP, ivScanResult.scannedGender);
         singleIVScanResult.addIVCombination(ivCombination.att, ivCombination.def, ivCombination.sta);
-        clipResult = clipboardTokenHandler.getResults(singleIVScanResult, pokeInfoCalculator, true);
+        clipResult = clipboardTokenHandler.getResults(singleIVScanResult, pokeInfoCalculator, SINGLE_RESULT);
 
 
         Toast toast = Toast.makeText(this, String.format(getString(R.string.clipboard_copy_toast), clipResult),
@@ -1257,7 +1268,9 @@ public class Pokefly extends Service {
         populateResultsHeader(ivScanResult);
 
 
-        if (ivScanResult.getCount() == 1) {
+        if (ivScanResult.getCount() == 0) {
+            populateNotIVMatch(ivScanResult);
+        } else if (ivScanResult.getCount() == 1) {
             populateSingleIVMatch(ivScanResult);
         } else { // More than a match
             populateMultipleIVMatch(ivScanResult);
@@ -1282,14 +1295,14 @@ public class Pokefly extends Service {
         expandedLevelSeekbar.setMax(levelToSeekbarProgress(40));
 
         // Set Thumb value to current Pokemon level
-        expandedLevelSeekbar.setProgress(levelToSeekbarProgress(estimatedPokemonLevel));
+        expandedLevelSeekbar.setProgress(levelToSeekbarProgress(estimatedPokemonLevelRange.min));
 
         // Set Seekbar Background max value to max Pokemon level at trainer level 40
         expandedLevelSeekbarBackground.setMax(levelToSeekbarProgress(40));
 
         // Set Thumb 1 drawable to an orange marker and value at the max possible Pokemon level at the current
         // trainer level
-        expandedLevelSeekbarBackground.getThumb(0).setThumb(getDrawableC(R.drawable
+        expandedLevelSeekbarBackground.getThumb(0).setThumb(ContextCompat.getDrawable(this, R.drawable
                 .orange_seekbar_thumb_marker));
         expandedLevelSeekbarBackground.getThumb(0).setValue(
                 levelToSeekbarProgress(Data.trainerLevelToMaxPokeLevel(trainerLevel)));
@@ -1325,12 +1338,13 @@ public class Pokefly extends Service {
      * Shows the name and level of the pokemon in the results dialog.
      */
     private void populateResultsHeader(IVScanResult ivScanResult) {
+        resultPokedexNumber.setText("#" + ivScanResult.pokemon.pokedexNumber);
         resultsPokemonName.setText(ivScanResult.pokemon.toString());
-        resultsPokemonLevel.setText(getString(R.string.level_num, ivScanResult.estimatedPokemonLevel));
+        resultsPokemonLevel.setText(getString(R.string.level_num, ivScanResult.estimatedPokemonLevel.toString()));
     }
 
     /**
-     * Populates the reuslt screen with the layout as if its multiple results.
+     * Populates the result screen with the layout as if its multiple results.
      */
     private void populateMultipleIVMatch(IVScanResult ivScanResult) {
         llMaxIV.setVisibility(View.VISIBLE);
@@ -1344,7 +1358,8 @@ public class Pokefly extends Service {
 
 
         populateAllIvPossibilities(ivScanResult);
-
+        seeAllPossibilities.setVisibility(View.VISIBLE);
+        correctCPorLevel.setVisibility(View.GONE);
     }
 
     /**
@@ -1353,6 +1368,23 @@ public class Pokefly extends Service {
     private void populateAllIvPossibilities(IVScanResult ivScanResult) {
         IVResultsAdapter ivResults = new IVResultsAdapter(ivScanResult, this);
         rvResults.setAdapter(ivResults);
+    }
+
+    /**
+     * Populates the result screen with error warning.
+     */
+    private void populateNotIVMatch(IVScanResult ivScanResult) {
+        llMaxIV.setVisibility(View.VISIBLE);
+        llMinIV.setVisibility(View.VISIBLE);
+        llSingleMatch.setVisibility(View.GONE);
+        llMultipleIVMatches.setVisibility(View.VISIBLE);
+        tvAvgIV.setText(getString(R.string.avg));
+
+        resultsCombinations.setText(
+                String.format(getString(R.string.possible_iv_combinations), ivScanResult.iVCombinations.size()));
+
+        seeAllPossibilities.setVisibility(View.GONE);
+        correctCPorLevel.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -1372,10 +1404,12 @@ public class Pokefly extends Service {
 
         llSingleMatch.setVisibility(View.VISIBLE);
         llMultipleIVMatches.setVisibility(View.GONE);
+        seeAllPossibilities.setVisibility(View.VISIBLE);
+        correctCPorLevel.setVisibility(View.GONE);
     }
 
     private int getSeekbarOffset() {
-        return (int) (2 * estimatedPokemonLevel);
+        return (int) (2 * estimatedPokemonLevelRange.min);
     }
 
     private double seekbarProgressToLevel(int progress) {
@@ -1384,6 +1418,8 @@ public class Pokefly extends Service {
     }
 
     /**
+     * Calculate the seekbar progress from a pokemon level.
+     *
      * @param level a valid pokemon level (hence <= 40).
      * @return a seekbar progress index.
      */
@@ -1392,7 +1428,7 @@ public class Pokefly extends Service {
     }
 
     /**
-     * Sets the growth estimate text boxes to correpond to the
+     * Sets the growth estimate text boxes to correspond to the
      * pokemon evolution and level set by the user.
      */
     private void populateAdvancedInformation(IVScanResult ivScanResult) {
@@ -1401,7 +1437,7 @@ public class Pokefly extends Service {
 
         setEstimateCpTextBox(ivScanResult, selectedLevel, selectedPokemon);
         setEstimateHPTextBox(ivScanResult, selectedLevel, selectedPokemon);
-        setPokemonPerfectionPercentageText(ivScanResult, selectedPokemon);
+        setPokemonPerfectionPercentageText(ivScanResult, selectedLevel, selectedPokemon);
         setEstimateCostTextboxes(ivScanResult, selectedLevel, selectedPokemon);
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
@@ -1413,13 +1449,16 @@ public class Pokefly extends Service {
      * Sets the pokemon perfection % text in the powerup and evolution results box.
      *
      * @param ivScanResult    The object containing the ivs to base current pokemon on.
+     * @param selectedLevel   Which level the prediction should me made for.
      * @param selectedPokemon The pokemon to compare selected iv with max iv to.
      */
-    private void setPokemonPerfectionPercentageText(IVScanResult ivScanResult, Pokemon selectedPokemon) {
+    private void setPokemonPerfectionPercentageText(IVScanResult ivScanResult,
+                                                    double selectedLevel, Pokemon selectedPokemon) {
         CPRange cpRange = pokeInfoCalculator.getCpRangeAtLevel(selectedPokemon,
-                ivScanResult.getCombinationLowIVs(), ivScanResult.getCombinationHighIVs(), 40);
+                ivScanResult.getCombinationLowIVs(), ivScanResult.getCombinationHighIVs(),
+                selectedLevel);
         double maxCP = pokeInfoCalculator.getCpRangeAtLevel(selectedPokemon,
-                IVCombination.MAX, IVCombination.MAX, 40).high;
+                IVCombination.MAX, IVCombination.MAX, selectedLevel).high;
         double perfection = (100.0 * cpRange.getFloatingAvg()) / maxCP;
         int difference = (int) (cpRange.getFloatingAvg() - maxCP);
         DecimalFormat df = new DecimalFormat("#.#");
@@ -1440,7 +1479,7 @@ public class Pokefly extends Service {
      */
     private void setEstimateHPTextBox(IVScanResult ivScanResult, double selectedLevel, Pokemon selectedPokemon) {
         int newHP = pokeInfoCalculator.getHPAtLevel(ivScanResult, selectedLevel, selectedPokemon);
-        int oldHP = pokeInfoCalculator.getHPAtLevel(ivScanResult, estimatedPokemonLevel, ivScanResult.pokemon);
+        int oldHP = pokeInfoCalculator.getHPAtLevel(ivScanResult, estimatedPokemonLevelRange.min, ivScanResult.pokemon);
         int hpDiff = newHP - oldHP;
         String sign = (hpDiff >= 0) ? "+" : ""; //add plus in front if positive.
         String hpText = newHP + " (" + sign + hpDiff + ")";
@@ -1454,7 +1493,7 @@ public class Pokefly extends Service {
      *                     variable
      */
     private void setAndCalculatePokeSpamText(IVScanResult ivScanResult) {
-        if (settings.isPokeSpamEnabled()
+        if (GoIVSettings.getInstance(this).isPokeSpamEnabled()
                 && ivScanResult.pokemon != null) {
             if (ivScanResult.pokemon.candyEvolutionCost < 0) {
                 exResPokeSpam.setText(getString(R.string.pokespam_not_available));
@@ -1463,9 +1502,23 @@ public class Pokefly extends Service {
             }
 
             PokeSpam pokeSpamCalculator = new PokeSpam(pokemonCandy.or(0), ivScanResult.pokemon.candyEvolutionCost);
-            String text = getString(R.string.pokespam_formatted_message,
-                    pokeSpamCalculator.getTotalEvolvable(), pokeSpamCalculator.getEvolveRows(),
-                    pokeSpamCalculator.getEvolveExtra());
+
+            // number for total evolvable
+            int totEvol = pokeSpamCalculator.getTotalEvolvable();
+            // number for rows of evolvables
+            int evolRow = pokeSpamCalculator.getEvolveRows();
+            // number for evolvables in extra row (not complete row)
+            int evolExtra = pokeSpamCalculator.getEvolveExtra();
+
+            String text;
+
+            if (totEvol < PokeSpam.HOW_MANY_POKEMON_WE_HAVE_PER_ROW) {
+                text = String.valueOf(totEvol);
+            } else if (evolExtra == 0) {
+                text = getString(R.string.pokespam_formatted_message2, totEvol, evolRow);
+            } else {
+                text = getString(R.string.pokespam_formatted_message, totEvol, evolRow, evolExtra);
+            }
             exResPokeSpam.setText(text);
             pokeSpamView.setVisibility(View.VISIBLE);
         } else {
@@ -1510,7 +1563,7 @@ public class Pokefly extends Service {
      * @param selectedPokemon The target pokemon. (example, ivScan pokemon can be weedle, selected can be beedrill.)
      */
     private void setEstimateCostTextboxes(IVScanResult ivScanResult, double selectedLevel, Pokemon selectedPokemon) {
-        UpgradeCost cost = pokeInfoCalculator.getUpgradeCost(selectedLevel, estimatedPokemonLevel);
+        UpgradeCost cost = pokeInfoCalculator.getUpgradeCost(selectedLevel, estimatedPokemonLevelRange.min);
         int evolutionCandyCost = pokeInfoCalculator.getCandyCostForEvolution(ivScanResult.pokemon, selectedPokemon);
         String candyCostText = cost.candy + evolutionCandyCost + "";
         exResCandy.setText(candyCostText);
@@ -1520,13 +1573,13 @@ public class Pokefly extends Service {
     /**
      * Sets the text color of the level next to the slider in the estimate box to normal or orange depending on if
      * the user can level up the pokemon that high with his current trainer level. For example, if the user has
-     * trainer level 20, then his pokemon can reach a max level of 21.5 - so any goalLevel above 21.5 would become
+     * trainer level 20, then his pokemon can reach a max level of 22 - so any goalLevel above 22 would become
      * orange.
      *
      * @param selectedLevel The level to reach.
      */
     private void setEstimateLevelTextColor(double selectedLevel) {
-        // If selectedLevel exeeds trainer capabilities then show text in orange
+        // If selectedLevel exceeds trainer capabilities then show text in orange
         if (selectedLevel > Data.trainerLevelToMaxPokeLevel(trainerLevel)) {
             exResLevel.setTextColor(getColorC(R.color.orange));
         } else {
@@ -1603,18 +1656,19 @@ public class Pokefly extends Service {
         }
     }
 
-    @OnClick({R.id.btnCancelInfo, R.id.btnCloseInfo})
     /**
-     * resets the info dialogue to its default state
+     * Resets the info dialogue to its default state.
      */
+    @OnClick({R.id.btnCancelInfo, R.id.btnCloseInfo})
     public void cancelInfoDialog() {
         hideInfoLayoutArcPointer();
 
         resetAppraisalCheckBoxes();
+        eggRaidSwitch.setChecked(false); //reset egg/raid checkbox
 
         resetPokeflyStateMachine();
         resetInfoDialogue();
-        if (!batterySaver) {
+        if (!GoIVSettings.getInstance(this).isManualScreenshotModeEnabled()) {
             autoAppraisal.reset();
             ivButton.setShown(true, infoShownSent);
         }
@@ -1682,11 +1736,19 @@ public class Pokefly extends Service {
      * Opens input appraisal expand box if setting for defaulting to expansion is on.
      */
     private void openAppraisalBoxIfSettingOn() {
-        if (settings.shouldAutoOpenExpandedAppraise()) {
+        if (GoIVSettings.getInstance(this).shouldAutoOpenExpandedAppraise()) {
             setVisibility(inputAppraisalExpandBox, appraisalBox, true, true);
             positionHandler.setVisibility(appraisalBox.getVisibility());
             moveOverlayUpOrDownToMatchAppraisalBox();
         }
+    }
+
+    /**
+     * If input is open, appraisal should be closed, and vice versa. This method shows the appraisal box if the input
+     * is hidden, or hides the appraisal box if the input is visible.
+     */
+    private void setInputBoxToMatchAppraisalBox() {
+        defaultInputPart.setVisibility(appraisalBox.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
     /**
@@ -1726,7 +1788,7 @@ public class Pokefly extends Service {
      */
     private void showCandyTextBoxBasedOnSettings() {
         //enable/disable visibility based on PokeSpam enabled or not
-        if (settings.isPokeSpamEnabled()) {
+        if (GoIVSettings.getInstance(this).isPokeSpamEnabled()) {
             pokeSpamDialogInputContentBox.setVisibility(View.VISIBLE);
             pokemonHPEdit.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         } else {
@@ -1774,23 +1836,25 @@ public class Pokefly extends Service {
             setVisibility(inputAppraisalExpandBox, appraisalBox, false, false);
             positionHandler.setVisibility(appraisalBox.getVisibility());
             moveOverlayUpOrDownToMatchAppraisalBox(); //move the overlay to correct position regarding appraisal box
-            adjustArcPointerBar(estimatedPokemonLevel);
+            adjustArcPointerBar(estimatedPokemonLevelRange.min);
 
-            if (batterySaver) {
+            if (GoIVSettings.getInstance(this).isManualScreenshotModeEnabled()) {
                 infoShownReceived = false;
             }
 
-            if (!settings.shouldShouldConfirmationDialogs()) {
+            if (!GoIVSettings.getInstance(this).shouldShouldConfirmationDialogs()) {
                 checkIv();
             }
         }
         showCandyTextBoxBasedOnSettings();
         openAppraisalBoxIfSettingOn();
+        setInputBoxToMatchAppraisalBox();
     }
 
     private <T> String optionalIntToString(Optional<T> src) {
         return src.transform(new Function<T, String>() {
-            @Override public String apply(T input) {
+            @Override
+            public String apply(T input) {
                 return input.toString();
             }
         }).or("");
@@ -1801,16 +1865,10 @@ public class Pokefly extends Service {
         if (externalFilesDir == null) {
             externalFilesDir = getFilesDir();
         }
-        String extdir = externalFilesDir.toString();
-        if (!new File(extdir + "/tessdata/eng.traineddata").exists() || !new File(extdir + "/tessdata/jpn.traineddata").exists()) {
-            CopyUtils.copyAssetFolder(getAssets(), "tessdata", extdir + "/tessdata");
-        }
+        String extDir = externalFilesDir.toString();
+            CopyUtils.copyAssetFolder(getAssets(), "tessdata", extDir + "/tessdata");
 
-        ocr = OcrHelper.init(extdir, displayMetrics.widthPixels, displayMetrics.heightPixels,
-                pokeInfoCalculator.get(28).name,
-                pokeInfoCalculator.get(31).name,
-                settings,
-                getResources());
+        ocr = OcrHelper.init(extDir, pokeInfoCalculator, GoIVSettings.getInstance(this), getResources());
     }
 
 
@@ -1821,13 +1879,13 @@ public class Pokefly extends Service {
      * @param pokemonImage   The image of the pokemon
      * @param screenShotPath The screenshot path if it is a file, used to delete once checked
      */
-    private void scanPokemon(Bitmap pokemonImage, @NonNull Optional<String> screenShotPath) {
+    private void scanPokemon(@NonNull Bitmap pokemonImage, @NonNull Optional<String> screenShotPath) {
         //WARNING: this method *must* always send an intent at the end, no matter what, to avoid the application
         // hanging.
 
         Intent info = Pokefly.createNoInfoIntent();
         try {
-            ScanResult res = ocr.scanPokemon(pokemonImage, trainerLevel);
+            ScanResult res = ocr.scanPokemon(GoIVSettings.getInstance(this), pokemonImage, trainerLevel);
             if (res.isFailed()) {
                 Toast.makeText(Pokefly.this, getString(R.string.scan_pokemon_failed), Toast.LENGTH_SHORT).show();
             }
@@ -1846,7 +1904,6 @@ public class Pokefly extends Service {
             return;
         }
         scanPokemon(bmp, Optional.<String>absent());
-        bmp.recycle();
     }
 
     /**
@@ -1856,7 +1913,7 @@ public class Pokefly extends Service {
     private final BroadcastReceiver processBitmap = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bitmap bitmap = (Bitmap) intent.getParcelableExtra(KEY_BITMAP);
+            Bitmap bitmap = intent.getParcelableExtra(KEY_BITMAP);
             if (bitmap == null) {
                 return;
             }
@@ -1879,7 +1936,6 @@ public class Pokefly extends Service {
             }
 
             scanPokemon(bitmap, screenShotPath);
-            bitmap.recycle();
         }
     };
 
@@ -1893,7 +1949,7 @@ public class Pokefly extends Service {
         public void onReceive(Context context, Intent intent) {
             if (!receivedInfo) {
                 if (intent.hasExtra(KEY_SEND_INFO_NAME) && intent.hasExtra(KEY_SEND_INFO_CP) && intent.hasExtra(
-                        KEY_SEND_INFO_HP) && intent.hasExtra(KEY_SEND_INFO_LEVEL)) {
+                        KEY_SEND_INFO_HP) && intent.hasExtra(KEY_SEND_INFO_LEVEL_LOWER)) {
                     receivedInfo = true;
 
                     pokemonName = intent.getStringExtra(KEY_SEND_INFO_NAME);
@@ -1907,6 +1963,8 @@ public class Pokefly extends Service {
                             (Optional<Integer>) intent.getSerializableExtra(KEY_SEND_INFO_CP);
                     @SuppressWarnings("unchecked") Optional<Integer> lPokemonHP =
                             (Optional<Integer>) intent.getSerializableExtra(KEY_SEND_INFO_HP);
+                    @SuppressWarnings("unchecked") Pokemon.Gender lPokemonGender =
+                            (Pokemon.Gender) intent.getSerializableExtra(KEY_SEND_INFO_GENDER);
                     @SuppressWarnings("unchecked") Optional<Integer> lCandyAmount =
                             (Optional<Integer>) intent.getSerializableExtra(KEY_SEND_INFO_CANDY_AMOUNT);
                     @SuppressWarnings("unchecked") Optional<Integer> lCandyUpgradeCost =
@@ -1917,14 +1975,16 @@ public class Pokefly extends Service {
                     screenShotPath = lScreenShotFile;
                     pokemonCP = lPokemonCP;
                     pokemonHP = lPokemonHP;
+                    pokemonGender = lPokemonGender;
                     pokemonCandy = lCandyAmount;
                     candyUpgradeCost = lCandyUpgradeCost;
                     pokemonUniqueID = lUniqueID;
 
-                    estimatedPokemonLevel = intent.getDoubleExtra(KEY_SEND_INFO_LEVEL, estimatedPokemonLevel);
-                    if (estimatedPokemonLevel < 1.0) {
-                        estimatedPokemonLevel = 1.0;
-                    }
+
+                    double estimatedPokemonLevelMin = intent.getDoubleExtra(KEY_SEND_INFO_LEVEL_LOWER, 1);
+                    double estimatedPokemonLevelMax = intent.getDoubleExtra(KEY_SEND_INFO_LEVEL_HIGHER, 1);
+
+                    estimatedPokemonLevelRange = new LevelRange(estimatedPokemonLevelMin, estimatedPokemonLevelMax);
 
                     showInfoLayout();
                 } else {
@@ -1933,6 +1993,4 @@ public class Pokefly extends Service {
             }
         }
     };
-
-
 }

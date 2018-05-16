@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e1e1e1"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:id="@+id/ocr_calibration_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:padding="8dp"
+            android:paddingStart="28dp"
+            android:paddingEnd="28dp"
+            android:text="@string/title_activity_ocr_calibration_result"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/buttonText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            android:orientation="vertical"
+            android:paddingEnd="28dp"
+            android:paddingStart="28dp"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/ocr_calibration_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/ocr_calibration_result_description" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/saveCalibrationButton"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:text="@string/ocr_calibration_save" />
+
+                <Button
+                    android:id="@+id/backToGoivButton"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/go_back_to_goiv"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/errorListTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:textColor="@android:color/holo_red_dark"
+                tools:text="Detection error one\nDetection error two\nDetection error three" />
+
+
+            <TextView
+                android:id="@+id/ocr_calibration_check"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingBottom="8dp"
+                android:text="@string/ocr_calibration_check_before" />
+
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:text="@string/go_back"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/errorField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="#fff"
+            android:orientation="vertical"
+            android:padding="28dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:text="@string/report_error"
+                android:textSize="22sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:text="@string/send_email_to_devs_recalibration" />
+
+            <Button
+                android:id="@+id/emailErrorButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/send_email_to_devs_button" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ocr_result_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:adjustViewBounds="true"
+            android:background="@android:color/white"
+            android:minHeight="120dp"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+</ScrollView>
