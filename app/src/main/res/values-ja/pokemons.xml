@@ -393,6 +393,8 @@
         <item>デオキシス_アタック</item>
         <item>デオキシス_スピード</item>
         <item>デオキシス</item>
+        <!-- Alola form -->
+        <item>アローッシー</item>
     </string-array>
     <string-array name="typeName">
         <!--  0   normal --> <item>ノーマル</item>
