@@ -40,6 +40,8 @@ public class Pokemon {
      */
     public final List<Pokemon> evolutions;
 
+    public final List<Pokemon> forms;
+
     /**
      * Pokemon name for OCR, this is what you saw in PokemonGo app.
      */
@@ -69,6 +71,7 @@ public class Pokemon {
         this.baseStamina = baseStamina;
         this.devoNumber = devoNumber;
         this.evolutions = new ArrayList<>();
+        this.forms = new ArrayList<>();
         this.candyEvolutionCost = candyEvolutionCost;
     }
 

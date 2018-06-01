@@ -131,7 +131,7 @@ public class PokemonNameCorrector {
             case (102): // Exeggutor
                 // check types including dragon
                 if (pokemonType.toLowerCase().contains(pokeInfoCalculator.getTypeName(14).toLowerCase())) {
-                    guess = new PokeDist(pokeInfoCalculator.get(389), 0); // Alola form
+                    guess = new PokeDist(pokeInfoCalculator.get(102).forms.get(0), 0); // Alola form
                 }
                 break;
 

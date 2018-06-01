@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="formNames">
+        <!-- Deoxys -->
+        <item>ノーマルフォルム</item>
+        <item>アタックフォルム</item>
+        <item>ディフェンスフォルム</item>
+        <item>スピードフォルム</item>
+        <!-- Exeggutor -->
+        <item>アローラのすがた</item>
+    </string-array>
+</resources>
