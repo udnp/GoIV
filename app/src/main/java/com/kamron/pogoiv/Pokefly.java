@@ -1339,7 +1339,12 @@ public class Pokefly extends Service {
      */
     private void populateResultsHeader(IVScanResult ivScanResult) {
         resultPokedexNumber.setText("#" + ivScanResult.pokemon.pokedexNumber);
-        resultsPokemonName.setText(ivScanResult.pokemon.toString());
+        String pokemonName = ivScanResult.pokemon.toString();
+        if (pokemonName.contains(" - ")) { // check including form name
+            //format pokemon name text
+            pokemonName = pokemonName.replace(" - ", "\n");
+        }
+        resultsPokemonName.setText(pokemonName);
         resultsPokemonLevel.setText(getString(R.string.level_num, ivScanResult.estimatedPokemonLevel.toString()));
     }
 
