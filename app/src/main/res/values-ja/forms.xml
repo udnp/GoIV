@@ -2,7 +2,6 @@
 <resources>
     <string-array name="formNames">
         <!-- Deoxys -->
-        <item>ノーマルフォルム</item>
         <item>アタックフォルム</item>
         <item>ディフェンスフォルム</item>
         <item>スピードフォルム</item>

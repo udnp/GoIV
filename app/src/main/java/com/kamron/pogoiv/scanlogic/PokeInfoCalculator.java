@@ -441,7 +441,7 @@ public class PokeInfoCalculator {
             return list; // normal form only
         }
 
-        list.addAll(normalFormPokemon.forms); //TODO Deoxys normal form
+        list.addAll(normalFormPokemon.forms);
         return list;
     }
 
