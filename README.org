@@ -36,5 +36,8 @@
 ** ライセンス
    本家開発元と同じく GPL 3.0 です．
 
+** 更新履歴
+   [[https://github.com/udnp/GoIV_JP/blob/master/JP_RELEASE_LOG.md][コチラ]] をごらんされたし．
+
 ** Special Thanks
    [[https://github.com/farkam135/GoIV][GoIV Project]]   
