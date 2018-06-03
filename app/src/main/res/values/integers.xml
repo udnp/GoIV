@@ -1377,7 +1377,7 @@
         <item>78</item>  <!--Slowking-->
         <item>-1</item>  <!--Misdreavus-->
         <item>-1</item>  <!--Unown-->
-        <item>-1</item>  <!--Wobbuffet-->
+        <item>359</item>  <!--Wobbuffet-->
         <item>-1</item>  <!--Girafarig-->
         <item>-1</item>  <!--Pineco-->
         <item>203</item> <!--Forretres-->
@@ -1927,7 +1927,7 @@
         <item>-1</item> <!--Tropius-->
         <item>-1</item> <!--Chimecho-->
         <item>-1</item> <!--Absol-->
-        <item>50</item> <!--Wynaut-->
+        <item>25</item> <!--Wynaut-->
         <item>50</item> <!--Snorunt-->
         <item>-1</item> <!--Glalie-->
         <item>25</item> <!--Spheal-->
@@ -2165,7 +2165,7 @@
         <item>-1</item>       <!-- Slowking = 198 -->
         <item>199</item>      <!-- Misdreavus = 199 -->
         <item>200</item>      <!-- Unown = 200 -->
-        <item>201</item>      <!-- Wobbuffet = 201 -->
+        <item>-1</item>      <!-- Wobbuffet = 201 -->
         <item>202</item>      <!-- Girafarig = 202 -->
         <item>203</item>      <!-- Pineco = 203 -->
         <item>-1</item>       <!-- Forretres = 204 -->
@@ -2324,7 +2324,7 @@
         <item>356</item> <!--Tropius-->
         <item>357</item> <!--Chimecho-->
         <item>358</item> <!--Absol-->
-        <item>359</item> <!--Wynaut-->
+        <item>201</item> <!--Wynaut-->
         <item>360</item> <!--Snorunt-->
         <item>-1</item> <!--Glalie-->
         <item>362</item> <!--Spheal-->
