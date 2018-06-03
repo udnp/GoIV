@@ -1358,7 +1358,7 @@
         <item>178</item> <!--Flaaffy-->
         <item>179</item> <!--Ampharos-->
         <item>43</item>  <!--Bellossom-->
-        <item>-1</item>  <!--Marill-->
+        <item>297</item>  <!--Marill-->
         <item>182</item> <!--Azumarill-->
         <item>-1</item>  <!--Sudowoodo-->
         <item>60</item>  <!--Politoed-->
@@ -1865,7 +1865,7 @@
         <item>-1</item> <!--Exploud-->
         <item>50</item> <!--Makuhita-->
         <item>-1</item> <!--Hariyama-->
-        <item>-1</item> <!--Azurill-->
+        <item>25</item> <!--Azurill-->
         <item>-1</item> <!--Nosepass-->
         <item>50</item> <!--Skitty-->
         <item>-1</item> <!--Delcatty-->
@@ -2146,7 +2146,7 @@
         <item>-1</item>       <!-- Flaaffy = 179 -->
         <item>-1</item>       <!-- Ampharos = 180 -->
         <item>-1</item>       <!-- Bellossom = 181 -->
-        <item>182</item>      <!-- Marill = 182 -->
+        <item>-1</item>      <!-- Marill = 182 -->
         <item>-1</item>       <!-- Azumarill = 183 -->
         <item>184</item>      <!-- Sudowoodo = 184 -->
         <item>-1</item>       <!-- Politoed = 185 -->
