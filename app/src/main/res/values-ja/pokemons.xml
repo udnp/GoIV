@@ -389,9 +389,6 @@
         <item>グラードン</item>
         <item>レックウザ</item>
         <item>ジラーチ</item>
-        <item>デオキシス_ディフェンス</item>
-        <item>デオキシス_アタック</item>
-        <item>デオキシス_スピード</item>
         <item>デオキシス</item>
     </string-array>
     <string-array name="typeName">
