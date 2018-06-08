@@ -3,6 +3,8 @@ package com.kamron.pogoiv.scanlogic;
 import com.google.common.base.Optional;
 import com.kamron.pogoiv.utils.LevelRange;
 
+import java.text.Normalizer;
+
 /**
  * A ScanResult represents the result of an OCR scan.
  * Created by pgiarrusso on 3/9/2016.
@@ -51,7 +53,12 @@ public class ScanResult {
     }
 
     public String getPokemonType() {
-        return pokemonType;
+        //first ensure that there's no special characters such as é, á or â, and convert them to e, a , a.
+        //These kinds of characters should not be possible to scan, but we're clearing them out for
+        //future proofing.
+        String seperatedType = Normalizer.normalize(pokemonType, Normalizer.Form.NFD);
+        seperatedType = seperatedType.replaceAll("[^\\p{ASCII}]", "");
+        return seperatedType;
     }
 
     public Pokemon.Gender getPokemonGender() {
