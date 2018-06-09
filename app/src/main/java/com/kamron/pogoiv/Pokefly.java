@@ -1253,7 +1253,7 @@ public class Pokefly extends Service {
      * Initialises the autocompletetextview which allows people to search for pokemon names.
      */
     private void initializePokemonAutoCompleteTextView() {
-        String[] pokeList = getResources().getStringArray(R.array.pokemon);
+        String[] pokeList = pokeInfoCalculator.getPokemonNamesWithFormsArray();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.autocomplete_pokemon_list_item,
                 pokeList);
         autoCompleteTextView1.setAdapter(adapter);
