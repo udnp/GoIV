@@ -121,12 +121,7 @@ public class PokemonNameCorrector {
         }
 
 
-        //6. All else failed: make a wild guess based only on closest name match
-        if (guess.pokemon == null) {
-            guess = getNicknameGuess(poketext, pokeInfoCalculator.getPokedex());
-        }
-
-        // check Alola form
+        //6. Check if the found pokemon should be alolan variant or not.
         switch (guess.pokemon.number) {
             case (102): // Exeggutor
                 // check types including dragon
@@ -137,6 +132,11 @@ public class PokemonNameCorrector {
 
             default:
                 // do nothing
+        }
+
+        //7. All else failed: make a wild guess based only on closest name match
+        if (guess.pokemon == null) {
+            guess = getNicknameGuess(poketext, pokeInfoCalculator.getPokedex());
         }
 
         return guess;
