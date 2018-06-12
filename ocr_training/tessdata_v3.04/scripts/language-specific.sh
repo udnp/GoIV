@@ -312,8 +312,12 @@ JPN_FONTS=( \
     "TakaoGothic" \
     "VL Gothic" \
     "Noto Sans CJK JP Bold" \
+    "Noto Sans CJK JP Heavy" \
+    "Noto Sans CJK JP Light" \
+    "Noto Sans CJK JP Medium" \
     "Noto Sans CJK JP Semi-Light" \
-)
+    "Noto Sans CJK JP Ultra-Light" \
+    )
 
 RUSSIAN_FONTS=( \
     "Arial Bold" \
