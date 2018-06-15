@@ -308,6 +308,7 @@ CHI_TRA_FONTS=( \
 
 JPN_FONTS=( \
     "Lato Medium" \
+    "MotoyaLMaru" \
     "TakaoExGothic" \
     "TakaoGothic" \
     "VL Gothic" \
