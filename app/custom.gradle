@@ -2,6 +2,21 @@ apply plugin: 'com.android.application'
 
 android {
     /**
+     * Build configurations for APK
+     * Ensure the following values are updated before generating release builds:
+     * versionCode (Increment of 1)
+     * versionName (Based on Semantic Versioning 2.0 - http://semver.org/)
+     */
+    defaultConfig {
+        minSdkVersion 19 /*Dont change this unless you know why*/
+        targetSdkVersion 27 /*Dont change this unless you know why*/
+        versionCode 40
+        versionName "4.3.3"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    /**
      * Product flavors
      * Offline - No Internet permission and disable Crashlytics
      * Online - Internet permission and enable Crashlytics
