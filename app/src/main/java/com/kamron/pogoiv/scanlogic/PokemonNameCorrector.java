@@ -133,16 +133,11 @@ public class PokemonNameCorrector {
 
 
         //6. Check if the found pokemon should be alolan variant or not.
-        switch (guess.pokemon.number) {
-            case (102): // Exeggutor
-                // check types including dragon
-                if (pokemonType.toLowerCase().contains(pokeInfoCalculator.getTypeName(14).toLowerCase())) {
-                    guess = new PokeDist(pokeInfoCalculator.get(102).forms.get(0), 0); // Alola form
-                }
-                break;
-
-            default:
-                // do nothing
+        if (pokemonType != null) {
+            PokeDist alolanGuess = checkAlolanVariant(guess, pokemonType);
+            if (alolanGuess != null) {
+                guess = alolanGuess;
+            }
         }
 
         //7. All else failed: make a wild guess based only on closest name match
@@ -153,6 +148,27 @@ public class PokemonNameCorrector {
         return guess;
     }
 
+    private PokeDist checkAlolanVariant(PokeDist guess, String pokemonType) {
+        try {
+            switch (guess.pokemon.number) {
+                case (102): // Exeggutor (dex 103)
+                    // check types including dragon
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(14).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+
+                default:
+                    // do nothing
+
+            }
+        } catch (NullPointerException e) {
+            return null;
+        }
+
+        return null;
+    }
 
     /**
      * A method which returns if there's a pokemon which matches the candy name & evolution cost. This method will
