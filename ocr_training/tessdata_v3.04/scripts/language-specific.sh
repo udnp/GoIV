@@ -315,6 +315,8 @@ JPN_FONTS=( \
     "Noto Sans CJK JP Medium" \
     "Noto Sans CJK JP Semi-Light" \
     "Noto Sans CJK JP Ultra-Light" \
+    "Sony Mobile UD Gothic Light, Light" \
+    "Sony Mobile UD Gothic Regular," \
     "TakaoExGothic" \
     "TakaoGothic" \
     "VL Gothic" \
