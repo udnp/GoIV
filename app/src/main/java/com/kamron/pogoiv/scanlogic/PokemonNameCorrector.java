@@ -89,6 +89,17 @@ public class PokemonNameCorrector {
             }
         }
 
+        //3.1 Azuril and marill have the same evolution cost, but different types.
+        if (candytext.toLowerCase().contains(pokeInfoCalculator.get(182).name.toLowerCase())
+                && (candyUpgradeCost.get() != -1)){ //its not an azumarill
+            //if the scanned data contains the type water, it must be a marill, as azuril is normal type.
+            if (pokemonType.contains(pokeInfoCalculator.getTypeName(2))){
+                guess = new PokeDist(pokeInfoCalculator.get(182), 0);
+            } else{
+                guess = new PokeDist(pokeInfoCalculator.get(297), 0);
+            }
+        }
+
         //4. maybe the candy upgrade cost was scanned wrong because the candy icon was interpreted as a number (for
         // example the black candy is not cleaned by the ocr). Try checking if any in the possible evolutions that
         // match without the first character.
@@ -122,16 +133,11 @@ public class PokemonNameCorrector {
 
 
         //6. Check if the found pokemon should be alolan variant or not.
-        switch (guess.pokemon.number) {
-            case (102): // Exeggutor
-                // check types including dragon
-                if (pokemonType.toLowerCase().contains(pokeInfoCalculator.getTypeName(14).toLowerCase())) {
-                    guess = new PokeDist(pokeInfoCalculator.get(102).forms.get(0), 0); // Alola form
-                }
-                break;
-
-            default:
-                // do nothing
+        if (pokemonType != null) {
+            PokeDist alolanGuess = checkAlolanVariant(guess, pokemonType);
+            if (alolanGuess != null) {
+                guess = alolanGuess;
+            }
         }
 
         //7. All else failed: make a wild guess based only on closest name match
@@ -142,6 +148,146 @@ public class PokemonNameCorrector {
         return guess;
     }
 
+    private PokeDist checkAlolanVariant(PokeDist guess, String pokemonType) {
+        try {
+            switch (guess.pokemon.number) {
+                case (102): // Exeggutor (dex 103)
+                    // check types including dragon
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(14).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (18): // Rattata
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (19): // Raticate
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (25): // Raichu
+                    // check types including psychic
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(10).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (26): // Sandshrew
+                    // check types including ice
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(5).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (27): // Sandslash
+                    // check types including ice
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(5).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (36): // Vulpix
+                    // check types including ice
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(5).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (37): // Ninetales
+                    // check types including ice
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(5).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (49): // Diglett
+                    // check types including steel
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(16).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (50): // Dugtrio
+                    // check types including steel
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(16).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (51): // Meowth
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (52): // Persian
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (73): // Geodude
+                    // check types including electric
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(3).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (74): // Graveler
+                    // check types including electric
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(3).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (75): // Golem
+                    // check types including electric
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(3).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (87): // Grimer
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (88): // Muk
+                    // check types including dark
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(15).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+                case (104): // Marowak
+                    // check types including fire
+                    if (pokemonType.toLowerCase().contains(
+                            pokeInfoCalculator.getTypeName(1).toLowerCase())) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    }
+                    break;
+
+                default:
+                    // do nothing
+
+            }
+        } catch (NullPointerException e) {
+            return null;
+        }
+
+        return null;
+    }
 
     /**
      * A method which returns if there's a pokemon which matches the candy name & evolution cost. This method will
