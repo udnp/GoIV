@@ -182,7 +182,6 @@ public class PokeInfoCalculator {
             }
         }
 
-        //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
         for (int i = 0; i < pokeListSize; i++) {
             if (devolution[i] != -1) {
                 Pokemon devo = pokedex.get(devolution[i]);
@@ -192,6 +191,7 @@ public class PokeInfoCalculator {
                 basePokemons.add(pokedex.get(i));
             }
 
+            //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
             if (formsCountIndex[i] != -1) {
                 int[] formsCount = res.getIntArray(R.array.formsCount);
                 int formsStartIndex = 0;
