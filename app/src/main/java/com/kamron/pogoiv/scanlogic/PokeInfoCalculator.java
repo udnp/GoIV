@@ -171,6 +171,7 @@ public class PokeInfoCalculator {
         final int[] formsCountIndex = res.getIntArray(R.array.formsCountIndex);
 
         int pokeListSize = names.length;
+        ArrayList<Pokemon> formVariantPokemons = new ArrayList<>();
         for (int i = 0; i < pokeListSize; i++) {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
                     evolutionCandyCost[i]);
@@ -181,7 +182,6 @@ public class PokeInfoCalculator {
             }
         }
 
-        //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
         for (int i = 0; i < pokeListSize; i++) {
             if (devolution[i] != -1) {
                 Pokemon devo = pokedex.get(devolution[i]);
@@ -191,6 +191,7 @@ public class PokeInfoCalculator {
                 basePokemons.add(pokedex.get(i));
             }
 
+            //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
             if (formsCountIndex[i] != -1) {
                 int[] formsCount = res.getIntArray(R.array.formsCount);
                 int formsStartIndex = 0;
@@ -216,7 +217,15 @@ public class PokeInfoCalculator {
                     if (!formPokemon.equals(formPokemonDisplayName)) {
                         pokemap.put(formPokemonDisplayName, formPokemon);
                     }
+                    formVariantPokemons.add(formPokemon);
                 }
+            }
+        }
+
+        // add evolutions to form variant pokemons instance if the normal form pokemon has its evolutions.
+        for (Pokemon formPokemon : formVariantPokemons) {
+            if (!pokedex.get(formPokemon.number).evolutions.isEmpty()) {
+                formPokemon.evolutions.addAll(pokedex.get(formPokemon.number).evolutions);
             }
         }
 
