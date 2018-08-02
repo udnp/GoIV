@@ -11,7 +11,6 @@ import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.R;
 import com.kamron.pogoiv.utils.LevelRange;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -525,9 +524,7 @@ public class PokeInfoCalculator {
     }
 
     /**
-     * Returns the type name, such as fire or water, in the correct current locale name. However, special characters
-     * such as â, é etc are replaced with their normalized forms a, e etc. So they can be compared with what's
-     * scanned. (The ocr does not recognize special characters such as é).
+     * Returns the type name, such as fire or water, in the correct current locale name.
      * <p>
      * Type numbers:
      * <p>
@@ -553,8 +550,6 @@ public class PokeInfoCalculator {
      * @param typeNameNum The number for the type to get the correct name for.
      */
     public String getTypeName(int typeNameNum) {
-        String cleanedType = Normalizer.normalize(typeNamesArray[typeNameNum], Normalizer.Form.NFD);
-        cleanedType = cleanedType.replaceAll("[\\p{M}]", "");
-        return cleanedType;
+        return typeNamesArray[typeNameNum];
     }
 }
