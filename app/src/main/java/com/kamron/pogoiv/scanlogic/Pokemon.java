@@ -33,6 +33,27 @@ public class Pokemon {
         }
     }
 
+    public enum Type {
+        NORMAL,
+        FIRE,
+        WATER,
+        ELECTRIC,
+        GRASS,
+        ICE,
+        FIGHTING,
+        POISON,
+        GROUND,
+        FLYING,
+        PSYCHIC,
+        BUG,
+        ROCK,
+        GHOST,
+        DRAGON,
+        DARK,
+        STEEL,
+        FAIRY,
+    }
+
     /**
      * Evolutions of this Pokemon, sorted in alphabetical order.
      * Try to avoid assumptions that only hold for Gen. I Pokemon: evolutions can have smaller
