@@ -547,9 +547,9 @@ public class PokeInfoCalculator {
      * 16 steel<p>
      * 17 fairy<p>
      *
-     * @param typeNameNum The number for the type to get the correct name for.
+     * @param type The number for the type to get the correct name for.
      */
-    public String getTypeName(int typeNameNum) {
-        return typeNamesArray[typeNameNum];
+    public String getTypeName(Pokemon.Type type) {
+        return typeNamesArray[type.ordinal()];
     }
 }
