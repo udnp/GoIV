@@ -10,12 +10,15 @@ import android.support.annotation.Nullable;
 import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.R;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by Johan Swanberg on 2016-08-18.
@@ -25,8 +28,8 @@ public class PokeInfoCalculator {
     private static PokeInfoCalculator instance;
 
     private ArrayList<Pokemon> pokedex = new ArrayList<>();
-    private String[] typeNamesArray;
     private String[] pokeNamesWithForm = {};
+    private Map<Pokemon.Type, String> normalizedTypeNames = new EnumMap<>(Pokemon.Type.class);
 
     /**
      * Pokemons that aren't evolutions of any other one.
@@ -68,7 +71,12 @@ public class PokeInfoCalculator {
      */
     private PokeInfoCalculator(@NonNull GoIVSettings settings, @NonNull Resources res) {
         populatePokemon(settings, res);
-        this.typeNamesArray = res.getStringArray(R.array.typeName);
+
+        // create and cache the normalized pokemon type locale name
+        for (int i = 0; i < res.getStringArray(R.array.typeName).length; i++) {
+            normalizedTypeNames.put(Pokemon.Type.values()[i],
+                    StringUtils.normalize(res.getStringArray(R.array.typeName)[i]));
+        }
     }
 
     public List<Pokemon> getPokedex() {
@@ -524,32 +532,11 @@ public class PokeInfoCalculator {
     }
 
     /**
-     * Returns the type name, such as fire or water, in the correct current locale name.
-     * <p>
-     * Type numbers:
-     * <p>
-     * 0 normal <p>
-     * 1 fire<p>
-     * 2 water<p>
-     * 3 electric<p>
-     * 4 grass<p>
-     * 5 ice<p>
-     * 6 fighting<p>
-     * 7 poison<p>
-     * 8 ground<p>
-     * 9 flying<p>
-     * 10 psychic<p>
-     * 11 bug<p>
-     * 12 rock<p>
-     * 13 ghost<p>
-     * 14 dragon<p>
-     * 15 dark<p>
-     * 16 steel<p>
-     * 17 fairy<p>
+     * Returns the normalized type name for such as fire or water, in the correct current locale name.
      *
-     * @param type The number for the type to get the correct name for.
+     * @param type The enum for the type to get the correct name for.
      */
-    public String getTypeName(Pokemon.Type type) {
-        return typeNamesArray[type.ordinal()];
+    public String getNormalizedType(Pokemon.Type type) {
+        return normalizedTypeNames.get(type);
     }
 }
