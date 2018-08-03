@@ -72,6 +72,16 @@ public class PokeInfoCalculator {
     private PokeInfoCalculator(@NonNull GoIVSettings settings, @NonNull Resources res) {
         populatePokemon(settings, res);
 
+        // create and cache the full pokemon display name list
+        ArrayList<String> pokemonNamesArray = new ArrayList<>();
+        for (Pokemon poke : getPokedex()) {
+            for (Pokemon pokemonForm : getForms(poke)) {
+                pokemonNamesArray.add(pokemonForm.toString());
+            }
+        }
+
+        pokeNamesWithForm = pokemonNamesArray.toArray(new String[pokemonNamesArray.size()]);
+
         // create and cache the normalized pokemon type locale name
         for (int i = 0; i < res.getStringArray(R.array.typeName).length; i++) {
             normalizedTypeNames.put(Pokemon.Type.values()[i],
@@ -148,18 +158,6 @@ public class PokeInfoCalculator {
      * @return the full pokemon display names including forms as string array.
      */
     public String[] getPokemonNamesWithFormArray() {
-        if (pokeNamesWithForm.length != 0) {
-            return pokeNamesWithForm;
-        }
-
-        ArrayList<String> pokemonNamesArray = new ArrayList<>();
-        for (Pokemon poke : getPokedex()) {
-            for (Pokemon pokemonForm : getForms(poke)) {
-                pokemonNamesArray.add(pokemonForm.toString());
-            }
-        }
-
-        pokeNamesWithForm = pokemonNamesArray.toArray(new String[pokemonNamesArray.size()]);
         return pokeNamesWithForm;
     }
 
@@ -236,8 +234,6 @@ public class PokeInfoCalculator {
                 formPokemon.evolutions.addAll(pokedex.get(formPokemon.number).evolutions);
             }
         }
-
-        pokeNamesWithForm = getPokemonNamesWithFormArray();
     }
 
     /**
