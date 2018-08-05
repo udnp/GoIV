@@ -28,7 +28,7 @@ public class StringUtils {
         /* append more normalizers below for each locales, if needed */
         String lang = Locale.getDefault().getLanguage();
 
-        if (Locale.getDefault().getLanguage().contains("ja")) {
+        if (lang.contains("ja")) {
             s = toNormalSizeLetters(s);
         }
 
