@@ -68,7 +68,8 @@ public class PokemonNameCorrector {
 
 
         //3.  check correction for Eevee’s Evolution using it's Pokemon Type
-        if (guess.pokemon == null && candytext.toLowerCase().contains(pokeInfoCalculator.get(132).name.toLowerCase())) {
+        if (guess.pokemon == null
+                && StringUtils.normalize(candytext).contains(StringUtils.normalize(pokeInfoCalculator.get(132).name))) {
             HashMap<String, String> eeveelutionCorrection = new HashMap<>();
             eeveelutionCorrection.put(pokeInfoCalculator.getNormalizedType(Type.WATER),
                     pokeInfoCalculator.get(133).name); //Vaporeon
@@ -95,7 +96,7 @@ public class PokemonNameCorrector {
         }
 
         //3.1 Azuril and marill have the same evolution cost, but different types.
-        if (candytext.toLowerCase().contains(pokeInfoCalculator.get(182).name.toLowerCase())
+        if (StringUtils.normalize(candytext).contains(StringUtils.normalize(pokeInfoCalculator.get(182).name))
                 && (candyUpgradeCost.get() != -1)){ //its not an azumarill
             //if the scanned data contains the type water, it must be a marill, as azuril is normal type.
             if (StringUtils.normalize(pokemonType).contains(pokeInfoCalculator.getNormalizedType(Type.WATER))) {
