@@ -240,10 +240,11 @@ public class PokeInfoCalculator {
      * Gets the needed required candy and stardust to hit max level (relative to trainer level)
      *
      * @param goalLevel             The level to reach
-     * @param estimatedPokemonLevel The estimated level of hte pokemon
+     * @param estimatedPokemonLevel The estimated level of the pokemon
+     * @param isLucky               Whether the pokemon is lucky, therefore costs one half normal dust
      * @return The text that shows the amount of candy and stardust needed.
      */
-    public UpgradeCost getUpgradeCost(double goalLevel, double estimatedPokemonLevel) {
+    public UpgradeCost getUpgradeCost(double goalLevel, double estimatedPokemonLevel, boolean isLucky) {
         int neededCandy = 0;
         int neededStarDust = 0;
         while (estimatedPokemonLevel != goalLevel) {
@@ -289,6 +290,11 @@ public class PokeInfoCalculator {
 
             estimatedPokemonLevel += 0.5;
         }
+
+        if (isLucky) {
+            neededStarDust /= 2;
+        }
+
         return new UpgradeCost(neededStarDust, neededCandy);
     }
 
@@ -304,19 +310,19 @@ public class PokeInfoCalculator {
      * many possibilities or if there are none.
      */
     public IVScanResult getIVPossibilities(Pokemon selectedPokemon, LevelRange estimatedPokemonLevel,
-                                           int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender) {
+                                           int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender, boolean isLucy) {
 
         if (estimatedPokemonLevel.min == estimatedPokemonLevel.max) {
             return getSingleLevelIVPossibility(selectedPokemon, estimatedPokemonLevel.min, pokemonHP, pokemonCP,
-                    pokemonGender);
+                    pokemonGender, isLucy);
         }
 
         List<IVScanResult> possibilities = new ArrayList<>();
         for (double i = estimatedPokemonLevel.min; i <= estimatedPokemonLevel.max; i += 0.5) {
-            possibilities.add(getSingleLevelIVPossibility(selectedPokemon, i, pokemonHP, pokemonCP, pokemonGender));
+            possibilities.add(getSingleLevelIVPossibility(selectedPokemon, i, pokemonHP, pokemonCP, pokemonGender, isLucy));
         }
 
-        IVScanResult result = new IVScanResult(selectedPokemon, estimatedPokemonLevel, pokemonCP, pokemonGender);
+        IVScanResult result = new IVScanResult(selectedPokemon, estimatedPokemonLevel, pokemonCP, pokemonGender, isLucy);
         for (IVScanResult ivs : possibilities) {
             result.addPossibilitiesFrom(ivs);
         }
@@ -335,7 +341,8 @@ public class PokeInfoCalculator {
      * many possibilities.
      */
     private IVScanResult getSingleLevelIVPossibility(Pokemon selectedPokemon, double estimatedPokemonLevel,
-                                                     int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender) {
+                                                     int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender,
+                                                     boolean isLucky) {
         int baseAttack = selectedPokemon.baseAttack;
         int baseDefense = selectedPokemon.baseDefense;
         int baseStamina = selectedPokemon.baseStamina;
@@ -346,7 +353,7 @@ public class PokeInfoCalculator {
 
 
         IVScanResult returner = ScanContainer.createIVScanResult(selectedPokemon, new LevelRange(estimatedPokemonLevel),
-                pokemonCP, pokemonGender);
+                pokemonCP, pokemonGender, isLucky);
         for (int staminaIV = 0; staminaIV < 16; staminaIV++) {
             int hp = (int) Math.max(Math.floor((baseStamina + staminaIV) * lvlScalar), 10);
             if (hp == pokemonHP) {

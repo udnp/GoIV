@@ -41,6 +41,7 @@ public class IVScanResult {
     public int scannedHP = 0;
     public boolean rangeIVScan = false; //is this several levels worth of possible iv combinations?
     public Pokemon.Gender scannedGender;
+    public boolean isLucky;
 
     /**
      * Creates a holder object for IV scan results.
@@ -49,12 +50,15 @@ public class IVScanResult {
      * @param estimatedLevel The estimated pokemon level
      * @param pokemonCP      Pokemon CP
      * @param gender         Pokemon gender
+     * @param isLucky        Flag indicating Lucky Pokemon
      */
-    public IVScanResult(Pokemon pokemon, LevelRange estimatedLevel, int pokemonCP, Pokemon.Gender gender) {
+    public IVScanResult(Pokemon pokemon, LevelRange estimatedLevel, int pokemonCP, Pokemon.Gender gender,
+                        boolean isLucky) {
         this.pokemon = pokemon;
         this.estimatedPokemonLevel = estimatedLevel;
         this.scannedCP = pokemonCP;
         this.scannedGender = gender;
+        this.isLucky = isLucky;
     }
 
     public int getCount() {
