@@ -21,6 +21,7 @@ import com.kamron.pogoiv.scanlogic.PokeInfoCalculator;
 import com.kamron.pogoiv.scanlogic.Pokemon;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -655,6 +656,7 @@ public class OcrHelper {
 
     /**
      * Gets the candy name from a pokenon image.
+     * The candy name is returned as normalized text.
      *
      * @param pokemonImage the image of the whole screen
      * @return the candy name, or "" if nothing was found
@@ -676,10 +678,10 @@ public class OcrHelper {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             tesseract.setImage(candy);
-            candyName = fixOcrNumsToLetters(
-                    removeFirstOrLastWord(tesseract.getUTF8Text().trim().replace("-", " "), candyWordFirst));
+            candyName = StringUtils.normalize(fixOcrNumsToLetters(tesseract.getUTF8Text().replaceAll("[\\s]", "")))
+                    .replace(StringUtils.normalize(res.getString(R.string.candy)), "");
             if (isNidoranName(candyName)) {
-                candyName = getNidoranGenderName(pokemonGender);
+                candyName = StringUtils.normalize(getNidoranGenderName(pokemonGender));
             }
             ocrCache.put(hash, candyName);
         }
