@@ -120,7 +120,7 @@ public class PokeInfoCalculator {
     }
 
     public Pokemon get(String name) {
-        return pokemap.get(name.toLowerCase());
+        return pokemap.get(StringUtils.normalize(name));
     }
 
     private static String[] getPokemonNamesArray(Resources res) {
@@ -182,9 +182,9 @@ public class PokeInfoCalculator {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
                     evolutionCandyCost[i]);
             pokedex.add(p);
-            pokemap.put(names[i].toLowerCase(), p);
+            pokemap.put(StringUtils.normalize(names[i]), p);
             if (!names[i].equals(displayNames[i])) {
-                pokemap.put(displayNames[i], p);
+                pokemap.put(StringUtils.normalize(displayNames[i]), p);
             }
         }
 
@@ -219,9 +219,9 @@ public class PokeInfoCalculator {
                             devolution[i],
                             evolutionCandyCost[i]);
                     pokedex.get(i).forms.add(formPokemon);
-                    pokemap.put(formPokemonName.toLowerCase(), formPokemon);
+                    pokemap.put(StringUtils.normalize(formPokemonName), formPokemon);
                     if (!formPokemon.equals(formPokemonDisplayName)) {
-                        pokemap.put(formPokemonDisplayName, formPokemon);
+                        pokemap.put(StringUtils.normalize(formPokemonDisplayName), formPokemon);
                     }
                     formVariantPokemons.add(formPokemon);
                 }

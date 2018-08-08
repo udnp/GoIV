@@ -106,14 +106,6 @@ public class Pokemon {
         return displayName;
     }
 
-    public int getDistanceCaseInsensitive(String rhs) {
-        return Data.levenshteinDistance(name.toLowerCase(), rhs.toLowerCase());
-    }
-
-    public int getDistance(String rhs) {
-        return Data.levenshteinDistance(name, rhs);
-    }
-
     /**
      * Checks if this Pokemon is the direct evolution of otherPokemon.
      * Example:
