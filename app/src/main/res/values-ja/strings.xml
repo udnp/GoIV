@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="candy">アメ</string>
     <string name="mv1">驚異的で芸術的だ</string>
     <string name="mv2">目を引くものがある</string>
     <string name="mv3">普通以上</string>

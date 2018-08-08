@@ -91,6 +91,7 @@
     <string name="defense">Verteidigung</string>
     <string name="delete_screenshots_setting_summary">Lösche Screenshots vom GoIV automatisch</string>
     <string name="delete_screenshots_setting_title">lösche Screenshots</string>
+    <string name="candy">Bonbon</string>
     <string name="evolution">Entwicklung</string>
     <string name="iv_perfect" formatted="false">% Perfekt</string>
     <string name="ivtext_no_possibilities">Es gibt keine möglichen Kombinationen. Stellen Sie sicher, dass die Werte, die Sie eingegeben haben, korrekt sind.</string>
@@ -152,5 +153,5 @@
     <string name="is3">…sehen lassen</string>
     <string name="is2">Hut ab!</string>
     <string name="is1">die besten …gesehen</string>
-	
+
 </resources>
