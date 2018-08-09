@@ -21,6 +21,7 @@ import com.kamron.pogoiv.scanlogic.PokeInfoCalculator;
 import com.kamron.pogoiv.scanlogic.Pokemon;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +57,6 @@ public class OcrHelper {
     private static boolean isPokeSpamEnabled;
     private static LruCache<String, String> ocrCache;
     private static LruCache<String, String> appraisalCache;
-    private static boolean candyWordFirst;
 
     private static Resources res;
 
@@ -88,8 +88,6 @@ public class OcrHelper {
             ocrCache = new LruCache<>(200);
             appraisalCache = new LruCache<>(200);
 
-            candyWordFirst = isCandyWordFirst();
-
             instance = new OcrHelper();
         }
 
@@ -112,14 +110,6 @@ public class OcrHelper {
         instance = null;
         ocrCache = null;
         appraisalCache = null;
-    }
-
-    private static boolean isCandyWordFirst() {
-        // Check if language makes the pokemon name in candy second; France/Spain/Italy/Portuguese
-        // have Bonbon/Caramelos/Caramelle/Doces pokeName
-        String language = Locale.getDefault().getLanguage();
-        HashSet<String> specialCandyOrderLangs = new HashSet<>(Arrays.asList("fr", "es", "it", "pt"));
-        return specialCandyOrderLangs.contains(language);
     }
 
     /**
@@ -634,27 +624,12 @@ public class OcrHelper {
     }
 
     private static boolean isNidoranName(String pokemonName) {
-        return pokemonName.toLowerCase().contains(nidoUngendered);
-    }
-
-    @NonNull
-    private static String removeFirstOrLastWord(String src, boolean removeFirst) {
-        if (removeFirst) {
-            int fstSpace = src.indexOf(' ');
-            if (fstSpace != -1) {
-                return src.substring(fstSpace + 1);
-            }
-        } else {
-            int lstSpace = src.lastIndexOf(' ');
-            if (lstSpace != -1) {
-                return src.substring(0, lstSpace);
-            }
-        }
-        return src;
+        return StringUtils.normalize(pokemonName).contains(StringUtils.normalize(nidoUngendered));
     }
 
     /**
      * Gets the candy name from a pokenon image.
+     * The candy name is returned as normalized text.
      *
      * @param pokemonImage the image of the whole screen
      * @return the candy name, or "" if nothing was found
@@ -676,10 +651,18 @@ public class OcrHelper {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             tesseract.setImage(candy);
-            candyName = fixOcrNumsToLetters(
-                    removeFirstOrLastWord(tesseract.getUTF8Text().trim().replace("-", " "), candyWordFirst));
+            String candyText = tesseract.getUTF8Text();
+            String candyWordLocale = res.getString(R.string.candy);
+
+            candyText = fixOcrNumsToLetters(candyText);
+
+            // remove characters not included in pokemon names or candy word. (ex. white space, -, etc)
+            candyText = candyText.replaceAll("[^\\w♂♀]", "");
+
+            candyText = StringUtils.normalize(candyText);
+            candyName = candyText.replace(StringUtils.normalize(candyWordLocale), "");
             if (isNidoranName(candyName)) {
-                candyName = getNidoranGenderName(pokemonGender);
+                candyName = StringUtils.normalize(getNidoranGenderName(pokemonGender));
             }
             ocrCache.put(hash, candyName);
         }
@@ -930,26 +913,44 @@ public class OcrHelper {
         Optional<Integer> powerUpCandyCost = getPokemonPowerUpCandyCostFromImg(pokemonImage,
                 ScanArea.calibratedFromSettings(POKEMON_POWER_UP_CANDY_COST, settings));
 
+        int luckyOffset = 0;
+        // If no power up cost was found, check by offsetting down by the height of the
+        // "LUCKY POKEMON" string, which is slightly higher than the power up candy cost field
+        if (!powerUpCandyCost.isPresent()) {
+            int tempLuckyOffset = (int) (0.0247 * pokemonImage.getHeight() * 1.2); // Default value w/o calibration
+            ScanArea powerUpCandyArea = ScanArea.calibratedFromSettings(POKEMON_POWER_UP_CANDY_COST, settings);
+            if (powerUpCandyArea != null) {
+                tempLuckyOffset = (int) (powerUpCandyArea.height * 1.2);
+            }
+            
+            powerUpCandyCost = getPokemonPowerUpCandyCostFromImg(pokemonImage,
+                    ScanArea.calibratedFromSettings(POKEMON_POWER_UP_CANDY_COST, settings, tempLuckyOffset));
+            if (powerUpCandyCost.isPresent()) {
+                // Found successfully; assume this is a lucky pokemon and offset all further scans below that line
+                luckyOffset = tempLuckyOffset;
+            }
+        }
+
         double estimatedPokemonLevel = getPokemonLevelFromImg(pokemonImage, trainerLevel);
         LevelRange estimatedLevelRange =
                 refineLevelEstimate(trainerLevel, powerUpCandyCost, estimatedPokemonLevel);
 
         String type = getPokemonTypeFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_TYPE_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_TYPE_AREA, settings, luckyOffset));
         Pokemon.Gender gender = getPokemonGenderFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_GENDER_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_GENDER_AREA, settings, luckyOffset));
         String name = getPokemonNameFromImg(pokemonImage, gender,
-                ScanArea.calibratedFromSettings(POKEMON_NAME_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_NAME_AREA, settings)); // Not offset for lucky
         String candyName = getCandyNameFromImg(pokemonImage, gender,
-                ScanArea.calibratedFromSettings(CANDY_NAME_AREA, settings));
+                ScanArea.calibratedFromSettings(CANDY_NAME_AREA, settings, luckyOffset));
         Optional<Integer> hp = getPokemonHPFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_HP_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_HP_AREA, settings, luckyOffset));
         Optional<Integer> cp = getPokemonCPFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_CP_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_CP_AREA, settings)); // Not offset for lucky
         Optional<Integer> candyAmount = getCandyAmountFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_CANDY_AMOUNT_AREA, settings));
+                    ScanArea.calibratedFromSettings(POKEMON_CANDY_AMOUNT_AREA, settings, luckyOffset));
         Optional<Integer> evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings));
+                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset));
         String uniqueIdentifier = name + type + candyName + hp.toString() + cp
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 

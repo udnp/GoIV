@@ -10,12 +10,15 @@ import android.support.annotation.Nullable;
 import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.R;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Created by Johan Swanberg on 2016-08-18.
@@ -25,8 +28,8 @@ public class PokeInfoCalculator {
     private static PokeInfoCalculator instance;
 
     private ArrayList<Pokemon> pokedex = new ArrayList<>();
-    private String[] typeNamesArray;
     private String[] pokeNamesWithForm = {};
+    private Map<Pokemon.Type, String> normalizedTypeNames = new EnumMap<>(Pokemon.Type.class);
 
     /**
      * Pokemons that aren't evolutions of any other one.
@@ -68,7 +71,22 @@ public class PokeInfoCalculator {
      */
     private PokeInfoCalculator(@NonNull GoIVSettings settings, @NonNull Resources res) {
         populatePokemon(settings, res);
-        this.typeNamesArray = res.getStringArray(R.array.typeName);
+
+        // create and cache the full pokemon display name list
+        ArrayList<String> pokemonNamesArray = new ArrayList<>();
+        for (Pokemon poke : getPokedex()) {
+            for (Pokemon pokemonForm : getForms(poke)) {
+                pokemonNamesArray.add(pokemonForm.toString());
+            }
+        }
+
+        pokeNamesWithForm = pokemonNamesArray.toArray(new String[pokemonNamesArray.size()]);
+
+        // create and cache the normalized pokemon type locale name
+        for (int i = 0; i < res.getStringArray(R.array.typeName).length; i++) {
+            normalizedTypeNames.put(Pokemon.Type.values()[i],
+                    StringUtils.normalize(res.getStringArray(R.array.typeName)[i]));
+        }
     }
 
     public List<Pokemon> getPokedex() {
@@ -102,7 +120,7 @@ public class PokeInfoCalculator {
     }
 
     public Pokemon get(String name) {
-        return pokemap.get(name.toLowerCase());
+        return pokemap.get(StringUtils.normalize(name));
     }
 
     private static String[] getPokemonNamesArray(Resources res) {
@@ -140,18 +158,6 @@ public class PokeInfoCalculator {
      * @return the full pokemon display names including forms as string array.
      */
     public String[] getPokemonNamesWithFormArray() {
-        if (pokeNamesWithForm.length != 0) {
-            return pokeNamesWithForm;
-        }
-
-        ArrayList<String> pokemonNamesArray = new ArrayList<>();
-        for (Pokemon poke : getPokedex()) {
-            for (Pokemon pokemonForm : getForms(poke)) {
-                pokemonNamesArray.add(pokemonForm.toString());
-            }
-        }
-
-        pokeNamesWithForm = pokemonNamesArray.toArray(new String[pokemonNamesArray.size()]);
         return pokeNamesWithForm;
     }
 
@@ -171,17 +177,17 @@ public class PokeInfoCalculator {
         final int[] formsCountIndex = res.getIntArray(R.array.formsCountIndex);
 
         int pokeListSize = names.length;
+        ArrayList<Pokemon> formVariantPokemons = new ArrayList<>();
         for (int i = 0; i < pokeListSize; i++) {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
                     evolutionCandyCost[i]);
             pokedex.add(p);
-            pokemap.put(names[i].toLowerCase(), p);
+            pokemap.put(StringUtils.normalize(names[i]), p);
             if (!names[i].equals(displayNames[i])) {
-                pokemap.put(displayNames[i], p);
+                pokemap.put(StringUtils.normalize(displayNames[i]), p);
             }
         }
 
-        //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
         for (int i = 0; i < pokeListSize; i++) {
             if (devolution[i] != -1) {
                 Pokemon devo = pokedex.get(devolution[i]);
@@ -191,6 +197,7 @@ public class PokeInfoCalculator {
                 basePokemons.add(pokedex.get(i));
             }
 
+            //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
             if (formsCountIndex[i] != -1) {
                 int[] formsCount = res.getIntArray(R.array.formsCount);
                 int formsStartIndex = 0;
@@ -212,15 +219,21 @@ public class PokeInfoCalculator {
                             devolution[i],
                             evolutionCandyCost[i]);
                     pokedex.get(i).forms.add(formPokemon);
-                    pokemap.put(formPokemonName.toLowerCase(), formPokemon);
+                    pokemap.put(StringUtils.normalize(formPokemonName), formPokemon);
                     if (!formPokemon.equals(formPokemonDisplayName)) {
-                        pokemap.put(formPokemonDisplayName, formPokemon);
+                        pokemap.put(StringUtils.normalize(formPokemonDisplayName), formPokemon);
                     }
+                    formVariantPokemons.add(formPokemon);
                 }
             }
         }
 
-        pokeNamesWithForm = getPokemonNamesWithFormArray();
+        // add evolutions to form variant pokemons instance if the normal form pokemon has its evolutions.
+        for (Pokemon formPokemon : formVariantPokemons) {
+            if (!pokedex.get(formPokemon.number).evolutions.isEmpty()) {
+                formPokemon.evolutions.addAll(pokedex.get(formPokemon.number).evolutions);
+            }
+        }
     }
 
     /**
@@ -514,7 +527,12 @@ public class PokeInfoCalculator {
         return averageHP;
     }
 
-    public String getTypeName(int typeNameNum) {
-        return typeNamesArray[typeNameNum];
+    /**
+     * Returns the normalized type name for such as fire or water, in the correct current locale name.
+     *
+     * @param type The enum for the type to get the correct name for.
+     */
+    public String getNormalizedType(Pokemon.Type type) {
+        return normalizedTypeNames.get(type);
     }
 }
