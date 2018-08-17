@@ -922,7 +922,7 @@ public class OcrHelper {
             if (powerUpCandyArea != null) {
                 tempLuckyOffset = (int) (powerUpCandyArea.height * 1.2);
             }
-            
+
             powerUpCandyCost = getPokemonPowerUpCandyCostFromImg(pokemonImage,
                     ScanArea.calibratedFromSettings(POKEMON_POWER_UP_CANDY_COST, settings, tempLuckyOffset));
             if (powerUpCandyCost.isPresent()) {
@@ -955,7 +955,7 @@ public class OcrHelper {
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 
         return new ScanResult(estimatedLevelRange, name, type, candyName, gender, hp, cp, candyAmount, evolutionCost,
-                powerUpStardustCost, powerUpCandyCost, uniqueIdentifier);
+                powerUpStardustCost, powerUpCandyCost, (luckyOffset != 0), uniqueIdentifier);
     }
 
     /**
