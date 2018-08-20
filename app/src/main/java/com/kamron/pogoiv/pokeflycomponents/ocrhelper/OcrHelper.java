@@ -652,7 +652,7 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             tesseract.setImage(candy);
             String candyText = tesseract.getUTF8Text();
-            String candyWordLocale = res.getString(R.string.candy);
+            String candyWordLocale = res.getString(R.string.ocr_whitelist_candy_pre_post_phrase);
 
             candyText = fixOcrNumsToLetters(candyText);
 
