@@ -338,6 +338,7 @@ public class PokemonNameCorrector {
             if (dist < lowestDist) {
                 bestMatchPokemon = trypoke;
                 lowestDist = dist;
+                if (dist == 0) break;
             }
         }
         return new PokeDist(bestMatchPokemon, lowestDist);
@@ -352,6 +353,7 @@ public class PokemonNameCorrector {
             if (dist < lowestDist) {
                 bestMatchPokemon = trypoke.getValue();
                 lowestDist = dist;
+                if (dist == 0) break;
             }
         }
         return new PokeDist(bestMatchPokemon, lowestDist);
