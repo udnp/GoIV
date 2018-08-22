@@ -135,7 +135,7 @@ public class PokemonNameCorrector {
         //5.  get the pokemon with the closest name within the evolution line guessed from the candy (or candy and
         // cost calculation).
         if (guess.pokemon == null && bestGuessEvolutionLine != null) {
-            guess = getNicknameGuess(poketext, bestGuessEvolutionLine);
+            guess = guessBestPokemonByName(poketext, bestGuessEvolutionLine);
         }
 
 
@@ -149,7 +149,7 @@ public class PokemonNameCorrector {
 
         //7. All else failed: make a wild guess based only on closest name match
         if (guess.pokemon == null) {
-            guess = getNicknameGuess(poketext, pokeInfoCalculator.getPokedex());
+            guess = guessBestPokemonByName(poketext, pokeInfoCalculator.getPokedex());
         }
 
         return guess;
@@ -322,19 +322,19 @@ public class PokemonNameCorrector {
     }
 
     /**
-     * A method which returns the best guess at which pokemon it is according to similarity with the nickname
+     * A method which returns the best guess at which pokemon it is according to similarity with the name
      * in the given pokemon list.
      *
-     * @param poketext the nickname to compare with
-     * @param pokemons the pokemon list to search the nickname into.
+     * @param name the input name to compare with
+     * @param pokemons the pokemon list to search the input name into.
      * @return a pokedist representing the search result.
      */
-    private PokeDist getNicknameGuess(String poketext, List<Pokemon> pokemons) {
+    private PokeDist guessBestPokemonByName(String name, List<Pokemon> pokemons) {
         //if there's no perfect match, get the pokemon that best matches the nickname within the best guess evo-line
         Pokemon bestMatchPokemon = null;
         int lowestDist = Integer.MAX_VALUE;
         for (Pokemon trypoke : pokemons) {
-            int dist = Data.levenshteinDistance(trypoke.name, poketext);
+            int dist = Data.levenshteinDistance(trypoke.name, name);
             if (dist < lowestDist) {
                 bestMatchPokemon = trypoke;
                 lowestDist = dist;
@@ -344,12 +344,20 @@ public class PokemonNameCorrector {
         return new PokeDist(bestMatchPokemon, lowestDist);
     }
 
-    private PokeDist getNicknameGuess(String poketext, Map<String, Pokemon> pokemons) {
+    /**
+     * A method which returns the best guess at which pokemon it is according to similarity with the name
+     * in the given pokemons collection.
+     *
+     * @param normalizedName the normalized input name to compare with
+     * @param pokemons the pokemons collection with normalized their names as keys to search the normalized name into.
+     * @return a pokedist representing the search result.
+     */
+    private PokeDist guessBestPokemonByNormalizedName(String normalizedName, Map<String, Pokemon> pokemons) {
         //if there's no perfect match, get the pokemon that best matches the nickname within the best guess evo-line
         Pokemon bestMatchPokemon = null;
         int lowestDist = Integer.MAX_VALUE;
         for (Map.Entry<String, Pokemon> trypoke : pokemons.entrySet()) {
-            int dist = Data.levenshteinDistance(trypoke.getKey(), poketext);
+            int dist = Data.levenshteinDistance(trypoke.getKey(), normalizedName);
             if (dist < lowestDist) {
                 bestMatchPokemon = trypoke.getValue();
                 lowestDist = dist;
@@ -368,7 +376,7 @@ public class PokemonNameCorrector {
      */
     private ArrayList<Pokemon> getBestGuessForEvolutionLine(String input) {
         //candy name will only ever match the base evolution, so search in getBasePokemons().
-        PokeDist bestMatch = getNicknameGuess(input, pokeInfoCalculator.getNormalizedCandyPokemons());
+        PokeDist bestMatch = guessBestPokemonByNormalizedName(input, pokeInfoCalculator.getNormalizedCandyPokemons());
         return pokeInfoCalculator.getEvolutionLine(bestMatch.pokemon);
     }
 
