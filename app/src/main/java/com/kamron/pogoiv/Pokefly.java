@@ -1827,8 +1827,8 @@ public class Pokefly extends Service {
 
             infoShownReceived = true;
             PokemonNameCorrector.PokeDist possiblePoke = PokemonNameCorrector
-                    .getInstance(PokeInfoCalculator.getInstance())
-                    .getPossiblePokemon(pokemonName, candyName, candyUpgradeCost, pokemonType);
+                    .getInstance(this.getResources())
+                    .getPossiblePokemon(pokemonName, candyName, candyUpgradeCost, pokemonType, pokemonGender);
             initialButtonsLayout.setVisibility(View.VISIBLE);
             onCheckButtonsLayout.setVisibility(View.GONE);
 
