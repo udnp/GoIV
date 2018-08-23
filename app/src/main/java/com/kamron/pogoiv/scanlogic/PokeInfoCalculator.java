@@ -43,8 +43,6 @@ public class PokeInfoCalculator {
      */
     private HashMap<String, Pokemon> candyPokemons = new HashMap<>();
 
-    private HashMap<String, Pokemon> pokemap = new HashMap<>();
-
     @NonNull
     public static synchronized PokeInfoCalculator getInstance(@NonNull GoIVSettings settings, @NonNull Resources res) {
         if (instance == null) {
@@ -119,10 +117,6 @@ public class PokeInfoCalculator {
         return null;
     }
 
-    public Pokemon get(String name) {
-        return pokemap.get(StringUtils.normalize(name));
-    }
-
     private static String[] getPokemonNamesArray(Resources res) {
         if (res.getBoolean(R.bool.use_default_pokemonsname_as_ocrstring)) {
             // If flag ON, force to use English strings as pokemon name for OCR.
@@ -182,10 +176,6 @@ public class PokeInfoCalculator {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
                     evolutionCandyCost[i]);
             pokedex.add(p);
-            pokemap.put(StringUtils.normalize(names[i]), p);
-            if (!names[i].equals(displayNames[i])) {
-                pokemap.put(StringUtils.normalize(displayNames[i]), p);
-            }
         }
 
         for (int i = 0; i < pokeListSize; i++) {
@@ -220,10 +210,6 @@ public class PokeInfoCalculator {
                             devolution[i],
                             evolutionCandyCost[i]);
                     pokedex.get(i).forms.add(formPokemon);
-                    pokemap.put(StringUtils.normalize(formPokemonName), formPokemon);
-                    if (!formPokemon.equals(formPokemonDisplayName)) {
-                        pokemap.put(StringUtils.normalize(formPokemonDisplayName), formPokemon);
-                    }
                     formVariantPokemons.add(formPokemon);
                 }
             }
