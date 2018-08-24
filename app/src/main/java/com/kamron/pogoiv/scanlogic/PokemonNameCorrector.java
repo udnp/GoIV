@@ -44,8 +44,8 @@ public class PokemonNameCorrector {
         this.normalizedPokemonNameMap = pokemap;
         this.res = res;
 
-        nidoFemale = pokeInfoCalculator.get(28).name;
-        nidoMale = pokeInfoCalculator.get(31).name;
+        nidoFemale = StringUtils.normalize(pokeInfoCalculator.get(28).name);
+        nidoMale = StringUtils.normalize(pokeInfoCalculator.get(31).name);
         nidoUngendered = nidoFemale.replace("♀", "").toLowerCase();
 
         // create and cache the normalized pokemon type locale name
@@ -202,8 +202,8 @@ public class PokemonNameCorrector {
 
         // remove characters not included in pokemon names or candy word. (ex. white space, -, etc)
         normalizedPokemonName = normalizedPokemonName.replaceAll("[^\\w♂♀]", "");
-        if (isNidoranName(normalizedPokemonName)) {
-            normalizedPokemonName = StringUtils.normalize(getNidoranGenderName(gender));
+        if (normalizedPokemonName.contains(nidoUngendered)) {
+            normalizedPokemonName = getNidoranGenderName(gender);
         }
 
         return normalizedPokemonName;
@@ -217,16 +217,11 @@ public class PokemonNameCorrector {
         // remove characters not included in pokemon names or candy word. (ex. white space, -, etc)
         normalizedCandyText = normalizedCandyText.replaceAll("[^\\w♂♀]", "");
         normalizedCandyName = normalizedCandyText.replace(StringUtils.normalize(candyWordLocale), "");
-        if (isNidoranName(normalizedCandyName)) {
-            normalizedCandyName = StringUtils.normalize(getNidoranGenderName(gender));
+        if (normalizedCandyName.contains(nidoUngendered)) {
+            normalizedCandyName = getNidoranGenderName(gender);
         }
 
         return normalizedCandyName;
-    }
-
-
-    private static boolean isNidoranName(String pokemonName) {
-        return StringUtils.normalize(pokemonName).contains(StringUtils.normalize(nidoUngendered));
     }
 
     /**
