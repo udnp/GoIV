@@ -159,7 +159,7 @@ public class Pokefly extends Service {
     private ImageView arcPointer;
     private LinearLayout infoLayout;
 
-
+    private PokemonNameCorrector pokemonNameCorrector;
     private PokeInfoCalculator pokeInfoCalculator;
 
     private AutoAppraisal autoAppraisal;
@@ -454,6 +454,7 @@ public class Pokefly extends Service {
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPDATE_UI));
 
         pokeInfoCalculator = PokeInfoCalculator.getInstance(GoIVSettings.getInstance(this), getResources());
+        pokemonNameCorrector = PokemonNameCorrector.getInstance(getResources());
         Map<String, Pokemon> pokemap = new HashMap<>();
         for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
             pokemap.put(StringUtils.normalize(pokemon.toString()), pokemon); // set display pokemon name as key
@@ -1826,9 +1827,8 @@ public class Pokefly extends Service {
         if (!infoShownReceived) {
 
             infoShownReceived = true;
-            PokemonNameCorrector.PokeDist possiblePoke = PokemonNameCorrector
-                    .getInstance(this.getResources())
-                    .getPossiblePokemon(pokemonName, candyName, candyUpgradeCost, pokemonType, pokemonGender);
+            PokemonNameCorrector.PokeDist possiblePoke = pokemonNameCorrector.getPossiblePokemon(pokemonName,
+                    candyName, candyUpgradeCost, pokemonType, pokemonGender);
             initialButtonsLayout.setVisibility(View.VISIBLE);
             onCheckButtonsLayout.setVisibility(View.GONE);
 
