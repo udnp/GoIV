@@ -107,7 +107,7 @@ public class PokemonNameCorrector {
         }
 
         //3.1 Azuril and marill have the same evolution cost, but different types.
-        if (StringUtils.normalize(candytext).contains(StringUtils.normalize(pokeInfoCalculator.get(182).name))
+        if (normalizedCandyName.contains(StringUtils.normalize(pokeInfoCalculator.get(182).name))
                 && (candyUpgradeCost.get() != -1)){ //its not an azumarill
             //if the scanned data contains the type water, it must be a marill, as azuril is normal type.
             if (normalizedPokemonType.contains(pokeInfoCalculator.getNormalizedType(Type.WATER))) {
