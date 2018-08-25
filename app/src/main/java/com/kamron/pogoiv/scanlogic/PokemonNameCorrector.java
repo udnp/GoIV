@@ -101,7 +101,7 @@ public class PokemonNameCorrector {
 
         //2. See if we can get a perfect match with candy name & upgrade cost
         if (guess.pokemon == null) {
-            bestGuessEvolutionLine = getBestGuessForEvolutionLine(candytext);
+            bestGuessEvolutionLine = getBestGuessForEvolutionLine(normalizedCandyName);
 
             ArrayList<Pokemon> candyNameEvolutionCostGuess =
                     getCandyNameEvolutionCostGuess(bestGuessEvolutionLine, candyUpgradeCost);
