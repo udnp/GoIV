@@ -134,7 +134,7 @@ public class IVPreviewPrinter {
      * @return the processed ivscanresult
      */
     private IVScanResult getIVScanResults(ScanResult res) {
-        PokemonNameCorrector corrector = PokemonNameCorrector.getInstance(pokefly.getResources());
+        PokemonNameCorrector corrector = PokemonNameCorrector.getInstance(pokefly);
         Pokemon poke = corrector.getPossiblePokemon(res.getPokemonName(), res.getCandyName(),
                 res.getEvolutionCandyCost(), res.getPokemonType(), res.getPokemonGender()).pokemon;
         IVScanResult ivrs = pokeInfoCalculator.getIVPossibilities(poke, res.getEstimatedPokemonLevel(),

@@ -1,6 +1,7 @@
 package com.kamron.pogoiv.scanlogic;
 
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -33,10 +34,9 @@ public class PokeInfoCalculator {
      */
     private ArrayList<Pokemon> candyPokemons = new ArrayList<>();
 
-    @NonNull
-    public static synchronized PokeInfoCalculator getInstance(@NonNull GoIVSettings settings, @NonNull Resources res) {
+    protected static synchronized @NonNull PokeInfoCalculator getInstance(@NonNull Context context) {
         if (instance == null) {
-            instance = new PokeInfoCalculator(settings, res);
+            instance = new PokeInfoCalculator(GoIVSettings.getInstance(context), context.getResources());
         }
         return instance;
     }

@@ -453,8 +453,8 @@ public class Pokefly extends Service {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPDATE_UI));
 
-        pokeInfoCalculator = PokeInfoCalculator.getInstance(GoIVSettings.getInstance(this), getResources());
-        pokemonNameCorrector = PokemonNameCorrector.getInstance(getResources());
+        pokemonNameCorrector = PokemonNameCorrector.getInstance(this);
+        pokeInfoCalculator = PokeInfoCalculator.getInstance();
         Map<String, Pokemon> pokemap = new HashMap<>();
         for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
             pokemap.put(StringUtils.normalize(pokemon.toString()), pokemon); // set display pokemon name as key
