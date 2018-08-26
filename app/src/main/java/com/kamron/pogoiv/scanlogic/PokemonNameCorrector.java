@@ -214,7 +214,7 @@ public class PokemonNameCorrector {
     private String getNormalizedCandyName(String candyText, Pokemon.Gender gender) {
         String normalizedCandyName;
         String normalizedCandyText = StringUtils.normalize(candyText);
-        String candyWordLocale = res.getString(R.string.candy);
+        String candyWordLocale = res.getString(R.string.ocr_whitelist_candy_pre_post_phrase);
 
         // remove characters not included in pokemon names or candy word. (ex. white space, -, etc)
         normalizedCandyText = normalizedCandyText.replaceAll("[^\\w♂♀]", "");
