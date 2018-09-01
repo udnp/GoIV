@@ -75,12 +75,15 @@ import com.kamron.pogoiv.scanlogic.UpgradeCost;
 import com.kamron.pogoiv.utils.CopyUtils;
 import com.kamron.pogoiv.utils.GuiUtil;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 import com.kamron.pogoiv.widgets.PokemonSpinnerAdapter;
 import com.kamron.pogoiv.widgets.recyclerviews.adapters.IVResultsAdapter;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -156,10 +159,12 @@ public class Pokefly extends Service {
     private ImageView arcPointer;
     private LinearLayout infoLayout;
 
-
+    private PokemonNameCorrector pokemonNameCorrector;
     private PokeInfoCalculator pokeInfoCalculator;
 
     private AutoAppraisal autoAppraisal;
+
+    private Map<String, Pokemon> normalizedPokemonNameMap;
 
     //results pokemon picker auto complete
     @BindView(R.id.autoCompleteTextView1)
@@ -448,7 +453,13 @@ public class Pokefly extends Service {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPDATE_UI));
 
-        pokeInfoCalculator = PokeInfoCalculator.getInstance(GoIVSettings.getInstance(this), getResources());
+        pokemonNameCorrector = PokemonNameCorrector.getInstance(this);
+        pokeInfoCalculator = PokeInfoCalculator.getInstance();
+        Map<String, Pokemon> pokemap = new HashMap<>();
+        for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
+            pokemap.put(StringUtils.normalize(pokemon.toString()), pokemon); // set display pokemon name as key
+        }
+        this.normalizedPokemonNameMap = pokemap;
         displayMetrics = getResources().getDisplayMetrics();
         initOcr();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -1122,7 +1133,7 @@ public class Pokefly extends Service {
             pokemon = pokeInputSpinnerAdapter.getItem(pokeInputSpinner.getSelectedItemPosition());
         } else { //user typed manually
             String userInput = autoCompleteTextView1.getText().toString();
-            pokemon = pokeInfoCalculator.get(userInput);
+            pokemon = normalizedPokemonNameMap.get(StringUtils.normalize(userInput));
             if (pokemon == null) { //no such pokemon was found, show error toast and abort showing results
                 Toast.makeText(this, userInput + getString(R.string.wrong_pokemon_name_input),
                         Toast.LENGTH_SHORT).show();
@@ -1816,8 +1827,8 @@ public class Pokefly extends Service {
         if (!infoShownReceived) {
 
             infoShownReceived = true;
-            PokemonNameCorrector.PokeDist possiblePoke = new PokemonNameCorrector(PokeInfoCalculator.getInstance())
-                    .getPossiblePokemon(pokemonName, candyName, candyUpgradeCost, pokemonType);
+            PokemonNameCorrector.PokeDist possiblePoke = pokemonNameCorrector.getPossiblePokemon(pokemonName,
+                    candyName, candyUpgradeCost, pokemonType, pokemonGender);
             initialButtonsLayout.setVisibility(View.VISIBLE);
             onCheckButtonsLayout.setVisibility(View.GONE);
 
