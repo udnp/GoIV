@@ -94,10 +94,18 @@ public class PokemonNameCorrector {
         String normalizedCandyName = getNormalizedCandyName(candytext, gender);
         String normalizedPokemonType = StringUtils.normalize(pokemonType);
         ArrayList<Pokemon> bestGuessEvolutionLine = null;
-        PokeDist guess;
+        PokeDist guess = null;
 
         //1. Check if nickname perfectly matches a pokemon (which means pokemon is probably not renamed)
+        for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
+            if (pokemon.name.equals(poketext)) {
+                guess = new PokeDist(pokemon, 0);
+                break;
+            }
+        }
+        if (guess == null) {
         guess = new PokeDist(normalizedPokemonNameMap.get(normalizedPokemonName), 0);
+        }
 
         //2. See if we can get a perfect match with candy name & upgrade cost
         if (guess.pokemon == null) {
