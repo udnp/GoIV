@@ -21,7 +21,6 @@ import com.kamron.pogoiv.scanlogic.PokeInfoCalculator;
 import com.kamron.pogoiv.scanlogic.Pokemon;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.utils.LevelRange;
-import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,9 +49,6 @@ import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEM
 public class OcrHelper {
 
     private static OcrHelper instance = null;
-    private static String nidoFemale;
-    private static String nidoMale;
-    private static String nidoUngendered;
     private static TessBaseAPI tesseract = null;
     private static boolean isPokeSpamEnabled;
     private static LruCache<String, String> ocrCache;
@@ -80,10 +76,6 @@ public class OcrHelper {
             tesseract.init(dataPath, "jpn");
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_default));
-
-            nidoFemale = pokeInfoCalculator.get(28).name;
-            nidoMale = pokeInfoCalculator.get(31).name;
-            nidoUngendered = nidoFemale.replace("♀", "").toLowerCase();
 
             ocrCache = new LruCache<>(200);
             appraisalCache = new LruCache<>(200);
@@ -484,9 +476,6 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_pokemon_name));
             tesseract.setImage(name);
             pokemonName = fixOcrNumsToLetters(tesseract.getUTF8Text().replace(" ", ""));
-            if (isNidoranName(pokemonName)) {
-                pokemonName = getNidoranGenderName(pokemonGender);
-            }
             ocrCache.put(hash, pokemonName);
         }
         return pokemonName;
@@ -609,27 +598,7 @@ public class OcrHelper {
     }
 
     /**
-     * Get the correctly gendered name of a pokemon.
-     *
-     * @param pokemonGender The gender of the nidoranX.
-     * @return The correct name of the pokemon, with the gender symbol at the end.
-     */
-    @NonNull
-    private static String getNidoranGenderName(Pokemon.Gender pokemonGender) {
-        switch (pokemonGender) {
-            case F: return nidoFemale;
-            case M: return nidoMale;
-            default: return "";
-        }
-    }
-
-    private static boolean isNidoranName(String pokemonName) {
-        return StringUtils.normalize(pokemonName).contains(StringUtils.normalize(nidoUngendered));
-    }
-
-    /**
      * Gets the candy name from a pokenon image.
-     * The candy name is returned as normalized text.
      *
      * @param pokemonImage the image of the whole screen
      * @return the candy name, or "" if nothing was found
@@ -651,19 +620,8 @@ public class OcrHelper {
             candy = replaceColors(candy, true, 68, 105, 108, Color.WHITE, 200, true);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_candy_name));
             tesseract.setImage(candy);
-            String candyText = tesseract.getUTF8Text();
-            String candyWordLocale = res.getString(R.string.candy);
-
-            candyText = fixOcrNumsToLetters(candyText);
-
-            // remove characters not included in pokemon names or candy word. (ex. white space, -, etc)
-            candyText = candyText.replaceAll("[^\\w♂♀]", "");
-
-            candyText = StringUtils.normalize(candyText);
-            candyName = candyText.replace(StringUtils.normalize(candyWordLocale), "");
-            if (isNidoranName(candyName)) {
-                candyName = StringUtils.normalize(getNidoranGenderName(pokemonGender));
-            }
+            candyName = tesseract.getUTF8Text();
+            candyName = fixOcrNumsToLetters(candyName);
             ocrCache.put(hash, candyName);
         }
         return candyName;
@@ -922,7 +880,7 @@ public class OcrHelper {
             if (powerUpCandyArea != null) {
                 tempLuckyOffset = (int) (powerUpCandyArea.height * 1.2);
             }
-            
+
             powerUpCandyCost = getPokemonPowerUpCandyCostFromImg(pokemonImage,
                     ScanArea.calibratedFromSettings(POKEMON_POWER_UP_CANDY_COST, settings, tempLuckyOffset));
             if (powerUpCandyCost.isPresent()) {
@@ -955,7 +913,7 @@ public class OcrHelper {
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 
         return new ScanResult(estimatedLevelRange, name, type, candyName, gender, hp, cp, candyAmount, evolutionCost,
-                powerUpStardustCost, powerUpCandyCost, uniqueIdentifier);
+                powerUpStardustCost, powerUpCandyCost, (luckyOffset != 0), uniqueIdentifier);
     }
 
     /**

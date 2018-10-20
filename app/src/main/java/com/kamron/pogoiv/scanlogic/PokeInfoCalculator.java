@@ -1,6 +1,7 @@
 package com.kamron.pogoiv.scanlogic;
 
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
@@ -10,15 +11,11 @@ import android.support.annotation.Nullable;
 import com.kamron.pogoiv.GoIVSettings;
 import com.kamron.pogoiv.R;
 import com.kamron.pogoiv.utils.LevelRange;
-import com.kamron.pogoiv.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Created by Johan Swanberg on 2016-08-18.
@@ -29,12 +26,6 @@ public class PokeInfoCalculator {
 
     private ArrayList<Pokemon> pokedex = new ArrayList<>();
     private String[] pokeNamesWithForm = {};
-    private Map<Pokemon.Type, String> normalizedTypeNames = new EnumMap<>(Pokemon.Type.class);
-
-    /**
-     * Pokemons that aren't evolutions of any other one.
-     */
-    private ArrayList<Pokemon> basePokemons = new ArrayList<>();
 
     /**
      * Pokemons who's name appears as a type of candy.
@@ -43,12 +34,9 @@ public class PokeInfoCalculator {
      */
     private ArrayList<Pokemon> candyPokemons = new ArrayList<>();
 
-    private HashMap<String, Pokemon> pokemap = new HashMap<>();
-
-    @NonNull
-    public static synchronized PokeInfoCalculator getInstance(@NonNull GoIVSettings settings, @NonNull Resources res) {
+    protected static synchronized @NonNull PokeInfoCalculator getInstance(@NonNull Context context) {
         if (instance == null) {
-            instance = new PokeInfoCalculator(settings, res);
+            instance = new PokeInfoCalculator(GoIVSettings.getInstance(context), context.getResources());
         }
         return instance;
     }
@@ -81,26 +69,16 @@ public class PokeInfoCalculator {
         }
 
         pokeNamesWithForm = pokemonNamesArray.toArray(new String[pokemonNamesArray.size()]);
-
-        // create and cache the normalized pokemon type locale name
-        for (int i = 0; i < res.getStringArray(R.array.typeName).length; i++) {
-            normalizedTypeNames.put(Pokemon.Type.values()[i],
-                    StringUtils.normalize(res.getStringArray(R.array.typeName)[i]));
-        }
     }
 
     public List<Pokemon> getPokedex() {
         return Collections.unmodifiableList(pokedex);
     }
 
-    public List<Pokemon> getBasePokemons() {
-        return Collections.unmodifiableList(basePokemons);
-    }
-
     /**
-     * Returns the full list of possible candy names.
+     * Returns the full list of pokemons possible candy name.
      *
-     * @return List of all candy names that exist in Pokemon Go
+     * @return List of all candy pokemons that exist in Pokemon Go.
      */
     public List<Pokemon> getCandyPokemons() {
         return Collections.unmodifiableList(candyPokemons);
@@ -117,10 +95,6 @@ public class PokeInfoCalculator {
             return pokedex.get(number);
         }
         return null;
-    }
-
-    public Pokemon get(String name) {
-        return pokemap.get(StringUtils.normalize(name));
     }
 
     private static String[] getPokemonNamesArray(Resources res) {
@@ -182,10 +156,6 @@ public class PokeInfoCalculator {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
                     evolutionCandyCost[i]);
             pokedex.add(p);
-            pokemap.put(StringUtils.normalize(names[i]), p);
-            if (!names[i].equals(displayNames[i])) {
-                pokemap.put(StringUtils.normalize(displayNames[i]), p);
-            }
         }
 
         for (int i = 0; i < pokeListSize; i++) {
@@ -194,7 +164,6 @@ public class PokeInfoCalculator {
                 devo.evolutions.add(pokedex.get(i));
             } else {
                 candyPokemons.add(pokedex.get(candyNamesArray[i]));
-                basePokemons.add(pokedex.get(i));
             }
 
             //Check for different pokemon forms, such as alolan forms, and add them to the formsCount.
@@ -219,10 +188,6 @@ public class PokeInfoCalculator {
                             devolution[i],
                             evolutionCandyCost[i]);
                     pokedex.get(i).forms.add(formPokemon);
-                    pokemap.put(StringUtils.normalize(formPokemonName), formPokemon);
-                    if (!formPokemon.equals(formPokemonDisplayName)) {
-                        pokemap.put(StringUtils.normalize(formPokemonDisplayName), formPokemon);
-                    }
                     formVariantPokemons.add(formPokemon);
                 }
             }
@@ -240,10 +205,11 @@ public class PokeInfoCalculator {
      * Gets the needed required candy and stardust to hit max level (relative to trainer level)
      *
      * @param goalLevel             The level to reach
-     * @param estimatedPokemonLevel The estimated level of hte pokemon
+     * @param estimatedPokemonLevel The estimated level of the pokemon
+     * @param isLucky               Whether the pokemon is lucky, therefore costs one half normal dust
      * @return The text that shows the amount of candy and stardust needed.
      */
-    public UpgradeCost getUpgradeCost(double goalLevel, double estimatedPokemonLevel) {
+    public UpgradeCost getUpgradeCost(double goalLevel, double estimatedPokemonLevel, boolean isLucky) {
         int neededCandy = 0;
         int neededStarDust = 0;
         while (estimatedPokemonLevel != goalLevel) {
@@ -289,6 +255,11 @@ public class PokeInfoCalculator {
 
             estimatedPokemonLevel += 0.5;
         }
+
+        if (isLucky) {
+            neededStarDust /= 2;
+        }
+
         return new UpgradeCost(neededStarDust, neededCandy);
     }
 
@@ -304,19 +275,19 @@ public class PokeInfoCalculator {
      * many possibilities or if there are none.
      */
     public IVScanResult getIVPossibilities(Pokemon selectedPokemon, LevelRange estimatedPokemonLevel,
-                                           int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender) {
+                                           int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender, boolean isLucy) {
 
         if (estimatedPokemonLevel.min == estimatedPokemonLevel.max) {
             return getSingleLevelIVPossibility(selectedPokemon, estimatedPokemonLevel.min, pokemonHP, pokemonCP,
-                    pokemonGender);
+                    pokemonGender, isLucy);
         }
 
         List<IVScanResult> possibilities = new ArrayList<>();
         for (double i = estimatedPokemonLevel.min; i <= estimatedPokemonLevel.max; i += 0.5) {
-            possibilities.add(getSingleLevelIVPossibility(selectedPokemon, i, pokemonHP, pokemonCP, pokemonGender));
+            possibilities.add(getSingleLevelIVPossibility(selectedPokemon, i, pokemonHP, pokemonCP, pokemonGender, isLucy));
         }
 
-        IVScanResult result = new IVScanResult(selectedPokemon, estimatedPokemonLevel, pokemonCP, pokemonGender);
+        IVScanResult result = new IVScanResult(selectedPokemon, estimatedPokemonLevel, pokemonCP, pokemonGender, isLucy);
         for (IVScanResult ivs : possibilities) {
             result.addPossibilitiesFrom(ivs);
         }
@@ -335,7 +306,8 @@ public class PokeInfoCalculator {
      * many possibilities.
      */
     private IVScanResult getSingleLevelIVPossibility(Pokemon selectedPokemon, double estimatedPokemonLevel,
-                                                     int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender) {
+                                                     int pokemonHP, int pokemonCP, Pokemon.Gender pokemonGender,
+                                                     boolean isLucky) {
         int baseAttack = selectedPokemon.baseAttack;
         int baseDefense = selectedPokemon.baseDefense;
         int baseStamina = selectedPokemon.baseStamina;
@@ -346,7 +318,7 @@ public class PokeInfoCalculator {
 
 
         IVScanResult returner = ScanContainer.createIVScanResult(selectedPokemon, new LevelRange(estimatedPokemonLevel),
-                pokemonCP, pokemonGender);
+                pokemonCP, pokemonGender, isLucky);
         for (int staminaIV = 0; staminaIV < 16; staminaIV++) {
             int hp = (int) Math.max(Math.floor((baseStamina + staminaIV) * lvlScalar), 10);
             if (hp == pokemonHP) {
@@ -525,14 +497,5 @@ public class PokeInfoCalculator {
                 10);
         int averageHP = Math.round(highHp + lowHp) / 2;
         return averageHP;
-    }
-
-    /**
-     * Returns the normalized type name for such as fire or water, in the correct current locale name.
-     *
-     * @param type The enum for the type to get the correct name for.
-     */
-    public String getNormalizedType(Pokemon.Type type) {
-        return normalizedTypeNames.get(type);
     }
 }

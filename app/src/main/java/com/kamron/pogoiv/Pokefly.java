@@ -75,12 +75,15 @@ import com.kamron.pogoiv.scanlogic.UpgradeCost;
 import com.kamron.pogoiv.utils.CopyUtils;
 import com.kamron.pogoiv.utils.GuiUtil;
 import com.kamron.pogoiv.utils.LevelRange;
+import com.kamron.pogoiv.utils.StringUtils;
 import com.kamron.pogoiv.widgets.PokemonSpinnerAdapter;
 import com.kamron.pogoiv.widgets.recyclerviews.adapters.IVResultsAdapter;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -120,6 +123,7 @@ public class Pokefly extends Service {
     private static final String KEY_SEND_UNIQUE_ID = "key_send_unique_id";
     private static final String KEY_SEND_POWERUP_STARTDUST_COST = "key_send_powerup_stardust";
     private static final String KEY_SEND_POWERUP_CANDYCOST = "key_send_powerup_candycost";
+    private static final String KEY_SEND_IS_LUCKY = "key_send_is_lucky";
 
     private static final String ACTION_PROCESS_BITMAP = "com.kamron.pogoiv.PROCESS_BITMAP";
     private static final String KEY_BITMAP = "bitmap";
@@ -155,10 +159,12 @@ public class Pokefly extends Service {
     private ImageView arcPointer;
     private LinearLayout infoLayout;
 
-
+    private PokemonNameCorrector pokemonNameCorrector;
     private PokeInfoCalculator pokeInfoCalculator;
 
     private AutoAppraisal autoAppraisal;
+
+    private Map<String, Pokemon> normalizedPokemonNameMap;
 
     //results pokemon picker auto complete
     @BindView(R.id.autoCompleteTextView1)
@@ -334,6 +340,7 @@ public class Pokefly extends Service {
     private Optional<Integer> pokemonCP = Optional.absent();
     private Optional<Integer> pokemonHP = Optional.absent();
     private Optional<Integer> candyUpgradeCost = Optional.absent();
+    private boolean isLucky;
     private String pokemonUniqueID = "";
     private LevelRange estimatedPokemonLevelRange = new LevelRange(1.0);
     private @NonNull Optional<String> screenShotPath = Optional.absent();
@@ -396,6 +403,7 @@ public class Pokefly extends Service {
         intent.putExtra(KEY_SEND_INFO_CANDY_AMOUNT, scanResult.getPokemonCandyAmount());
         intent.putExtra(KEY_SEND_UPGRADE_CANDY_COST, scanResult.getEvolutionCandyCost());
         intent.putExtra(KEY_SEND_UNIQUE_ID, scanResult.getPokemonUniqueID());
+        intent.putExtra(KEY_SEND_IS_LUCKY, scanResult.getIsLucky());
         intent.putExtra(KEY_SEND_POWERUP_CANDYCOST, scanResult.getPokemonPowerUpCandyCost());
         intent.putExtra(KEY_SEND_POWERUP_STARTDUST_COST, scanResult.getPokemonPowerUpStardustCost());
     }
@@ -445,7 +453,13 @@ public class Pokefly extends Service {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(ACTION_UPDATE_UI));
 
-        pokeInfoCalculator = PokeInfoCalculator.getInstance(GoIVSettings.getInstance(this), getResources());
+        pokemonNameCorrector = PokemonNameCorrector.getInstance(this);
+        pokeInfoCalculator = PokeInfoCalculator.getInstance();
+        Map<String, Pokemon> pokemap = new HashMap<>();
+        for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
+            pokemap.put(StringUtils.normalize(pokemon.toString()), pokemon); // set display pokemon name as key
+        }
+        this.normalizedPokemonNameMap = pokemap;
         displayMetrics = getResources().getDisplayMetrics();
         initOcr();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -1040,7 +1054,7 @@ public class Pokefly extends Service {
 
 
         IVScanResult ivScanResult = pokeInfoCalculator.getIVPossibilities(pokemon, estimatedPokemonLevelRange,
-                pokemonHP.get(), pokemonCP.get(), pokemonGender);
+                pokemonHP.get(), pokemonCP.get(), pokemonGender, isLucky);
 
         refineByAvailableAppraisalInfo(ivScanResult);
         refineByEggRaidInformation(ivScanResult);
@@ -1119,7 +1133,7 @@ public class Pokefly extends Service {
             pokemon = pokeInputSpinnerAdapter.getItem(pokeInputSpinner.getSelectedItemPosition());
         } else { //user typed manually
             String userInput = autoCompleteTextView1.getText().toString();
-            pokemon = pokeInfoCalculator.get(userInput);
+            pokemon = normalizedPokemonNameMap.get(StringUtils.normalize(userInput));
             if (pokemon == null) { //no such pokemon was found, show error toast and abort showing results
                 Toast.makeText(this, userInput + getString(R.string.wrong_pokemon_name_input),
                         Toast.LENGTH_SHORT).show();
@@ -1234,7 +1248,7 @@ public class Pokefly extends Service {
 
         String clipResult;
         IVScanResult singleIVScanResult = new IVScanResult(ivScanResult.pokemon, ivScanResult.estimatedPokemonLevel,
-                ivScanResult.scannedCP, ivScanResult.scannedGender);
+                ivScanResult.scannedCP, ivScanResult.scannedGender, ivScanResult.isLucky);
         singleIVScanResult.addIVCombination(ivCombination.att, ivCombination.def, ivCombination.sta);
         clipResult = clipboardTokenHandler.getResults(singleIVScanResult, pokeInfoCalculator, SINGLE_RESULT);
 
@@ -1443,7 +1457,7 @@ public class Pokefly extends Service {
         setEstimateCpTextBox(ivScanResult, selectedLevel, selectedPokemon);
         setEstimateHPTextBox(ivScanResult, selectedLevel, selectedPokemon);
         setPokemonPerfectionPercentageText(ivScanResult, selectedLevel, selectedPokemon);
-        setEstimateCostTextboxes(ivScanResult, selectedLevel, selectedPokemon);
+        setEstimateCostTextboxes(ivScanResult, selectedLevel, selectedPokemon, ivScanResult.isLucky);
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
 
@@ -1566,9 +1580,11 @@ public class Pokefly extends Service {
      * @param ivScanResult    The pokemon to base the estimate on.
      * @param selectedLevel   The level the pokemon needs to reach.
      * @param selectedPokemon The target pokemon. (example, ivScan pokemon can be weedle, selected can be beedrill.)
+     * @param isLucky         Whether the pokemon is lucky, and costs half the normal amount of dust.
      */
-    private void setEstimateCostTextboxes(IVScanResult ivScanResult, double selectedLevel, Pokemon selectedPokemon) {
-        UpgradeCost cost = pokeInfoCalculator.getUpgradeCost(selectedLevel, estimatedPokemonLevelRange.min);
+    private void setEstimateCostTextboxes(IVScanResult ivScanResult, double selectedLevel, Pokemon selectedPokemon,
+                                          boolean isLucky) {
+        UpgradeCost cost = pokeInfoCalculator.getUpgradeCost(selectedLevel, estimatedPokemonLevelRange.min, isLucky);
         int evolutionCandyCost = pokeInfoCalculator.getCandyCostForEvolution(ivScanResult.pokemon, selectedPokemon);
         String candyCostText = cost.candy + evolutionCandyCost + "";
         exResCandy.setText(candyCostText);
@@ -1811,8 +1827,8 @@ public class Pokefly extends Service {
         if (!infoShownReceived) {
 
             infoShownReceived = true;
-            PokemonNameCorrector.PokeDist possiblePoke = new PokemonNameCorrector(PokeInfoCalculator.getInstance())
-                    .getPossiblePokemon(pokemonName, candyName, candyUpgradeCost, pokemonType);
+            PokemonNameCorrector.PokeDist possiblePoke = pokemonNameCorrector.getPossiblePokemon(pokemonName,
+                    candyName, candyUpgradeCost, pokemonType, pokemonGender);
             initialButtonsLayout.setVisibility(View.VISIBLE);
             onCheckButtonsLayout.setVisibility(View.GONE);
 
@@ -1974,6 +1990,8 @@ public class Pokefly extends Service {
                             (Optional<Integer>) intent.getSerializableExtra(KEY_SEND_INFO_CANDY_AMOUNT);
                     @SuppressWarnings("unchecked") Optional<Integer> lCandyUpgradeCost =
                             (Optional<Integer>) intent.getSerializableExtra(KEY_SEND_UPGRADE_CANDY_COST);
+                    @SuppressWarnings("unchecked") boolean lIsLucky =
+                            (boolean) intent.getSerializableExtra(KEY_SEND_IS_LUCKY);
                     @SuppressWarnings("unchecked") String lUniqueID =
                             (String) intent.getSerializableExtra(KEY_SEND_UNIQUE_ID);
 
@@ -1983,6 +2001,7 @@ public class Pokefly extends Service {
                     pokemonGender = lPokemonGender;
                     pokemonCandy = lCandyAmount;
                     candyUpgradeCost = lCandyUpgradeCost;
+                    isLucky = lIsLucky;
                     pokemonUniqueID = lUniqueID;
 
 

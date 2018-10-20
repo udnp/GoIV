@@ -21,13 +21,15 @@ public class ScanResult {
     private final Optional<Integer> evolutionCandyCost;
     private final Optional<Integer> powerUpStardustCost;
     private final Optional<Integer> powerUpCandyCost;
+    private final boolean isLucky;
     private final String uniqueID;
 
     public ScanResult(LevelRange estimatedPokemonLevel, String pokemonName, String pokemonType, String candyName,
                       Pokemon.Gender pokemonGender,
                       Optional<Integer> pokemonHP, Optional<Integer> pokemonCP,
                       Optional<Integer> pokemonCandyAmount, Optional<Integer> evolutionCandyCost,
-                      Optional<Integer> powerUpStardustCost, Optional<Integer> powerUpCandyCost, String uniqueID) {
+                      Optional<Integer> powerUpStardustCost, Optional<Integer> powerUpCandyCost,
+                      boolean isLucky, String uniqueID) {
         this.estimatedPokemonLevelRange = estimatedPokemonLevel;
         this.pokemonName = pokemonName;
         this.pokemonType = pokemonType;
@@ -39,6 +41,7 @@ public class ScanResult {
         this.evolutionCandyCost = evolutionCandyCost;
         this.powerUpStardustCost = powerUpStardustCost;
         this.powerUpCandyCost = powerUpCandyCost;
+        this.isLucky = isLucky;
         this.uniqueID = uniqueID;
     }
 
@@ -80,6 +83,10 @@ public class ScanResult {
 
     public Optional<Integer> getPokemonPowerUpCandyCost() {
         return powerUpCandyCost;
+    }
+
+    public boolean getIsLucky() {
+        return isLucky;
     }
 
     public String getPokemonUniqueID() {

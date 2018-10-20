@@ -26,8 +26,8 @@ public class ScanContainer {
      * Create a new IVScanResult and updates the scanContainer singleton.
      */
     public static IVScanResult createIVScanResult(Pokemon pokemon, LevelRange estimatedPokemonLevel, int pokemonCP,
-                                                  Pokemon.Gender pokemonGender) {
-        IVScanResult res = new IVScanResult(pokemon, estimatedPokemonLevel, pokemonCP, pokemonGender);
+                                                  Pokemon.Gender pokemonGender, boolean isLucky) {
+        IVScanResult res = new IVScanResult(pokemon, estimatedPokemonLevel, pokemonCP, pokemonGender, isLucky);
         scanContainer.addNewScan(res);
         return res;
     }
