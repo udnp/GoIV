@@ -1,45 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="formNames">
-        <!-- Deoxys -->
+        <!--Rattata-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Raticate-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Raichu-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Sandshrew-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Sandslash-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Vulpix-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Ninetales-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Diglett-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Dugtrio-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Meowth-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Persian-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Geodude-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Graveler-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Golem-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Grimer-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Muk-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Exeggutor-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Marowak-->
+        <item>Normal Form</item>
+        <item>アローラのすがた</item>
+        <!--Unown-->
+        <item>Fのすがた</item>
+        <item>Aのすがた</item>
+        <item>Bのすがた</item>
+        <item>Cのすがた</item>
+        <item>Dのすがた</item>
+        <item>Eのすがた</item>
+        <item>Gのすがた</item>
+        <item>Hのすがた</item>
+        <item>Iのすがた</item>
+        <item>Jのすがた</item>
+        <item>Kのすがた</item>
+        <item>Lのすがた</item>
+        <item>Mのすがた</item>
+        <item>Nのすがた</item>
+        <item>Oのすがた</item>
+        <item>Pのすがた</item>
+        <item>Qのすがた</item>
+        <item>Rのすがた</item>
+        <item>Sのすがた</item>
+        <item>Tのすがた</item>
+        <item>Uのすがた</item>
+        <item>Vのすがた</item>
+        <item>Wのすがた</item>
+        <item>Xのすがた</item>
+        <item>Yのすがた</item>
+        <item>Zのすがた</item>
+        <item>！のすがた</item>
+        <item>？のすがた</item>
+        <!--Spinda-->
+        <item>00</item>
+        <item>01 Form</item>
+        <item>02 Form</item>
+        <item>03 Form</item>
+        <item>04 Form</item>
+        <item>05 Form</item>
+        <item>06 Form</item>
+        <item>07 Form</item>
+        <!--Castform-->
+        <item>ポワルンのすがた</item>
+        <item>たいようのすがた</item>
+        <item>あまみずのすがた</item>
+        <item>ゆきぐものすがた</item>
+        <!--Deoxys-->
+        <item>ノーマルフォルム</item>
         <item>アタックフォルム</item>
         <item>ディフェンスフォルム</item>
         <item>スピードフォルム</item>
-        <!-- Exeggutor -->
-        <item>アローラのすがた</item>
-        <!-- Rattata -->
-        <item>アローラのすがた</item>
-        <!-- Raticate -->
-        <item>アローラのすがた</item>
-        <!-- Raichu -->
-        <item>アローラのすがた</item>
-        <!-- Sandshrew -->
-        <item>アローラのすがた</item>
-        <!-- Sandslash -->
-        <item>アローラのすがた</item>
-        <!-- Vulpix -->
-        <item>アローラのすがた</item>
-        <!-- Ninetales -->
-        <item>アローラのすがた</item>
-        <!-- Diglett -->
-        <item>アローラのすがた</item>
-        <!-- Dugtrio -->
-        <item>アローラのすがた</item>
-        <!-- Meowth -->
-        <item>アローラのすがた</item>
-        <!-- Persian -->
-        <item>アローラのすがた</item>
-        <!-- Geodude -->
-        <item>アローラのすがた</item>
-        <!-- Graveler -->
-        <item>アローラのすがた</item>
-        <!-- Golem -->
-        <item>アローラのすがた</item>
-        <!-- Grimer -->
-        <item>アローラのすがた</item>
-        <!-- Muk -->
-        <item>アローラのすがた</item>
-        <!-- Marowak -->
-        <item>アローラのすがた</item>
+        <!--Wormadam-->
+        <item>Plant Form</item>
+        <item>Sandy Form</item>
+        <item>Trash Form</item>
+        <!--Cherrim-->
+        <item>Overcast Form</item>
+        <item>Sunny Form</item>
+        <!--Shellos-->
+        <item>West Sea Form</item>
+        <item>East Sea Form</item>
+        <!--Gastrodon-->
+        <item>West Sea Form</item>
+        <item>East Sea Form</item>
+        <!--Rotom-->
+        <item>Normal Form</item>
+        <item>Frost Form</item>
+        <item>Fan Form</item>
+        <item>Mow Form</item>
+        <item>Wash Form</item>
+        <item>Heat Form</item>
+        <!--Giratina-->
+        <item>Altered Form</item>
+        <item>Origin Form</item>
+        <!--Shaymin-->
+        <item>Land Form</item>
+        <item>Sky Form</item>
+        <!--Arceus-->
+        <item>Normal Form</item>
+        <item>Fighting Form</item>
+        <item>Flying Form</item>
+        <item>Poison Form</item>
+        <item>Ground Form</item>
+        <item>Rock Form</item>
+        <item>Bug Form</item>
+        <item>Ghost Form</item>
+        <item>Steel Form</item>
+        <item>Fire Form</item>
+        <item>Water Form</item>
+        <item>Grass Form</item>
+        <item>Electric Form</item>
+        <item>Psychic Form</item>
+        <item>Ice Form</item>
+        <item>Dragon Form</item>
+        <item>Dark Form</item>
+        <item>Fairy Form</item>
     </string-array>
 </resources>
