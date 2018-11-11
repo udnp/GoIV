@@ -293,7 +293,7 @@
     <string name="token_msg_cpMax_msg2">Ritorna la quantità di PL che il \'mon avrà al livello massimo.</string>
     <string name="token_msg_cpMis">Ritorna la quantità di PL che mancheranno al \'mon rispetto ad un altro della stessa specie con IV perfetti al livello massimo.</string>
     <string name="token_msg_cpPerc">Ritorna una percentuale che esprime quante altre possibili combinazioni di IV sono migliori della combinazione IV di questo \'mon. Più basso è il risultato, meglio è.</string>
-    <string name="token_msg_cpTier">Questo token dà un idea di quanto potente questo \'mon può diventare, misurando i PL massimi possibili che può ottenere. Per esempio, un Lapras può arrivare fino a 2980 PL, mentre un Dugtrio arriverebbe fino a 1168 PL. Perciò Lapras otterrebbe una A mentre Dugtrio prenderebbe E-. Queste valutazioni sono corrette basandosi sugli IV del tuo 'mon.</string>
+    <string name="token_msg_cpTier">Questo token dà un idea di quanto potente questo \'mon può diventare, misurando i PL massimi possibili che può ottenere. Per esempio, un Lapras può arrivare fino a 2980 PL, mentre un Dugtrio arriverebbe fino a 1168 PL. Perciò Lapras otterrebbe una A mentre Dugtrio prenderebbe E-. Queste valutazioni sono corrette basandosi sugli IV del tuo \'mon.</string>
     <string name="token_msg_best">migliore</string>
     <string name="token_msg_worst">peggiore</string>
     <string name="token_msg_ivPerc_maxSup">massima apice</string>

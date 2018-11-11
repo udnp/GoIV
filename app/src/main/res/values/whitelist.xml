@@ -10,4 +10,5 @@
     <string name="ocr_whitelist_pokemon_identifier">kgm.0123456789</string>
     <string name="ocr_whitelist_candy_name">@string/ocr_whitelist_default</string>
     <string name="ocr_whitelist_candy_pre_post_phrase">@string/candy</string>
+    <string name="ocr_whitelist_appraisals">@string/ocr_whitelist_default</string>
 </resources>
