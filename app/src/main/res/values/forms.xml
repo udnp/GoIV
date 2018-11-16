@@ -336,55 +336,55 @@
         <item>70</item> <!-- Alola Form -->
         <!--Raticate-->
         <item>144</item> <!-- Normal Form -->
-        <item>154</item> <!-- Alola Form -->
+        <item>159</item> <!-- Alola Form -->
         <!--Raichu-->
         <item>165</item> <!-- Normal Form -->
-        <item>154</item> <!-- Alola Form -->
+        <item>172</item> <!-- Alola Form -->
         <!--Sandshrew-->
         <item>145</item> <!-- Normal Form -->
-        <item>129</item> <!-- Alola Form -->
+        <item>154</item> <!-- Alola Form -->
         <!--Sandslash-->
         <item>202</item> <!-- Normal Form -->
-        <item>195</item> <!-- Alola Form -->
+        <item>221</item> <!-- Alola Form -->
         <!--Vulpix-->
         <item>122</item> <!-- Normal Form -->
-        <item>109</item> <!-- Alola Form -->
+        <item>122</item> <!-- Alola Form -->
         <!--Ninetales-->
         <item>204</item> <!-- Normal Form -->
-        <item>193</item> <!-- Alola Form -->
+        <item>207</item> <!-- Alola Form -->
         <!--Diglett-->
         <item>88</item> <!-- Normal Form -->
-        <item>82</item> <!-- Alola Form -->
+        <item>89</item> <!-- Alola Form -->
         <!--Dugtrio-->
         <item>147</item> <!-- Normal Form -->
-        <item>145</item> <!-- Alola Form -->
+        <item>148</item> <!-- Alola Form -->
         <!--Meowth-->
         <item>81</item> <!-- Normal Form -->
-        <item>78</item> <!-- Alola Form -->
+        <item>81</item> <!-- Alola Form -->
         <!--Persian-->
         <item>139</item> <!-- Normal Form -->
-        <item>136</item> <!-- Alola Form -->
+        <item>139</item> <!-- Alola Form -->
         <!--Geodude-->
         <item>163</item> <!-- Normal Form -->
-        <item>132</item> <!-- Alola Form -->
+        <item>163</item> <!-- Alola Form -->
         <!--Graveler-->
         <item>196</item> <!-- Normal Form -->
-        <item>164</item> <!-- Alola Form -->
+        <item>196</item> <!-- Alola Form -->
         <!--Golem-->
         <item>229</item> <!-- Normal Form -->
-        <item>198</item> <!-- Alola Form -->
+        <item>229</item> <!-- Alola Form -->
         <!--Grimer-->
         <item>90</item> <!-- Normal Form -->
         <item>90</item> <!-- Alola Form -->
         <!--Muk-->
         <item>184</item> <!-- Normal Form -->
-        <item>172</item> <!-- Alola Form -->
+        <item>184</item> <!-- Alola Form -->
         <!--Exeggutor-->
         <item>158</item> <!-- Normal Form -->
-        <item>153</item> <!-- Alola Form -->
+        <item>158</item> <!-- Alola Form -->
         <!--Marowak-->
         <item>200</item> <!-- Normal Form -->
-        <item>186</item> <!-- Alola Form -->
+        <item>200</item> <!-- Alola Form -->
         <!--Unown-->
         <item>-1</item> <!-- F Form -->
         <item>-1</item> <!-- A Form -->
@@ -482,58 +482,58 @@
     <integer-array name="formStamina">
         <!--Rattata-->
         <item>60</item> <!-- Normal Form -->
-        <item>102</item> <!-- Alola Form -->
+        <item>60</item> <!-- Alola Form -->
         <!--Raticate-->
         <item>110</item> <!-- Normal Form -->
-        <item>181</item> <!-- Alola Form -->
+        <item>150</item> <!-- Alola Form -->
         <!--Raichu-->
         <item>120</item> <!-- Normal Form -->
-        <item>155</item> <!-- Alola Form -->
+        <item>120</item> <!-- Alola Form -->
         <!--Sandshrew-->
         <item>100</item> <!-- Normal Form -->
-        <item>137</item> <!-- Alola Form -->
+        <item>100</item> <!-- Alola Form -->
         <!--Sandslash-->
         <item>150</item> <!-- Normal Form -->
-        <item>181</item> <!-- Alola Form -->
+        <item>150</item> <!-- Alola Form -->
         <!--Vulpix-->
         <item>76</item> <!-- Normal Form -->
-        <item>116</item> <!-- Alola Form -->
+        <item>76</item> <!-- Alola Form -->
         <!--Ninetales-->
         <item>146</item> <!-- Normal Form -->
-        <item>177</item> <!-- Alola Form -->
+        <item>146</item> <!-- Alola Form -->
         <!--Diglett-->
         <item>20</item> <!-- Normal Form -->
-        <item>67</item> <!-- Alola Form -->
+        <item>20</item> <!-- Alola Form -->
         <!--Dugtrio-->
         <item>70</item> <!-- Normal Form -->
-        <item>111</item> <!-- Alola Form -->
+        <item>70</item> <!-- Alola Form -->
         <!--Meowth-->
         <item>80</item> <!-- Normal Form -->
-        <item>120</item> <!-- Alola Form -->
+        <item>80</item> <!-- Alola Form -->
         <!--Persian-->
         <item>130</item> <!-- Normal Form -->
-        <item>163</item> <!-- Alola Form -->
+        <item>130</item> <!-- Alola Form -->
         <!--Geodude-->
         <item>80</item> <!-- Normal Form -->
-        <item>120</item> <!-- Alola Form -->
+        <item>80</item> <!-- Alola Form -->
         <!--Graveler-->
         <item>110</item> <!-- Normal Form -->
-        <item>146</item> <!-- Alola Form -->
+        <item>110</item> <!-- Alola Form -->
         <!--Golem-->
         <item>160</item> <!-- Normal Form -->
-        <item>190</item> <!-- Alola Form -->
+        <item>160</item> <!-- Alola Form -->
         <!--Grimer-->
         <item>160</item> <!-- Normal Form -->
-        <item>190</item> <!-- Alola Form -->
+        <item>160</item> <!-- Alola Form -->
         <!--Muk-->
         <item>210</item> <!-- Normal Form -->
-        <item>233</item> <!-- Alola Form -->
+        <item>210</item> <!-- Alola Form -->
         <!--Exeggutor-->
         <item>190</item> <!-- Normal Form -->
-        <item>216</item> <!-- Alola Form -->
+        <item>190</item> <!-- Alola Form -->
         <!--Marowak-->
         <item>120</item> <!-- Normal Form -->
-        <item>155</item> <!-- Alola Form -->
+        <item>120</item> <!-- Alola Form -->
         <!--Unown-->
         <item>-1</item> <!-- F Form -->
         <item>-1</item> <!-- A Form -->
@@ -578,10 +578,10 @@
         <item>140</item> <!-- Rainy Form -->
         <item>140</item> <!-- Snowy Form -->
         <!--Deoxys-->
-        <item>137</item> <!-- Normal Form -->
-        <item>137</item> <!-- Attack Form -->
-        <item>137</item> <!-- Defense Form -->
-        <item>137</item> <!-- Speed Form -->
+        <item>100</item> <!-- Normal Form -->
+        <item>100</item> <!-- Attack Form -->
+        <item>100</item> <!-- Defense Form -->
+        <item>100</item> <!-- Speed Form -->
         <!--Wormadam-->
         <item>155</item> <!-- Plant Form -->
         <item>155</item> <!-- Sandy Form -->
