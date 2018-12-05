@@ -164,8 +164,6 @@ public class Pokefly extends Service {
 
     private AutoAppraisal autoAppraisal;
 
-    private Map<String, Pokemon> normalizedPokemonNameMap;
-
     //results pokemon picker auto complete
     @BindView(R.id.autoCompleteTextView1)
     AutoCompleteTextView autoCompleteTextView1;
@@ -455,11 +453,6 @@ public class Pokefly extends Service {
 
         pokemonNameCorrector = PokemonNameCorrector.getInstance(this);
         pokeInfoCalculator = PokeInfoCalculator.getInstance();
-        Map<String, Pokemon> pokemap = new HashMap<>();
-        for (Pokemon pokemon : pokeInfoCalculator.getPokedex()) {
-            pokemap.put(StringUtils.normalize(pokemon.toString()), pokemon); // set display pokemon name as key
-        }
-        this.normalizedPokemonNameMap = pokemap;
         displayMetrics = getResources().getDisplayMetrics();
         initOcr();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -1127,13 +1120,20 @@ public class Pokefly extends Service {
      */
     private Pokemon interpretWhichPokemonUserInput() {
         //below picks a pokemon from either the pokemon spinner or the user text input
-        Pokemon pokemon;
+        Pokemon pokemon = null;
         if (pokeInputSpinner.getVisibility() == View.VISIBLE) { //user picked pokemon from spinner
             //This could be pokemon = pokeInputSpinner.getSelectedItem(); if they didn't give it type Object.
             pokemon = pokeInputSpinnerAdapter.getItem(pokeInputSpinner.getSelectedItemPosition());
         } else { //user typed manually
             String userInput = autoCompleteTextView1.getText().toString();
-            pokemon = normalizedPokemonNameMap.get(StringUtils.normalize(userInput));
+            int lowestDist = Integer.MAX_VALUE;
+            for (Pokemon poke : pokeInfoCalculator.getPokedex()){
+                int dist =  Data.levenshteinDistance(poke.name, userInput);
+                if (dist < lowestDist){
+                    lowestDist = dist;
+                    pokemon = poke;
+                }
+            }
             if (pokemon == null) { //no such pokemon was found, show error toast and abort showing results
                 Toast.makeText(this, userInput + getString(R.string.wrong_pokemon_name_input),
                         Toast.LENGTH_SHORT).show();
