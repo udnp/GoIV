@@ -51,6 +51,9 @@ export LANGDATA_ROOT=../langdata
 
 source ./tesstrain_utils.sh
 
+# overwrite FONTS_DIR for tesstrain_utils.sh
+export FONTS_DIR=../fonts
+
 ARGV=("$@")
 parse_flags
 

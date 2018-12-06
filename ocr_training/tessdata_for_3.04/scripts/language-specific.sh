@@ -36,38 +36,10 @@ FRAKTUR_FONTS=(
 
 # List of fonts to train on
 LATIN_FONTS=(
-    "Arial Bold" \
-    "Arial Bold Italic" \
-    "Arial Italic" \
-    "Arial" \
-    "Courier New Bold" \
-    "Courier New Bold Italic" \
-    "Courier New Italic" \
-    "Courier New" \
-    "Times New Roman, Bold" \
-    "Times New Roman, Bold Italic" \
-    "Times New Roman, Italic" \
-    "Times New Roman," \
-    "Georgia Bold" \
-    "Georgia Italic" \
-    "Georgia" \
-    "Georgia Bold Italic" \
-    "Trebuchet MS Bold" \
-    "Trebuchet MS Bold Italic" \
-    "Trebuchet MS Italic" \
-    "Trebuchet MS" \
-    "Verdana Bold" \
-    "Verdana Italic" \
-    "Verdana" \
-    "Verdana Bold Italic" \
-    "URW Bookman L Bold" \
-    "URW Bookman L Italic" \
-    "URW Bookman L Bold Italic" \
-    "Century Schoolbook L Bold" \
-    "Century Schoolbook L Italic" \
-    "Century Schoolbook L Bold Italic" \
-    "Century Schoolbook L Medium" \
-    "DejaVu Sans Ultra-Light" \
+    "Lato" \
+    "Lato Bold" \
+    "Lato Medium" \
+    "Lato Semi-Bold" \
 )
 
 # List of fonts for printed/neo-Latin ('lat' language code, different from Latin script)
