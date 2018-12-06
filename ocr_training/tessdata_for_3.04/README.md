@@ -15,3 +15,7 @@ Use following `git subtree` command in GoIV project *root* dir when sync and upd
 ```
 $ git subtree pull --prefix ocr_training/tessdata_for_3.04/langdata tesseract-ocr/langdata master --squash
 ```
+
+### traineddata
+
+This dir includes tesseract-ocr trained data files.
