@@ -2,6 +2,10 @@
 
 ## dir contents
 
+### fonts
+This dir includes the font files used for training data.
+
+
 ### langdata
 This dir includes tesseract-ocr langdata, imported from tesseract-ocr/langdata repo in github with following `git subtree` command.
 
@@ -16,6 +20,11 @@ Use following `git subtree` command in GoIV project *root* dir when sync and upd
 $ git subtree pull --prefix ocr_training/tessdata_for_3.04/langdata tesseract-ocr/langdata master --squash
 ```
 
-### traineddata
 
+### scripts
+This dir includes the script files to generate tesseract-ocr trained data file.
+These are imported and customized from training util scripts in tesseract-ocr v3.04.01-4(Ubuntu 16.04.3 package).
+
+
+### traineddata
 This dir includes tesseract-ocr trained data files.
