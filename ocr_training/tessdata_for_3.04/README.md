@@ -21,6 +21,10 @@ $ git subtree pull --prefix ocr_training/tessdata_for_3.04/langdata tesseract-oc
 ```
 
 
+### out
+This dir temporarily is used by the scripts to generate tesseract-ocr trained data file.
+
+
 ### scripts
 This dir includes the script files to generate tesseract-ocr trained data file.
 These are imported and customized from training util scripts in tesseract-ocr v3.04.01-4(Ubuntu 16.04.3 package).
