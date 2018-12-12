@@ -72,7 +72,7 @@ android {
      * Update (both Gradle and local SDK) whenever possible
      */
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.3'
 
     /**
      * Build configurations for APK
@@ -87,6 +87,9 @@ android {
         versionName "5.2.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'/**, 'x86', 'x86_64'**/
+        }
     }
 
     /**
@@ -152,7 +155,8 @@ android {
         abi {
             enable true
             reset()
-            include 'armeabi-v7a'/**, 'arm64-v8a', 'x86', 'x86_64'**/
+            include 'armeabi-v7a', 'arm64-v8a'/**, 'x86', 'x86_64'**/
+            universalApk true
         }
     }
     sourceSets {
@@ -163,8 +167,10 @@ android {
     }
 
     android.applicationVariants.all { variant ->
-        variant.outputs.all {
-            outputFileName = "GoIV-${variant.name}.${variant.versionName}.apk"
+        variant.outputs.all { output ->
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)
+            if(abi != null) outputFileName = "GoIV-${abi}-${variant.name}.${variant.versionName}.apk"
+            else outputFileName = "GoIV-${variant.name}.${variant.versionName}.apk"
         }
     }
 }
