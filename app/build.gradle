@@ -100,6 +100,14 @@ android {
     flavorDimensions "default"
 
     productFlavors {
+        ocr_testing {
+            applicationId 'nagoya.sawdagger.pogoiv.nointernet.ocr_testing'
+            buildConfigField "boolean", "INTERNET_AVAILABLE", "false"
+            buildConfigField "boolean", "DISTRIBUTION_GITHUB", "true"
+            buildConfigField "boolean", "DISTRIBUTION_PLAYSTORE", "false"
+            ext.enableCrashlytics = false
+            dimension "default"
+        }
         offline {
             applicationId "com.swanberg.pogoiv.nointernet"
             buildConfigField "boolean", "INTERNET_AVAILABLE", "false"
