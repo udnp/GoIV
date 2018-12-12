@@ -635,9 +635,6 @@ public class Pokefly extends Service {
             externalFilesDir = getFilesDir();
         }
         String extDir = externalFilesDir.toString();
-        if (!new File(extDir + "/tessdata/eng.traineddata").exists()) {
-            CopyUtils.copyAssetFolder(getAssets(), "tessdata", extDir + "/tessdata");
-        }
 
         ocr = OcrHelper.init(this, extDir, pokeInfoCalculator);
     }
