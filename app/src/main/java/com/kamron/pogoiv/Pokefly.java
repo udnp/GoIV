@@ -214,6 +214,13 @@ public class Pokefly extends Service {
     // Result data
     private PokemonSpinnerAdapter extendedEvolutionSpinnerAdapter;
 
+    @BindView(R.id.baseStatAtk)
+    TextView baseStatAtk;
+    @BindView(R.id.baseStatDef)
+    TextView baseStatDef;
+    @BindView(R.id.baseStatSta)
+    TextView baseStatSta;
+
     @BindView(R.id.extendedEvolutionSpinner)
     Spinner extendedEvolutionSpinner;
 
@@ -1461,6 +1468,9 @@ public class Pokefly extends Service {
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
 
+        //setBaseStat(ivScanResult.pokemon); // for the scanned pokemon
+        setBaseStat(selectedPokemon); // for the selected pokemon
+
         setAndCalculatePokeSpamText(ivScanResult);
     }
 
@@ -1503,6 +1513,12 @@ public class Pokefly extends Service {
         String sign = (hpDiff >= 0) ? "+" : ""; //add plus in front if positive.
         String hpText = newHP + " (" + sign + hpDiff + ")";
         exResultHP.setText(hpText);
+    }
+
+    private void setBaseStat(Pokemon pokemon) {
+        baseStatAtk.setText(String.valueOf(pokemon.baseAttack));
+        baseStatDef.setText(String.valueOf(pokemon.baseDefense));
+        baseStatSta.setText(String.valueOf(pokemon.baseStamina));
     }
 
     /**
