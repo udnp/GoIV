@@ -73,7 +73,12 @@ public class OcrHelper {
 
         if (instance == null) {
             tesseract = new TessBaseAPI();
-            tesseract.init(dataPath, "jpn");
+            String lang = Locale.getDefault().getLanguage();
+            if (lang.contains("ja")) {
+                tesseract.init(dataPath, "jpn");
+            } else {
+                tesseract.init(dataPath, "eng");
+            }
             tesseract.setPageSegMode(TessBaseAPI.PageSegMode.PSM_SINGLE_LINE);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_default));
 

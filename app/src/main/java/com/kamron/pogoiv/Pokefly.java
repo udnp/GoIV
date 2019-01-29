@@ -83,6 +83,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -1903,7 +1904,12 @@ public class Pokefly extends Service {
             externalFilesDir = getFilesDir();
         }
         String extDir = externalFilesDir.toString();
-            CopyUtils.copyAssetFolder(getAssets(), "tessdata", extDir + "/tessdata");
+        String lang = Locale.getDefault().getLanguage();
+        if (lang.contains("ja")) {
+            CopyUtils.copyAssetFile(getAssets(), "tessdata", "jpn.traineddata", extDir + "/tessdata");
+        } else {
+            CopyUtils.copyAssetFile(getAssets(), "tessdata", "eng.traineddata", extDir + "/tessdata");
+        }
 
         ocr = OcrHelper.init(extDir, pokeInfoCalculator, GoIVSettings.getInstance(this), getResources());
     }
