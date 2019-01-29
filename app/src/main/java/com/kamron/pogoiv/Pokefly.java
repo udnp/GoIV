@@ -72,7 +72,6 @@ import com.kamron.pogoiv.scanlogic.PokemonShareHandler;
 import com.kamron.pogoiv.scanlogic.ScanContainer;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.scanlogic.UpgradeCost;
-import com.kamron.pogoiv.utils.CopyUtils;
 import com.kamron.pogoiv.utils.GuiUtil;
 import com.kamron.pogoiv.utils.LevelRange;
 import com.kamron.pogoiv.utils.StringUtils;
@@ -83,7 +82,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -1904,13 +1902,6 @@ public class Pokefly extends Service {
             externalFilesDir = getFilesDir();
         }
         String extDir = externalFilesDir.toString();
-        String lang = Locale.getDefault().getLanguage();
-        if (lang.contains("ja")) {
-            CopyUtils.copyAssetFile(getAssets(), "tessdata", "jpn.traineddata", extDir + "/tessdata");
-        } else {
-            CopyUtils.copyAssetFile(getAssets(), "tessdata", "eng.traineddata", extDir + "/tessdata");
-        }
-
         ocr = OcrHelper.init(extDir, pokeInfoCalculator, GoIVSettings.getInstance(this), getResources());
     }
 
