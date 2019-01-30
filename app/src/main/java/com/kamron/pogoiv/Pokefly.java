@@ -72,18 +72,14 @@ import com.kamron.pogoiv.scanlogic.PokemonShareHandler;
 import com.kamron.pogoiv.scanlogic.ScanContainer;
 import com.kamron.pogoiv.scanlogic.ScanResult;
 import com.kamron.pogoiv.scanlogic.UpgradeCost;
-import com.kamron.pogoiv.utils.CopyUtils;
 import com.kamron.pogoiv.utils.GuiUtil;
 import com.kamron.pogoiv.utils.LevelRange;
-import com.kamron.pogoiv.utils.StringUtils;
 import com.kamron.pogoiv.widgets.PokemonSpinnerAdapter;
 import com.kamron.pogoiv.widgets.recyclerviews.adapters.IVResultsAdapter;
 
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -213,6 +209,13 @@ public class Pokefly extends Service {
 
     // Result data
     private PokemonSpinnerAdapter extendedEvolutionSpinnerAdapter;
+
+    @BindView(R.id.baseStatAtk)
+    TextView baseStatAtk;
+    @BindView(R.id.baseStatDef)
+    TextView baseStatDef;
+    @BindView(R.id.baseStatSta)
+    TextView baseStatSta;
 
     @BindView(R.id.extendedEvolutionSpinner)
     Spinner extendedEvolutionSpinner;
@@ -1461,6 +1464,9 @@ public class Pokefly extends Service {
         exResLevel.setText(String.valueOf(selectedLevel));
         setEstimateLevelTextColor(selectedLevel);
 
+        //setBaseStat(ivScanResult.pokemon); // for the scanned pokemon
+        setBaseStat(selectedPokemon); // for the selected pokemon
+
         setAndCalculatePokeSpamText(ivScanResult);
     }
 
@@ -1503,6 +1509,12 @@ public class Pokefly extends Service {
         String sign = (hpDiff >= 0) ? "+" : ""; //add plus in front if positive.
         String hpText = newHP + " (" + sign + hpDiff + ")";
         exResultHP.setText(hpText);
+    }
+
+    private void setBaseStat(Pokemon pokemon) {
+        baseStatAtk.setText(String.valueOf(pokemon.baseAttack));
+        baseStatDef.setText(String.valueOf(pokemon.baseDefense));
+        baseStatSta.setText(String.valueOf(pokemon.baseStamina));
     }
 
     /**
@@ -1887,8 +1899,6 @@ public class Pokefly extends Service {
             externalFilesDir = getFilesDir();
         }
         String extDir = externalFilesDir.toString();
-            CopyUtils.copyAssetFolder(getAssets(), "tessdata", extDir + "/tessdata");
-
         ocr = OcrHelper.init(extDir, pokeInfoCalculator, GoIVSettings.getInstance(this), getResources());
     }
 
