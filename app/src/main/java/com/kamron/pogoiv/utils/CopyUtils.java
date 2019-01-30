@@ -37,6 +37,14 @@ public class CopyUtils {
 
     }
 
+    public static boolean copyAssetFile(AssetManager assetManager, String fromAssetPath, String file, String toPath) {
+        new File(toPath).mkdirs();
+        boolean res = true;
+        res &= copyAsset(assetManager, fromAssetPath + "/" + file, toPath + "/" + file);
+        return res;
+
+    }
+
     private static boolean copyAsset(AssetManager assetManager, String fromAssetPath, String toPath) {
         try {
             InputStream in = assetManager.open(fromAssetPath);
