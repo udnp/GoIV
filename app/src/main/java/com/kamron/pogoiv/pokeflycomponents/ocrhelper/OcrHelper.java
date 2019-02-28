@@ -384,6 +384,7 @@ public class OcrHelper {
             }
         }
 
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
         tesseract.setImage(powerUpStardustCostImage);
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
@@ -426,6 +427,7 @@ public class OcrHelper {
             }
         }
 
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
         tesseract.setImage(powerUpCandyCostImage);
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
