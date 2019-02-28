@@ -294,15 +294,15 @@ public class OcrHelper {
 
         //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
         //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
-        //looking for a specific color that evolve button doesnt have.
+        //looking for characters that evolve button doesnt have.
         Bitmap leftOfEvolutionCostImage = null;
         if (evolutionCostArea != null) {
             evolutionCostImage = getImageCrop(pokemonImage, evolutionCostArea);
 
             leftOfEvolutionCostImage = Bitmap.createBitmap(pokemonImage,
-                    evolutionCostArea.xPoint - evolutionCostArea.width,//-evolutionCostArea.width,
+                    evolutionCostArea.xPoint - evolutionCostArea.width / 2,//-evolutionCostArea.width,
                     evolutionCostArea.yPoint,
-                    evolutionCostArea.width,
+                    evolutionCostArea.width / 2,
                     evolutionCostArea.height);
             //xstart,ystart,xwidth,
             // ywidth)
@@ -314,12 +314,13 @@ public class OcrHelper {
 
         boolean isNewAttackButton = false;
         if (leftOfEvolutionCostImage != null) {
-            int middle = leftOfEvolutionCostImage.getHeight() / 2;
-            for (int i = 0; i < leftOfEvolutionCostImage.getWidth(); i++) {
-                System.out.println("color is: " + leftOfEvolutionCostImage.getPixel(i, middle));
-                if (leftOfEvolutionCostImage.getPixel(i, middle) == Color.rgb(68,105,108)) {
-                    isNewAttackButton = true;
-                }
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
+            tesseract.setImage(leftOfEvolutionCostImage);
+            String ocrResult = tesseract.getUTF8Text();
+            //In this cropped area, [Evolve] button has no characters, or just one character "1" as evolution item cost.
+            if (!ocrResult.isEmpty() && !ocrResult.equals("1"))
+            {
+                isNewAttackButton = true;
             }
         }
         if (isNewAttackButton) {
