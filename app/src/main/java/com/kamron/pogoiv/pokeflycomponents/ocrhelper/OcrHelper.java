@@ -291,40 +291,11 @@ public class OcrHelper {
     private static Optional<Integer> getPokemonEvolutionCostFromImg(@NonNull Bitmap pokemonImage,
                                                                     @Nullable ScanArea evolutionCostArea) {
         Bitmap evolutionCostImage = null;
-
-        //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
-        //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
-        //looking for characters that evolve button doesnt have.
-        Bitmap leftOfEvolutionCostImage = null;
         if (evolutionCostArea != null) {
             evolutionCostImage = getImageCrop(pokemonImage, evolutionCostArea);
-
-            leftOfEvolutionCostImage = Bitmap.createBitmap(pokemonImage,
-                    evolutionCostArea.xPoint - evolutionCostArea.width / 2,//-evolutionCostArea.width,
-                    evolutionCostArea.yPoint,
-                    evolutionCostArea.width / 2,
-                    evolutionCostArea.height);
-            //xstart,ystart,xwidth,
-            // ywidth)
-
         }
         if (evolutionCostImage == null) {
             evolutionCostImage = getImageCrop(pokemonImage, 0.625, 0.815, 0.2, 0.03);
-        }
-
-        boolean isNewAttackButton = false;
-        if (leftOfEvolutionCostImage != null) {
-            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
-            tesseract.setImage(leftOfEvolutionCostImage);
-            String ocrResult = tesseract.getUTF8Text();
-            //In this cropped area, [Evolve] button has no characters, or just one character "1" as evolution item cost.
-            if (!ocrResult.isEmpty() && !ocrResult.equals("1"))
-            {
-                isNewAttackButton = true;
-            }
-        }
-        if (isNewAttackButton) {
-            return Optional.of(-1);
         }
 
         String hash = "candyCost" + hashBitmap(evolutionCostImage);
@@ -354,6 +325,38 @@ public class OcrHelper {
             ocrCache.put(hash, ocrResult);
         }
         return result;
+    }
+
+    private static boolean hasEvolveArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea) {
+        //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
+        //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
+        //looking for characters that evolve button doesnt have.
+        boolean hasEvolveArea = true;
+        Bitmap leftOfEvolutionCostImage = null;
+
+        if (evolutionCostArea != null) {
+            leftOfEvolutionCostImage = Bitmap.createBitmap(pokemonImage,
+                    evolutionCostArea.xPoint - evolutionCostArea.width / 2,//-evolutionCostArea.width,
+                    evolutionCostArea.yPoint,
+                    evolutionCostArea.width / 2,
+                    evolutionCostArea.height);
+            //xstart,ystart,xwidth,
+            // ywidth)
+        } else {
+            leftOfEvolutionCostImage = getImageCrop(pokemonImage, 0.625 - 0.2 / 2, 0.815, 0.2 / 2, 0.03);
+        }
+
+        if (leftOfEvolutionCostImage != null) {
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
+            tesseract.setImage(leftOfEvolutionCostImage);
+            String ocrResult = tesseract.getUTF8Text();
+            //In this cropped area, [Evolve] button has no characters, or just one character "1" as evolution item cost.
+            if (!ocrResult.isEmpty() && !ocrResult.equals("1")) {
+                hasEvolveArea = false;
+            }
+        }
+
+        return hasEvolveArea;
     }
 
     /**
@@ -958,8 +961,14 @@ public class OcrHelper {
                 ScanArea.calibratedFromSettings(POKEMON_CP_AREA, settings)); // Not offset for lucky
         Optional<Integer> candyAmount = getCandyAmountFromImg(pokemonImage,
                     ScanArea.calibratedFromSettings(POKEMON_CANDY_AMOUNT_AREA, settings, luckyOffset));
-        Optional<Integer> evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset));
+        Optional<Integer> evolutionCost;
+        ScanArea evolutionCostArea =
+                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset);
+        if (hasEvolveArea(pokemonImage, evolutionCostArea)) {
+            evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage, evolutionCostArea);
+        } else {
+            evolutionCost = Optional.of(-1);
+        }
         String uniqueIdentifier = name + type + candyName + hp.toString() + cp
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 
