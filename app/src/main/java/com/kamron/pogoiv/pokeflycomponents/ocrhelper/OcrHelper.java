@@ -333,7 +333,6 @@ public class OcrHelper {
         //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
         //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
         //looking for characters that evolve button doesnt have.
-        boolean hasEvolveArea = true;
         Bitmap evolutionStardustCostImage = null;
 
         if (evolutionCostArea != null && powerUpStardustCostArea != null) {
@@ -352,13 +351,42 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             tesseract.setImage(evolutionStardustCostImage);
             String ocrResult = tesseract.getUTF8Text();
-            //In this cropped area, [Evolve] button has no characters, or just one character "1" as evolution item cost.
-            if (!ocrResult.isEmpty() && !ocrResult.equals("1")) {
-                hasEvolveArea = false;
+
+            // Currently GoIV's auto calibration makes this cropping area include the icon indicating stardust or
+            // evolution item at first in numbers. So needs to remove the first character mis-detected from
+            // that icon.
+            ocrResult = ocrResult.replaceFirst("^\\D", "");
+
+            // In this cropping area, it might be included mis-detected numbers caused by PoGo [X] button covering
+            // numbers GoIV needs.
+            // e.g. mis-detected as 181 for evolution item count 1.
+            // So if the OCR result text end with number "1", judging as evolution item count and remove the
+            // characters previous "1".
+            ocrResult = ocrResult.replaceFirst("^.+1$", "1");
+
+            //In this cropped area, it is expected that [Evolve] button has no characters,
+            //or just one character "1" as evolution item cost.
+
+            // 1. check to include no characters.
+            if (ocrResult.isEmpty()) {
+                return true;
+            }
+
+            // 2. check to include evolution item cost == 1
+            try {
+                int result = Integer.parseInt(ocrResult);
+                if (result == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                //OCR result in this cropped area is not number.
+                return false;
             }
         }
 
-        return hasEvolveArea;
+        return false;
     }
 
     /**
