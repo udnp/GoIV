@@ -39,6 +39,7 @@ import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEM
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_HP_AREA;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_NAME_AREA;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_POWER_UP_CANDY_COST;
+import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_POWER_UP_STARDUST_COST;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_TYPE_AREA;
 
 
@@ -327,28 +328,29 @@ public class OcrHelper {
         return result;
     }
 
-    private static boolean hasEvolveArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea) {
+    private static boolean hasEvolveArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea,
+                                         @Nullable ScanArea powerUpStardustCostArea) {
         //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
         //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
         //looking for characters that evolve button doesnt have.
         boolean hasEvolveArea = true;
-        Bitmap leftOfEvolutionCostImage = null;
+        Bitmap evolutionStardustCostImage = null;
 
-        if (evolutionCostArea != null) {
-            leftOfEvolutionCostImage = Bitmap.createBitmap(pokemonImage,
-                    evolutionCostArea.xPoint - evolutionCostArea.width / 2,//-evolutionCostArea.width,
+        if (evolutionCostArea != null && powerUpStardustCostArea != null) {
+            evolutionStardustCostImage = Bitmap.createBitmap(pokemonImage,
+                    powerUpStardustCostArea.xPoint,
                     evolutionCostArea.yPoint,
-                    evolutionCostArea.width / 2,
+                    powerUpStardustCostArea.width,
                     evolutionCostArea.height);
-            //xstart,ystart,xwidth,
-            // ywidth)
         } else {
-            leftOfEvolutionCostImage = getImageCrop(pokemonImage, 0.625 - 0.2 / 2, 0.815, 0.2 / 2, 0.03);
+            // xStart and xWidth from powerUpStardustCostArea in getPokemonPowerUpStardustCostFromImg()
+            // yStart and yHeight from evolutionCostArea in getPokemonEvolutionCostFromImg()
+            evolutionStardustCostImage = getImageCrop(pokemonImage, 0.544, 0.815, 0.139, 0.03);
         }
 
-        if (leftOfEvolutionCostImage != null) {
+        if (evolutionStardustCostImage != null) {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
-            tesseract.setImage(leftOfEvolutionCostImage);
+            tesseract.setImage(evolutionStardustCostImage);
             String ocrResult = tesseract.getUTF8Text();
             //In this cropped area, [Evolve] button has no characters, or just one character "1" as evolution item cost.
             if (!ocrResult.isEmpty() && !ocrResult.equals("1")) {
@@ -964,7 +966,9 @@ public class OcrHelper {
         Optional<Integer> evolutionCost;
         ScanArea evolutionCostArea =
                 ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset);
-        if (hasEvolveArea(pokemonImage, evolutionCostArea)) {
+        ScanArea powerUpStardustCostArea =
+                ScanArea.calibratedFromSettings(POKEMON_POWER_UP_STARDUST_COST, settings, luckyOffset);
+        if (hasEvolveArea(pokemonImage, evolutionCostArea, powerUpStardustCostArea)) {
             evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage, evolutionCostArea);
         } else {
             evolutionCost = Optional.of(-1);
