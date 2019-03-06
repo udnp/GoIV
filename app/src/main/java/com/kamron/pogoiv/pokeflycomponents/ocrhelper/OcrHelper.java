@@ -295,16 +295,17 @@ public class OcrHelper {
      * @return the evolution cost (or -1 if absent) wrapped in Optional.of(), or Optional.absent() on scan failure
      */
     private static Optional<Integer> getPokemonEvolutionCostFromImg(@NonNull Bitmap pokemonImage,
-                                                                    @Nullable ScanArea evolutionCostArea) {
-        Bitmap evolutionCostImage = null;
-        if (evolutionCostArea != null) {
-            evolutionCostImage = getImageCrop(pokemonImage, evolutionCostArea);
+                                                                    @Nullable ScanArea evolutionCandyCostArea,
+                                                                    @Nullable ScanArea powerupStardustCostArea) {
+        Bitmap evolutionCandyCostImage = null;
+        if (evolutionCandyCostArea != null) {
+            evolutionCandyCostImage = getImageCrop(pokemonImage, evolutionCandyCostArea);
         }
-        if (evolutionCostImage == null) {
-            evolutionCostImage = getImageCrop(pokemonImage, 0.625, 0.815, 0.2, 0.03);
+        if (evolutionCandyCostImage == null) {
+            evolutionCandyCostImage = getImageCrop(pokemonImage, 0.625, 0.815, 0.2, 0.03);
         }
 
-        String hash = "candyCost" + hashBitmap(evolutionCostImage);
+        String hash = "candyCost" + hashBitmap(evolutionCandyCostImage);
 
         if (ocrCache != null) {
             //return cache if it exists
@@ -319,11 +320,12 @@ public class OcrHelper {
             }
         }
 
-        Optional<Integer> result = getPokemonEvolutionCostFromImgUncached(evolutionCostImage);
+        Optional<Integer> result = getPokemonEvolutionCostFromImgUncached(evolutionCandyCostImage);
         String ocrResult;
-        if (result.isPresent()) {
+        if (result.isPresent() && isEvolvtionItemArea(pokemonImage, evolutionCandyCostArea, powerupStardustCostArea)) {
             ocrResult = String.valueOf(result.get()); //Store error code instead of scanned value
         } else {
+            result = Optional.absent();
             //XXX again, in the cache, we encode "no result" as an empty string.
             ocrResult = "";
         }
@@ -333,8 +335,8 @@ public class OcrHelper {
         return result;
     }
 
-    private static boolean hasEvolveArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea,
-                                         @Nullable ScanArea powerUpStardustCostArea) {
+    private static boolean isEvolvtionItemArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea,
+                                               @Nullable ScanArea powerUpStardustCostArea) {
         //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
         //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
         //looking for characters that evolve button doesnt have.
@@ -985,16 +987,12 @@ public class OcrHelper {
                 ScanArea.calibratedFromSettings(POKEMON_CP_AREA, settings)); // Not offset for lucky
         Optional<Integer> candyAmount = getCandyAmountFromImg(pokemonImage,
                     ScanArea.calibratedFromSettings(POKEMON_CANDY_AMOUNT_AREA, settings, luckyOffset));
-        Optional<Integer> evolutionCost;
-        ScanArea evolutionCostArea =
+        ScanArea evolutionCandyCostArea =
                 ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset);
         ScanArea powerUpStardustCostArea =
                 ScanArea.calibratedFromSettings(POKEMON_POWER_UP_STARDUST_COST, settings, luckyOffset);
-        if (hasEvolveArea(pokemonImage, evolutionCostArea, powerUpStardustCostArea)) {
-            evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage, evolutionCostArea);
-        } else {
-            evolutionCost = Optional.of(-1);
-        }
+        Optional<Integer> evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage, evolutionCandyCostArea,
+                powerUpStardustCostArea);
         String uniqueIdentifier = name + type + candyName + hp.toString() + cp
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 
