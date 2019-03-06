@@ -231,6 +231,32 @@ public class OcrHelper {
         return r;
     }
 
+    private static Bitmap normalizeCostAreaImage(@NonNull Bitmap costAreaImage) {
+        //clean the image
+        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo
+        //and the red color is rgb 255 95 100 when you cant afford the evolution
+        Bitmap evolutionCostImageCanAfford = replaceColors(costAreaImage, false, 68, 105, 108, Color.WHITE, 30,
+                false);
+        Bitmap evolutionCostImageCannotAfford = replaceColors(costAreaImage, false, 255, 115, 115, Color.WHITE, 40,
+                false);
+
+        boolean affordIsBlank = isOnlyWhite(evolutionCostImageCanAfford);
+        boolean cannotAffordIsBlank = isOnlyWhite(evolutionCostImageCannotAfford);
+        //check if fully evolved
+        if (affordIsBlank && cannotAffordIsBlank) { //if there's no red or black text, there's no text at all.
+            return evolutionCostImageCanAfford;
+        }
+
+        //use the correctly refined image (refined for red or black text)
+        if (affordIsBlank) {
+            costAreaImage = evolutionCostImageCannotAfford;
+        } else {
+            costAreaImage = evolutionCostImageCanAfford;
+        }
+
+        return costAreaImage;
+    }
+
     /**
      * Get the evolution cost for a pokemon, like getPokemonEvolutionCostFromImg, but without caching.
      *
@@ -238,28 +264,7 @@ public class OcrHelper {
      * @return the evolution cost (or -1 if absent) wrapped in Optional.of(), or Optional.absent() on scan failure
      */
     private static Optional<Integer> getPokemonEvolutionCostFromImgUncached(@NonNull Bitmap evolutionCostImage) {
-        //clean the image
-        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo
-        //and the red color is rgb 255 95 100 when you cant afford the evolution
-        Bitmap evolutionCostImageCanAfford = replaceColors(evolutionCostImage, false, 68, 105, 108, Color.WHITE, 30,
-                false);
-        Bitmap evolutionCostImageCannotAfford = replaceColors(evolutionCostImage, false, 255, 115, 115, Color.WHITE, 40,
-                false);
-
-        boolean affordIsBlank = isOnlyWhite(evolutionCostImageCanAfford);
-        boolean cannotAffordIsBlank = isOnlyWhite(evolutionCostImageCannotAfford);
-        //check if fully evolved
-        if (affordIsBlank && cannotAffordIsBlank) { //if there's no red or black text, there's no text at all.
-            return Optional.of(-1);
-        }
-
-        //use the correctly refined image (refined for red or black text)
-        if (affordIsBlank) {
-            evolutionCostImage = evolutionCostImageCannotAfford;
-        } else {
-            evolutionCostImage = evolutionCostImageCanAfford;
-        }
-
+        evolutionCostImage = normalizeCostAreaImage(evolutionCostImage);
         //If not cached or fully evolved, ocr text
         int result;
         tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
@@ -348,21 +353,10 @@ public class OcrHelper {
         }
 
         if (evolutionStardustCostImage != null) {
+            evolutionStardustCostImage = normalizeCostAreaImage(evolutionStardustCostImage);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             tesseract.setImage(evolutionStardustCostImage);
             String ocrResult = tesseract.getUTF8Text();
-
-            // Currently GoIV's auto calibration makes this cropping area include the icon indicating stardust or
-            // evolution item at first in numbers. So needs to remove the first character mis-detected from
-            // that icon.
-            ocrResult = ocrResult.replaceFirst("^\\D", "");
-
-            // In this cropping area, it might be included mis-detected numbers caused by PoGo [X] button covering
-            // numbers GoIV needs.
-            // e.g. mis-detected as 181 for evolution item count 1.
-            // So if the OCR result text end with number "1", judging as evolution item count and remove the
-            // characters previous "1".
-            ocrResult = ocrResult.replaceFirst("^.+1$", "1");
 
             //In this cropped area, it is expected that [Evolve] button has no characters,
             //or just one character "1" as evolution item cost.
