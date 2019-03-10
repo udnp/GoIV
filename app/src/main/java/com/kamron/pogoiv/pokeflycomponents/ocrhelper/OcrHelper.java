@@ -359,6 +359,9 @@ public class OcrHelper {
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             tesseract.setImage(evolutionStardustCostImage);
             String ocrResult = tesseract.getUTF8Text();
+            // remove characters for each locales to separate digits.
+            // e.g. ',' for en/ja, '.' for de/es/it, and ' ' for fr.
+            ocrResult = ocrResult.replaceAll("(\\W)", "");
 
             //In this cropped area, it is expected that [Evolve] button has no characters,
             //or just one character "1" as evolution item cost.
