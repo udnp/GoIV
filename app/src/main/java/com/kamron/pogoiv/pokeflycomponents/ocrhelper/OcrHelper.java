@@ -231,27 +231,31 @@ public class OcrHelper {
         return r;
     }
 
-    private static Bitmap normalizeCostAreaImage(@NonNull Bitmap costAreaImage) {
+    private static Bitmap cleanCostAreaImage(@NonNull Bitmap costAreaImage) {
         //clean the image
-        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo
-        //and the red color is rgb 255 95 100 when you cant afford the evolution
-        Bitmap evolutionCostImageCanAfford = replaceColors(costAreaImage, false, 68, 105, 108, Color.WHITE, 30,
+        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo/power up/new attack
+        //and the red color is rgb 255 95 100 when you cant afford the evolution/power up/new attack
+        //
+        //TODO: improve logic or current threshold values to clean a image, because currently the characters to
+        // separate digits(e.g. ',' for en/ja) are removed.
+        //TODO: add paramaters and logic to clean a image for lucky pokemon's stardust cost(yellow text).
+        Bitmap costImageCanAfford = replaceColors(costAreaImage, false, 68, 105, 108, Color.WHITE, 30,
                 false);
-        Bitmap evolutionCostImageCannotAfford = replaceColors(costAreaImage, false, 255, 115, 115, Color.WHITE, 40,
+        Bitmap costImageCannotAfford = replaceColors(costAreaImage, false, 255, 115, 115, Color.WHITE, 40,
                 false);
 
-        boolean affordIsBlank = isOnlyWhite(evolutionCostImageCanAfford);
-        boolean cannotAffordIsBlank = isOnlyWhite(evolutionCostImageCannotAfford);
-        //check if fully evolved
+        boolean affordIsBlank = isOnlyWhite(costImageCanAfford);
+        boolean cannotAffordIsBlank = isOnlyWhite(costImageCannotAfford);
+        //check if blank
         if (affordIsBlank && cannotAffordIsBlank) { //if there's no red or black text, there's no text at all.
-            return evolutionCostImageCanAfford;
+            return costImageCanAfford;
         }
 
         //use the correctly refined image (refined for red or black text)
         if (affordIsBlank) {
-            costAreaImage = evolutionCostImageCannotAfford;
+            costAreaImage = costImageCannotAfford;
         } else {
-            costAreaImage = evolutionCostImageCanAfford;
+            costAreaImage = costImageCanAfford;
         }
 
         return costAreaImage;
@@ -264,7 +268,7 @@ public class OcrHelper {
      * @return the evolution cost (or -1 if absent) wrapped in Optional.of(), or Optional.absent() on scan failure
      */
     private static Optional<Integer> getPokemonEvolutionCostFromImgUncached(@NonNull Bitmap evolutionCostImage) {
-        evolutionCostImage = normalizeCostAreaImage(evolutionCostImage);
+        evolutionCostImage = cleanCostAreaImage(evolutionCostImage);
         //If not cached or fully evolved, ocr text
         int result;
         tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
@@ -355,7 +359,7 @@ public class OcrHelper {
         }
 
         if (evolutionStardustCostImage != null) {
-            evolutionStardustCostImage = normalizeCostAreaImage(evolutionStardustCostImage);
+            evolutionStardustCostImage = cleanCostAreaImage(evolutionStardustCostImage);
             tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
             tesseract.setImage(evolutionStardustCostImage);
             String ocrResult = tesseract.getUTF8Text();
