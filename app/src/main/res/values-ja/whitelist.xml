@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ocr_whitelist_default">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/♀♂
+        あぁいぃうぅえぇおぉ
+        かがきぎくぐけげこご
+        さざしじすずせぜそぞ
+        ただちぢつっづてでとど
+        なにぬねの
+        はばぱひびぴふぶぷへべぺほぼぽ
+        まみむめも
+        やゃゆゅよょ
+        らりるれろ
+        わおん
+        アァイィウゥヴエェオォ
+        カガキギクグケゲコゴ
+        サザシジスズセゼソゾ
+        タダチヂツッヅテデトド
+        ナニヌネノ
+        ハバパヒビピフブプヘベペホボポ
+        マミムメモ
+        ヤャユュヨョ
+        ラリルレロ
+        ワヲン
+        ー</string>
     <string name="ocr_whitelist_pokemon_name">
         アァイィウゥヴエェオォ
         カガキギクグケゲコゴ
