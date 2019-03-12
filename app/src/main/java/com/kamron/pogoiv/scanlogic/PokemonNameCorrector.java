@@ -487,18 +487,26 @@ public class PokemonNameCorrector {
      */
     private ArrayList<Pokemon> getCandyNameEvolutionCostGuess(ArrayList<Pokemon> bestGuessEvolutionLine,
                                                               Optional<Integer> evolutionCost) {
+        int candyEvolutionCost;
         if (evolutionCost.isPresent()) {
-            ArrayList<Pokemon> PokemonValidOptions = new ArrayList<Pokemon>();
-            for (Pokemon pokemon : bestGuessEvolutionLine) {
-                if (evolutionCost.get().equals(pokemon.candyEvolutionCost)) {
-                    PokemonValidOptions.add(pokemon);
-                }
-            }
-            return PokemonValidOptions;
+            candyEvolutionCost = evolutionCost.get();
+        } else {
+            candyEvolutionCost = -1;
         }
 
-        //evolution cost scan failed, or no match
-        return null;
+        ArrayList<Pokemon> PokemonValidOptions = new ArrayList<Pokemon>();
+        for (Pokemon pokemon : bestGuessEvolutionLine) {
+            if (candyEvolutionCost == pokemon.candyEvolutionCost) {
+                PokemonValidOptions.add(pokemon);
+            }
+        }
+
+        if (PokemonValidOptions.size() == 0) {
+            //evolution cost scan failed, or no match
+            return null;
+        }
+
+        return PokemonValidOptions;
     }
 
     /**

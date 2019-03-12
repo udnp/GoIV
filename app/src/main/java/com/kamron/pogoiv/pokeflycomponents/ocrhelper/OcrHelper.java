@@ -24,7 +24,6 @@ import com.kamron.pogoiv.utils.LevelRange;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +38,7 @@ import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEM
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_HP_AREA;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_NAME_AREA;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_POWER_UP_CANDY_COST;
+import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_POWER_UP_STARDUST_COST;
 import static com.kamron.pogoiv.pokeflycomponents.ocrhelper.ScanFieldNames.POKEMON_TYPE_AREA;
 
 
@@ -230,6 +230,36 @@ public class OcrHelper {
         return r;
     }
 
+    private static Bitmap cleanCostAreaImage(@NonNull Bitmap costAreaImage) {
+        //clean the image
+        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo/power up/new attack
+        //and the red color is rgb 255 95 100 when you cant afford the evolution/power up/new attack
+        //
+        //TODO: improve logic or current threshold values to clean a image, because currently the characters to
+        // separate digits(e.g. ',' for en/ja) are removed.
+        //TODO: add paramaters and logic to clean a image for lucky pokemon's stardust cost(yellow text).
+        Bitmap costImageCanAfford = replaceColors(costAreaImage, false, 68, 105, 108, Color.WHITE, 30,
+                false);
+        Bitmap costImageCannotAfford = replaceColors(costAreaImage, false, 255, 115, 115, Color.WHITE, 40,
+                false);
+
+        boolean affordIsBlank = isOnlyWhite(costImageCanAfford);
+        boolean cannotAffordIsBlank = isOnlyWhite(costImageCannotAfford);
+        //check if blank
+        if (affordIsBlank && cannotAffordIsBlank) { //if there's no red or black text, there's no text at all.
+            return costImageCanAfford;
+        }
+
+        //use the correctly refined image (refined for red or black text)
+        if (affordIsBlank) {
+            costAreaImage = costImageCannotAfford;
+        } else {
+            costAreaImage = costImageCanAfford;
+        }
+
+        return costAreaImage;
+    }
+
     /**
      * Get the evolution cost for a pokemon, like getPokemonEvolutionCostFromImg, but without caching.
      *
@@ -237,28 +267,7 @@ public class OcrHelper {
      * @return the evolution cost (or -1 if absent) wrapped in Optional.of(), or Optional.absent() on scan failure
      */
     private static Optional<Integer> getPokemonEvolutionCostFromImgUncached(@NonNull Bitmap evolutionCostImage) {
-        //clean the image
-        //the dark color used for text in pogo is approximately rgb 76,112,114 if you can afford evo
-        //and the red color is rgb 255 95 100 when you cant afford the evolution
-        Bitmap evolutionCostImageCanAfford = replaceColors(evolutionCostImage, false, 68, 105, 108, Color.WHITE, 30,
-                false);
-        Bitmap evolutionCostImageCannotAfford = replaceColors(evolutionCostImage, false, 255, 115, 115, Color.WHITE, 40,
-                false);
-
-        boolean affordIsBlank = isOnlyWhite(evolutionCostImageCanAfford);
-        boolean cannotAffordIsBlank = isOnlyWhite(evolutionCostImageCannotAfford);
-        //check if fully evolved
-        if (affordIsBlank && cannotAffordIsBlank) { //if there's no red or black text, there's no text at all.
-            return Optional.of(-1);
-        }
-
-        //use the correctly refined image (refined for red or black text)
-        if (affordIsBlank) {
-            evolutionCostImage = evolutionCostImageCannotAfford;
-        } else {
-            evolutionCostImage = evolutionCostImageCanAfford;
-        }
-
+        evolutionCostImage = cleanCostAreaImage(evolutionCostImage);
         //If not cached or fully evolved, ocr text
         int result;
         tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
@@ -289,15 +298,17 @@ public class OcrHelper {
      * @return the evolution cost (or -1 if absent) wrapped in Optional.of(), or Optional.absent() on scan failure
      */
     private static Optional<Integer> getPokemonEvolutionCostFromImg(@NonNull Bitmap pokemonImage,
-                                                                    @Nullable ScanArea evolutionCostArea) {
-        Bitmap evolutionCostImage;
-        if (evolutionCostArea != null) {
-            evolutionCostImage = getImageCrop(pokemonImage, evolutionCostArea);
-        } else {
-            evolutionCostImage = getImageCrop(pokemonImage, 0.625, 0.815, 0.2, 0.03);
+                                                                    @Nullable ScanArea evolutionCandyCostArea,
+                                                                    @Nullable ScanArea powerupStardustCostArea) {
+        Bitmap evolutionCandyCostImage = null;
+        if (evolutionCandyCostArea != null) {
+            evolutionCandyCostImage = getImageCrop(pokemonImage, evolutionCandyCostArea);
+        }
+        if (evolutionCandyCostImage == null) {
+            evolutionCandyCostImage = getImageCrop(pokemonImage, 0.625, 0.815, 0.2, 0.03);
         }
 
-        String hash = "candyCost" + hashBitmap(evolutionCostImage);
+        String hash = "candyCost" + hashBitmap(evolutionCandyCostImage);
 
         if (ocrCache != null) {
             //return cache if it exists
@@ -312,11 +323,12 @@ public class OcrHelper {
             }
         }
 
-        Optional<Integer> result = getPokemonEvolutionCostFromImgUncached(evolutionCostImage);
+        Optional<Integer> result = getPokemonEvolutionCostFromImgUncached(evolutionCandyCostImage);
         String ocrResult;
-        if (result.isPresent()) {
+        if (result.isPresent() && isEvolvtionItemArea(pokemonImage, evolutionCandyCostArea, powerupStardustCostArea)) {
             ocrResult = String.valueOf(result.get()); //Store error code instead of scanned value
         } else {
+            result = Optional.absent();
             //XXX again, in the cache, we encode "no result" as an empty string.
             ocrResult = "";
         }
@@ -324,6 +336,59 @@ public class OcrHelper {
             ocrCache.put(hash, ocrResult);
         }
         return result;
+    }
+
+    private static boolean isEvolvtionItemArea(@NonNull Bitmap pokemonImage, @Nullable ScanArea evolutionCostArea,
+                                               @Nullable ScanArea powerUpStardustCostArea) {
+        //Since 'new attack' button is at the same place as "evolve" on max evolutions, we need to make sure
+        //We're not wrongly reading a 'new attack' button. Check this by scanning left of evolutionCostImage, and
+        //looking for characters that evolve button doesnt have.
+        Bitmap evolutionStardustCostImage = null;
+
+        if (evolutionCostArea != null && powerUpStardustCostArea != null) {
+            evolutionStardustCostImage = Bitmap.createBitmap(pokemonImage,
+                    powerUpStardustCostArea.xPoint,
+                    evolutionCostArea.yPoint,
+                    powerUpStardustCostArea.width,
+                    evolutionCostArea.height);
+        } else {
+            // xStart and xWidth from powerUpStardustCostArea in getPokemonPowerUpStardustCostFromImg()
+            // yStart and yHeight from evolutionCostArea in getPokemonEvolutionCostFromImg()
+            evolutionStardustCostImage = getImageCrop(pokemonImage, 0.544, 0.815, 0.139, 0.03);
+        }
+
+        if (evolutionStardustCostImage != null) {
+            evolutionStardustCostImage = cleanCostAreaImage(evolutionStardustCostImage);
+            tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
+            tesseract.setImage(evolutionStardustCostImage);
+            String ocrResult = tesseract.getUTF8Text();
+            // remove characters for each locales to separate digits.
+            // e.g. ',' for en/ja, '.' for de/es/it, and ' ' for fr.
+            ocrResult = ocrResult.replaceAll("(\\W)", "");
+
+            //In this cropped area, it is expected that [Evolve] button has no characters,
+            //or just one character "1" as evolution item cost.
+
+            // 1. check to include no characters.
+            if (ocrResult.isEmpty()) {
+                return true;
+            }
+
+            // 2. check to include evolution item cost == 1
+            try {
+                int result = Integer.parseInt(ocrResult);
+                if (result == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                //OCR result in this cropped area is not number.
+                return false;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -354,6 +419,7 @@ public class OcrHelper {
             }
         }
 
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
         tesseract.setImage(powerUpStardustCostImage);
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
@@ -396,6 +462,7 @@ public class OcrHelper {
             }
         }
 
+        tesseract.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, res.getString(R.string.ocr_whitelist_number));
         tesseract.setImage(powerUpCandyCostImage);
         String ocrResult = fixOcrLettersToNums(tesseract.getUTF8Text());
         try {
@@ -926,8 +993,12 @@ public class OcrHelper {
                 ScanArea.calibratedFromSettings(POKEMON_CP_AREA, settings)); // Not offset for lucky
         Optional<Integer> candyAmount = getCandyAmountFromImg(pokemonImage,
                     ScanArea.calibratedFromSettings(POKEMON_CANDY_AMOUNT_AREA, settings, luckyOffset));
-        Optional<Integer> evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage,
-                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset));
+        ScanArea evolutionCandyCostArea =
+                ScanArea.calibratedFromSettings(POKEMON_EVOLUTION_COST_AREA, settings, luckyOffset);
+        ScanArea powerUpStardustCostArea =
+                ScanArea.calibratedFromSettings(POKEMON_POWER_UP_STARDUST_COST, settings, luckyOffset);
+        Optional<Integer> evolutionCost = getPokemonEvolutionCostFromImg(pokemonImage, evolutionCandyCostArea,
+                powerUpStardustCostArea);
         String uniqueIdentifier = name + type + candyName + hp.toString() + cp
                 .toString() + powerUpStardustCost.toString() + powerUpCandyCost.toString();
 
