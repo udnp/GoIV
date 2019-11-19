@@ -55,6 +55,9 @@
         <!--Marowak-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
+        <!--Mewtwo-->
+        <item>Normal Form</item>
+        <item>アーマード</item>
         <!--Unown-->
         <item>Fのすがた</item>
         <item>Aのすがた</item>
@@ -153,5 +156,46 @@
         <item>Dragon Form</item>
         <item>Dark Form</item>
         <item>Fairy Form</item>
+        <!-- Basculin -->
+        <item>Red Striped Form</item>
+        <item>Blue Striped Form</item>
+        <!-- Darmanitan -->
+        <item>Standard Form</item>
+        <item>Zen Form</item>
+        <!-- Deerling -->
+        <item>Spring Form</item>
+        <item>Summer Form</item>
+        <item>Autumn Form</item>
+        <item>Winter Form</item>
+        <!-- Sawsbuck -->
+        <item>Spring Form</item>
+        <item>Summer Form</item>
+        <item>Autumn Form</item>
+        <item>Winter Form</item>
+        <!-- Tornadus -->
+        <item>Incarnate Form</item>
+        <item>Therian Form</item>
+        <!-- Thundurus -->
+        <item>Incarnate Form</item>
+        <item>Therian Form</item>
+        <!-- Landorus -->
+        <item>Incarnate Form</item>
+        <item>Therian Form</item>
+        <!-- Kyurem -->
+        <item>Normal Form</item>
+        <item>Black Form</item>
+        <item>White Form</item>
+        <!-- Keldeo -->
+        <item>Ordinary Form</item>
+        <item>Resolute Form</item>
+        <!-- Meloetta -->
+        <item>Aria Form</item>
+        <item>Pirouette Form</item>
+        <!-- Genesect -->
+        <item>Normal Form</item>
+        <item>Shock Form</item>
+        <item>Burn Form</item>
+        <item>Chill Form</item>
+        <item>Douse Form</item>
     </string-array>
 </resources>
