@@ -657,6 +657,10 @@
         <!-- gen 7? -->
         <item>メルタン</item>
         <item>メルメタル</item>
+        <!-- gen 8? -->
+        <item>タチフサグマ</item>
+        <item>ニャイキング</item>
+        <item>ネギガナイト</item>
     </string-array>
     <string-array name="typeName">
         <!--  0   normal --> <item>ノーマル</item>

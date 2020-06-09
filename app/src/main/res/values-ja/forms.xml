@@ -31,6 +31,7 @@
         <!--Meowth-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
+        <item>Galarian Form</item>
         <!--Persian-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
@@ -43,6 +44,9 @@
         <!--Golem-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
+        <!--Farfetchd-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
         <!--Grimer-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
@@ -55,6 +59,9 @@
         <!--Marowak-->
         <item>Normal Form</item>
         <item>アローラのすがた</item>
+        <!--Weezing-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
         <!--Mewtwo-->
         <item>Normal Form</item>
         <item>アーマード</item>
@@ -87,6 +94,12 @@
         <item>Zのすがた</item>
         <item>！のすがた</item>
         <item>？のすがた</item>
+        <!--Zigzagoon-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
+        <!--Linoone-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
         <!--Spinda-->
         <item>00</item>
         <item>01 Form</item>
@@ -97,6 +110,17 @@
         <item>06 Form</item>
         <item>07 Form</item>
         <item>08 Form</item>
+        <item>09 Form</item>
+        <item>10 Form</item>
+        <item>11 Form</item>
+        <item>12 Form</item>
+        <item>13 Form</item>
+        <item>14 Form</item>
+        <item>15 Form</item>
+        <item>16 Form</item>
+        <item>17 Form</item>
+        <item>18 Form</item>
+        <item>19 Form</item>
         <!--Castform-->
         <item>ポワルンのすがた</item>
         <item>たいようのすがた</item>
@@ -159,9 +183,14 @@
         <!-- Basculin -->
         <item>Red Striped Form</item>
         <item>Blue Striped Form</item>
+        <!--Darumaka-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
         <!-- Darmanitan -->
         <item>Standard Form</item>
         <item>Zen Form</item>
+        <item>Galarian Standard Form</item>
+        <item>Galarian Zen Form</item>
         <!-- Deerling -->
         <item>Spring Form</item>
         <item>Summer Form</item>
@@ -172,6 +201,15 @@
         <item>Summer Form</item>
         <item>Autumn Form</item>
         <item>Winter Form</item>
+        <!--Frillish-->
+        <item>Normal Form</item>
+        <item>Female Form</item>
+        <!--Jellicent-->
+        <item>Normal Form</item>
+        <item>Female Form</item>
+        <!--Stunfisk-->
+        <item>Normal Form</item>
+        <item>Galarian Form</item>
         <!-- Tornadus -->
         <item>Incarnate Form</item>
         <item>Therian Form</item>
@@ -183,8 +221,8 @@
         <item>Therian Form</item>
         <!-- Kyurem -->
         <item>Normal Form</item>
-        <item>Black Form</item>
         <item>White Form</item>
+        <item>Black Form</item>
         <!-- Keldeo -->
         <item>Ordinary Form</item>
         <item>Resolute Form</item>
@@ -193,9 +231,9 @@
         <item>Pirouette Form</item>
         <!-- Genesect -->
         <item>Normal Form</item>
+        <item>Douse Form</item>
         <item>Shock Form</item>
         <item>Burn Form</item>
         <item>Chill Form</item>
-        <item>Douse Form</item>
     </string-array>
 </resources>
