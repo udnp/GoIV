@@ -61,66 +61,66 @@
         <item>アローラのすがた</item>
         <!--Weezing-->
         <item>Normal Form</item>
-        <item>Galarian Form</item>
+        <item>ガラルのすがた</item>
         <!--Mewtwo-->
         <item>Normal Form</item>
-        <item>アーマード</item>
+        <item>アーマードミュウツー</item>
         <!--Unown-->
-        <item>Fのすがた</item>
-        <item>Aのすがた</item>
-        <item>Bのすがた</item>
-        <item>Cのすがた</item>
-        <item>Dのすがた</item>
-        <item>Eのすがた</item>
-        <item>Gのすがた</item>
-        <item>Hのすがた</item>
-        <item>Iのすがた</item>
-        <item>Jのすがた</item>
-        <item>Kのすがた</item>
-        <item>Lのすがた</item>
-        <item>Mのすがた</item>
-        <item>Nのすがた</item>
-        <item>Oのすがた</item>
-        <item>Pのすがた</item>
-        <item>Qのすがた</item>
-        <item>Rのすがた</item>
-        <item>Sのすがた</item>
-        <item>Tのすがた</item>
-        <item>Uのすがた</item>
-        <item>Vのすがた</item>
-        <item>Wのすがた</item>
-        <item>Xのすがた</item>
-        <item>Yのすがた</item>
-        <item>Zのすがた</item>
-        <item>！のすがた</item>
-        <item>？のすがた</item>
+        <item>F</item>
+        <item>A</item>
+        <item>B</item>
+        <item>C</item>
+        <item>D</item>
+        <item>E</item>
+        <item>G</item>
+        <item>H</item>
+        <item>I</item>
+        <item>J</item>
+        <item>K</item>
+        <item>L</item>
+        <item>M</item>
+        <item>N</item>
+        <item>O</item>
+        <item>P</item>
+        <item>Q</item>
+        <item>R</item>
+        <item>S</item>
+        <item>T</item>
+        <item>U</item>
+        <item>V</item>
+        <item>W</item>
+        <item>X</item>
+        <item>Y</item>
+        <item>Z</item>
+        <item>！</item>
+        <item>？</item>
         <!--Zigzagoon-->
         <item>Normal Form</item>
-        <item>Galarian Form</item>
+        <item>ガラルのすがた</item>
         <!--Linoone-->
         <item>Normal Form</item>
-        <item>Galarian Form</item>
+        <item>ガラルのすがた</item>
         <!--Spinda-->
-        <item>00</item>
-        <item>01 Form</item>
-        <item>02 Form</item>
-        <item>03 Form</item>
-        <item>04 Form</item>
-        <item>05 Form</item>
-        <item>06 Form</item>
-        <item>07 Form</item>
-        <item>08 Form</item>
-        <item>09 Form</item>
-        <item>10 Form</item>
-        <item>11 Form</item>
-        <item>12 Form</item>
-        <item>13 Form</item>
-        <item>14 Form</item>
-        <item>15 Form</item>
-        <item>16 Form</item>
-        <item>17 Form</item>
-        <item>18 Form</item>
-        <item>19 Form</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
         <!--Castform-->
         <item>ポワルンのすがた</item>
         <item>たいようのすがた</item>
@@ -132,108 +132,108 @@
         <item>ディフェンスフォルム</item>
         <item>スピードフォルム</item>
         <!--Burmy-->
-        <item>Plant Form</item>
-        <item>Sandy Form</item>
-        <item>Trash Form</item>
+        <item>くさきのミノ</item>
+        <item>すなちのミノ</item>
+        <item>ゴミのミノ</item>
         <!--Wormadam-->
-        <item>Plant Form</item>
-        <item>Sandy Form</item>
-        <item>Trash Form</item>
+        <item>くさきのミノ</item>
+        <item>すなちのミノ</item>
+        <item>ゴミのミノ</item>
         <!--Cherrim-->
-        <item>Overcast Form</item>
-        <item>Sunny Form</item>
+        <item>ネガフォルム</item>
+        <item>ポジフォルム</item>
         <!--Shellos-->
-        <item>West Sea Form</item>
-        <item>East Sea Form</item>
+        <item>にしのうみ</item>
+        <item>ひがしのうみ</item>
         <!--Gastrodon-->
-        <item>West Sea Form</item>
-        <item>East Sea Form</item>
+        <item>にしのうみ</item>
+        <item>ひがしのうみ</item>
         <!--Rotom-->
         <item>Normal Form</item>
-        <item>Frost Form</item>
-        <item>Fan Form</item>
-        <item>Mow Form</item>
-        <item>Wash Form</item>
-        <item>Heat Form</item>
+        <item>フロストロトム</item>
+        <item>スピンロトム</item>
+        <item>カットロトム</item>
+        <item>ウォッシュロトム</item>
+        <item>ヒートロトム</item>
         <!--Giratina-->
-        <item>Altered Form</item>
-        <item>Origin Form</item>
+        <item>アナザーフォルム</item>
+        <item>オリジンフォルム</item>
         <!--Shaymin-->
-        <item>Land Form</item>
-        <item>Sky Form</item>
+        <item>ランドフォルム</item>
+        <item>スカイフォルム</item>
         <!--Arceus-->
         <item>Normal Form</item>
-        <item>Fighting Form</item>
-        <item>Flying Form</item>
-        <item>Poison Form</item>
-        <item>Ground Form</item>
-        <item>Rock Form</item>
-        <item>Bug Form</item>
-        <item>Ghost Form</item>
-        <item>Steel Form</item>
-        <item>Fire Form</item>
-        <item>Water Form</item>
-        <item>Grass Form</item>
-        <item>Electric Form</item>
-        <item>Psychic Form</item>
-        <item>Ice Form</item>
-        <item>Dragon Form</item>
-        <item>Dark Form</item>
-        <item>Fairy Form</item>
+        <item>こぶしのプレート</item>
+        <item>あおぞらプレート</item>
+        <item>もうどくプレート</item>
+        <item>だいちのプレート</item>
+        <item>がんせきプレート</item>
+        <item>たまむしプレート</item>
+        <item>もののけプレート</item>
+        <item>こうてつプレート</item>
+        <item>ひのたまプレート</item>
+        <item>しずくプレート</item>
+        <item>みどりのプレート</item>
+        <item>いかずちプレート</item>
+        <item>ふしぎのプレート</item>
+        <item>つららのプレート</item>
+        <item>りゅうのプレート</item>
+        <item>こわもてプレート</item>
+        <item>せいれいプレート</item>
         <!-- Basculin -->
-        <item>Red Striped Form</item>
-        <item>Blue Striped Form</item>
+        <item>あかすじのすがた</item>
+        <item>あおすじのすがた</item>
         <!--Darumaka-->
         <item>Normal Form</item>
-        <item>Galarian Form</item>
+        <item>ガラルのすがた</item>
         <!-- Darmanitan -->
         <item>Standard Form</item>
-        <item>Zen Form</item>
-        <item>Galarian Standard Form</item>
-        <item>Galarian Zen Form</item>
+        <item>ダルマモード</item>
+        <item>ガラルのすがた</item>
+        <item>ガラルのすがたダルマモード</item>
         <!-- Deerling -->
-        <item>Spring Form</item>
-        <item>Summer Form</item>
-        <item>Autumn Form</item>
-        <item>Winter Form</item>
+        <item>はるのすがた</item>
+        <item>なつのすがた</item>
+        <item>あきのすがた</item>
+        <item>ふゆのすがた</item>
         <!-- Sawsbuck -->
-        <item>Spring Form</item>
-        <item>Summer Form</item>
-        <item>Autumn Form</item>
-        <item>Winter Form</item>
+        <item>はるのすがた</item>
+        <item>なつのすがた</item>
+        <item>あきのすがた</item>
+        <item>ふゆのすがた</item>
         <!--Frillish-->
-        <item>Normal Form</item>
-        <item>Female Form</item>
+        <item>オスのすがた</item>
+        <item>メスのすがた</item>
         <!--Jellicent-->
-        <item>Normal Form</item>
-        <item>Female Form</item>
+        <item>オスのすがた</item>
+        <item>メスのすがた</item>
         <!--Stunfisk-->
         <item>Normal Form</item>
-        <item>Galarian Form</item>
+        <item>ガラルのすがた</item>
         <!-- Tornadus -->
-        <item>Incarnate Form</item>
-        <item>Therian Form</item>
+        <item>けしんフォルム</item>
+        <item>れいじゅうフォルム</item>
         <!-- Thundurus -->
-        <item>Incarnate Form</item>
-        <item>Therian Form</item>
+        <item>けしんフォルム</item>
+        <item>れいじゅうフォルム</item>
         <!-- Landorus -->
-        <item>Incarnate Form</item>
-        <item>Therian Form</item>
+        <item>けしんフォルム</item>
+        <item>れいじゅうフォルム</item>
         <!-- Kyurem -->
         <item>Normal Form</item>
-        <item>White Form</item>
-        <item>Black Form</item>
+        <item>ホワイトキュレム</item>
+        <item>ブラックキュレム</item>
         <!-- Keldeo -->
-        <item>Ordinary Form</item>
-        <item>Resolute Form</item>
+        <item>いつものすがた</item>
+        <item>かくごのすがた</item>
         <!-- Meloetta -->
-        <item>Aria Form</item>
-        <item>Pirouette Form</item>
+        <item>ボイスフォルム</item>
+        <item>ステップフォルム</item>
         <!-- Genesect -->
         <item>Normal Form</item>
-        <item>Douse Form</item>
-        <item>Shock Form</item>
-        <item>Burn Form</item>
-        <item>Chill Form</item>
+        <item>アクアカセット</item>
+        <item>イナズマカセット</item>
+        <item>ブレイズカセット</item>
+        <item>フリーズカセット</item>
     </string-array>
 </resources>
