@@ -503,6 +503,12 @@ public class PokemonNameCorrector {
                     }
 
                     break;
+                case (617): // Stunfisk
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.STEEL))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
+
                 default:
                     // do nothing
 
