@@ -153,13 +153,20 @@ public class PokeInfoCalculator {
         int pokeListSize = names.length;
         ArrayList<Pokemon> formVariantPokemons = new ArrayList<>();
 
-        // quick hardcoded patch for Meltan and Melmetal
-        // Tentatively use pokedex list size until supporting discontinuous pokedex numbers,
-        // like as #493 Arceus, #808 Meltan, #809 Melmetal.
-        candyNamesArray[pokeListSize - 2] = pokeListSize - 2;
-        candyNamesArray[pokeListSize - 1] = pokeListSize - 2;
-        devolution[pokeListSize - 1] = pokeListSize - 2;
-        // END patch for Meltan and Melmetal
+        // quick hardcoded patch for supporting discontinuous pokedex number pokemons followings
+        //   #808 Meltan
+        //   #809 Melmetal
+        //   #862 Obstagoon,
+        //   #863 Perrserker,
+        //   #865 Sirfetch'd
+        // currently GoIV logic expects that pokedex numbers are continuous and less than pokeListSize.
+        // so this patch shifts these to dummy indexes, with pokeListSize offset.
+        final int meltan_shifted_index = pokeListSize - 5;
+        final int melmetal_shifted_index = pokeListSize - 4;
+        candyNamesArray[meltan_shifted_index] = meltan_shifted_index;
+        candyNamesArray[melmetal_shifted_index] = meltan_shifted_index;
+        devolution[melmetal_shifted_index] = meltan_shifted_index;
+        // END patch for supporting discontinuous pokedex number pokemons
 
         for (int i = 0; i < pokeListSize; i++) {
             Pokemon p = new Pokemon(names[i], displayNames[i], i, attack[i], defense[i], stamina[i], devolution[i],
