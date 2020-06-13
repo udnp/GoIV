@@ -326,6 +326,10 @@ public class PokemonNameCorrector {
                     if (normalizedPokemonType.contains(normalizePokemonType(Type.DARK))) {
                         return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
                     }
+                    // check types including steel
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.STEEL))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(2), 0);
+                    }
                     break;
                 case (52): // Persian
                     // check types including dark
@@ -369,6 +373,21 @@ public class PokemonNameCorrector {
                         return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
                     }
                     break;
+                case (109): // Weezing
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.FAIRY))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
+                case (262): // Zigzagoon
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.DARK))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
+                case (263): // Linoone
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.DARK))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
                 case (412): // Wormadam
                     if (normalizedPokemonType.contains(normalizePokemonType(Type.GRASS))) {
                         return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
@@ -408,7 +427,7 @@ public class PokemonNameCorrector {
                         return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
                     }
 
-                case (492): // Rotom
+                case (492): // Arceus
                     if (normalizedPokemonType.contains(normalizePokemonType(Type.NORMAL))) {
                         return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
                     }
@@ -465,6 +484,31 @@ public class PokemonNameCorrector {
                     }
 
                     break;
+                case (553): // Darumaka
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.ICE))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
+                case (554): // Darmanitan
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.PSYCHIC))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.FIRE))
+                        && normalizedPokemonType.contains(normalizePokemonType(Type.ICE))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(3), 0);
+                    } else if (normalizedPokemonType.contains(normalizePokemonType(Type.FIRE))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(0), 0);
+                    } else if (normalizedPokemonType.contains(normalizePokemonType(Type.ICE))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(2), 0);
+                    }
+
+                    break;
+                case (617): // Stunfisk
+                    if (normalizedPokemonType.contains(normalizePokemonType(Type.STEEL))) {
+                        return new PokeDist(pokeInfoCalculator.get(guess.pokemon.number).forms.get(1), 0);
+                    }
+                    break;
+
                 default:
                     // do nothing
 
